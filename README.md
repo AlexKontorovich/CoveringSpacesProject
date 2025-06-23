@@ -1,13 +1,13 @@
-# PrimeNumberTheoremAnd
-The objective of this project is to formalize in Lean the Prime Number Theorem (with classical error term), as well as related results such as the Prime Number Theorem in Arithmetic Progressions.  A stretch goal would be to obtain the Chebotarev density theorem.
+# Covering Spaces Project
+Organized by Alex Kontorovich and John Morgan
 
 ## Zulip
 
-The project is coordinated via a [Lean Zulip channel](https://leanprover.zulipchat.com/#narrow/channel/423402-PrimeNumberTheorem.2B).
+The project will be coordinated via a [Lean Zulip channel](https://leanprover.zulipchat.com).
 
 ## Blueprint
 
-This project has a blueprint, which is available at <https://AlexKontorovich.github.io/PrimeNumberTheoremAnd/web/>.
+This project has a blueprint, which is available at <https://AlexKontorovich.github.io/CoveringSpacesProject/web/>.
 
 To use the tool, first install local requirements using
 ```sh
@@ -30,9 +30,9 @@ scrapes these and populates the blueprint accordingly.
 
 ## Quick contributions via gitpod
 If you want to quickly contribute to the project without installing your own copy of lean, you can do so using gitpod.
-Simply visit: <https://gitpod.io/new/#https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/>, or click the button below:
+Simply visit: <https://gitpod.io/new/#https://github.com/AlexKontorovich/CoveringSpacesProject/>, or click the button below:
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/#https://github.com/AlexKontorovich/PrimeNumberTheoremAnd/)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/#https://github.com/AlexKontorovich/CoveringSpacesProject/)
 
 All the required dependencies will be loaded (this takes a few minutes), after which you will be brought to a web-based
 vscode window, where you can edit the code, and submit PR's.
