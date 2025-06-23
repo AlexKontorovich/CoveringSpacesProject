@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: >
   If you use this project in your work, please cite it using the metadata below.
-title: "Prime Number Theorem and More"
+title: "Covering Spaces Project"
 version: 0.1.0
 date-released: 2024-01-09
 authors:
@@ -11,14 +11,12 @@ authors:
   - family-names: Tao
     given-names: Terence
     orcid: https://orcid.org/0000-0002-0140-7641
-repository-code: https://github.com/AlexKontorovich/PrimeNumberTheoremAnd
-url: https://github.com/AlexKontorovich/PrimeNumberTheoremAnd
+repository-code: https://github.com/AlexKontorovich/CoveringSpacesProject
+url: https://github.com/AlexKontorovich/CoveringSpacesProject
 abstract: >
-  A collaborative research exposition on the Prime Number Theorem and related topics in analytic number theory, 
-  organized by Alex Kontorovich and Terence Tao. Launched January 9, 2024, and ongoing.
+  A collaborative research exposition on covering spaces,
+  organized by Alex Kontorovich and John Morgan. Launched June 23, 2025, and ongoing.
 keywords:
-  - number theory
-  - analytic number theory
-  - prime number theorem
+  - covering spaces
   - collaborative mathematics
   - expository project

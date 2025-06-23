@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-package «PrimeNumberTheoremAnd» where
+package «CoveringSpacesProject» where
   leanOptions := #[
     ⟨`pp.unicode.fun, true⟩, -- pretty-prints `fun a ↦ b`
     ⟨`pp.proofs.withType, false⟩,
@@ -10,7 +10,7 @@ package «PrimeNumberTheoremAnd» where
   ]
 
 @[default_target]
-lean_lib «PrimeNumberTheoremAnd»
+lean_lib «CoveringSpacesProject»
 
 --
 -- DO NOT REPLACE WITH '@ "master"': the pace of development of mathlib is too

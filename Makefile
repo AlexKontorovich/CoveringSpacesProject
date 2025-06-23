@@ -1,6 +1,6 @@
 LAKEBIN=lake
 
-PROJECT=PrimeNumberTheoremAnd
+PROJECT=CoveringSpacesProject
 
 FILES=$(basename $(notdir $(wildcard $(PROJECT)/*.lean)))
 BLUEPRINTS=$(addsuffix .tex, $(addprefix blueprint/, $(FILES)))

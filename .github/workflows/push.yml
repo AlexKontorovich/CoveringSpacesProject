@@ -110,7 +110,7 @@ jobs:
             .lake/build/doc/Std
             .lake/build/doc/Mathlib
             .lake/build/doc/declarations
-            !.lake/build/doc/declarations/declaration-data-PrimeNumberTheoremAnd*
+            !.lake/build/doc/declarations/declaration-data-CoveringSpacesProject*
           key: MathlibDoc-${{ hashFiles('lake-manifest.json') }}
           restore-keys: |
             MathlibDoc-
@@ -141,7 +141,7 @@ jobs:
       #  uses: actions/download-artifact@v3
       #  with:
       #    path: blueprint_artifacts
-      #    
+      #
       #- name: Extract blueprint artifacts
       #  run: tar xvf blueprint_artifacts/github-pages/artifact.tar -C docs/
 
