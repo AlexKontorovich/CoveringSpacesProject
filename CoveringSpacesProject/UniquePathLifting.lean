@@ -1,7 +1,9 @@
 import Mathlib
 
+open TopologicalSpace Function
+
 /-%%
-\section{Unique Path Liftiing}
+\section{Unique Path Lifting}
 \begin{definition}[IsLift]\label{IsLift}\lean{IsLift}\leanok
 Let $f\colon X\to Y$. A {\em lift of a map $\alpha\colon A\to Y$ through $f$} is a map
 $\tilde\alpha\colon A\to X$ such that $f\circ \tilde \alpha=\alpha$.
@@ -36,11 +38,23 @@ def Sheet {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
 /-%%
 \noindent
 {\bf N.B.} Given $U$ evenly covered by $f$, if $U$ is not connected, there can be different notions of the sheets above $U$.
+%%-/
 
-\begin{definition}
-A map $\pi\colon P\to B$ is a {\em covering projection} if it is surjective and every
-point $x\in B$ has an evenly covered open neighborhood.
+/-%%
+\begin{definition}[Covering Projection]\label{CoveringProjection}\lean{CoveringProjection}\leanok\uses{LocalTrivialization}
+A map $proj\colon X\to Y$ is a {\em covering projection} if it is surjective and there is an open cover $\{U_\alpha\}_{\alpha\in A}$
+such that each $U_\alpha$ has a local trivialization.
 \end{definition}
+%%-/
+def CoveringProjection {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y]
+    (proj : X → Y) (F : Type*) [TopologicalSpace F]
+    {A : Type*} (U : A → Opens Y) :
+    Prop :=
+  IsOpenCover U ∧
+  Surjective proj ∧ ∀ (α : A), LocalTrivialization proj (U α) F
+
+/-%%
 
 \begin{lemma}[sheet]\label{sheet}\lean{sheet}
 Let $f\colon X\to Y$ be a map, $U\subset Y$ an open set of $Y$ that is evenly covered by $f$, and  ${\mathcal S}=(F_u,\rho_U)$ a sheet structure on $f^{-1}(U)$. Let $A$ be a connected space and $\varphi\colon A\to U\subset Y$.
