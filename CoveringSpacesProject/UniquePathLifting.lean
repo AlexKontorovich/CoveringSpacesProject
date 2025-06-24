@@ -2,11 +2,16 @@ import Mathlib
 
 /-%%
 \section{Unique Path Liftiing}
-\begin{definition}
+\begin{definition}[IsLift]\label{IsLift}\lean{IsLift}\leanok
 Let $f\colon X\to Y$. A {\em lift of a map $\alpha\colon A\to Y$ through $f$} is a map
 $\tilde\alpha\colon A\to X$ such that $f\circ \tilde \alpha=\alpha$.
 \end{definition}
+%%-/
+def IsLift {X Y A : Type*}
+    (f : X → Y) (α : A → Y) (α' : A → X) : Prop :=
+  f ∘ α' = α
 
+/-%%
 \begin{definition}
 Let $f\colon X\to Y$ be a map. An open set $U\subset Y$ is {\em evenly covered by $f$} if there exist a discrete space $F$
 and a homeomorphism $\rho\colon F\times U\to f^{-1}(U)$ with the property that $f\circ \rho\colon F\times U\to U$
