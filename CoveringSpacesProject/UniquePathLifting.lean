@@ -12,13 +12,28 @@ def IsLift {X Y A : Type*}
   f ∘ α' = α
 
 /-%%
-\begin{definition}
-Let $f\colon X\to Y$ be a map. An open set $U\subset Y$ is {\em evenly covered by $f$} if there exist a discrete space $F$
-and a homeomorphism $\rho\colon F\times U\to f^{-1}(U)$ with the property that $f\circ \rho\colon F\times U\to U$
-is projection onto the second factor. The choice of $(F,\rho)$ with these properties is a {\em sheet structure} on $f^{-1}(U)$.
-The {\em sheet indexed by $x\in F_U$} is $\rho(\{x\}\times U)$.
+\begin{definition}[LocalTrivialization]\label{LocalTrivialization}\lean{LocalTrivialization}\leanok
+Let $proj\colon X\to Y$ be a map. An open set $U\subset Y$ has a {\em local
+trivialization} $(F, \rho)$ if there exist a discrete space $F$
+and a homeomorphism $\rho\colon proj^{-1}(U) \to U\times F$ with the property that $proj\circ \rho^{-1}\colon  U\times F \to U$
+is projection onto the second factor.
 \end{definition}
+%%-/
+def LocalTrivialization {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    (proj : X → Y) (U : Set Y) (F : Type*) [TopologicalSpace F] : Prop :=
+  (DiscreteTopology F ∧ ∃ (t : Trivialization F proj), t.baseSet = U)
 
+/-%%
+\begin{definition}[Sheet]\label{Sheet}\lean{Sheet}\leanok\uses{LocalTrivialization}
+A {\em sheet} $V$ over an open set $U\subset Y$ for a map $proj\colon X\to Y$ is a subset of $X$ such that there is a local trivialization $(F, \rho)$ of $U$ with $V = \rho^{-1}(U\times \{f\})$, for some $f \in F$.
+\end{definition}
+%%-/
+def Sheet {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    (proj : X → Y) (U : Set Y) (V : Set X) (F : Type*) [TopologicalSpace F]
+    : Prop := (DiscreteTopology F) ∧ ∃ (t : Trivialization F proj) (f : F),
+    U = t.baseSet ∧ V = t.invFun '' (U ×ˢ {f})
+
+/-%%
 \noindent
 {\bf N.B.} Given $U$ evenly covered by $f$, if $U$ is not connected, there can be different notions of the sheets above $U$.
 
