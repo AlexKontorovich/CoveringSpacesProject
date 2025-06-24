@@ -43,25 +43,39 @@ def Sheet {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
 /-%%
 \begin{definition}[Covering Projection]\label{CoveringProjection}\lean{CoveringProjection}\leanok\uses{LocalTrivialization}
 A map $proj\colon X\to Y$ is a {\em covering projection} if it is surjective and there is an open cover $\{U_\alpha\}_{\alpha\in A}$
-such that each $U_\alpha$ has a local trivialization.
+such that each $U_\alpha$ has a local trivialization $(F_\alpha, \rho_\alpha)$.
 \end{definition}
 %%-/
 def CoveringProjection {X Y : Type*} [TopologicalSpace X]
     [TopologicalSpace Y]
-    (proj : X → Y) (F : Type*) [TopologicalSpace F]
-    {A : Type*} (U : A → Opens Y) :
+    (proj : X → Y)
+    {A : Type*} (U : A → Opens Y)
+    (F : A → Type*) [∀ α : A, TopologicalSpace (F α)] :
     Prop :=
   IsOpenCover U ∧
-  Surjective proj ∧ ∀ (α : A), LocalTrivialization proj (U α) F
+  Surjective proj ∧ ∀ (α : A), LocalTrivialization proj (U α) (F α)
 
 /-%%
-
 \begin{lemma}[sheet]\label{sheet}\lean{sheet}
-Let $f\colon X\to Y$ be a map, $U\subset Y$ an open set of $Y$ that is evenly covered by $f$, and  ${\mathcal S}=(F_u,\rho_U)$ a sheet structure on $f^{-1}(U)$. Let $A$ be a connected space and $\varphi\colon A\to U\subset Y$.
+Let $proj\colon X\to Y$ be a map, $U\subset Y$ an open set of $Y$ that is evenly covered by $f$, and  ${\mathcal S}=(F_u,\rho_U)$ a sheet structure on $f^{-1}(U)$. Let $A$ be a connected space and $\varphi\colon A\to U\subset Y$.
 Then the lifts of $\varphi$ through $f$ are exactly the  maps  $A\to Y$ of the form $a\mapsto \rho_U(x,\varphi(a))$
 for $x\in F_U$.
 \end{lemma}
+%%-/
+def LocalLiftingMap {X Y : Type*} [TopologicalSpace X] [TopologicalSpace Y]
+    (proj : X → Y)
+    {A : Type*} (U : A → Opens Y)
+    (F : A → Type*) [∀ α, TopologicalSpace (F α)]
+    (covProj : CoveringProjection proj U F)
+    (Z : Type*) [TopologicalSpace Z] (Z_conn : ConnectedSpace Z)
+    (ϕ : Z → Y) (ϕ_cont : Continuous ϕ) (α : A) (image : Set.range ϕ ⊆ U α)
+    (z : Z)
+    :
+    X := by
+  sorry
 
+
+/-%%
 \begin{proof}
 Since $\varphi(A)\subset U$ for any lift $\tilde \varphi\colon A\to X$ had image contained in $f^{-1}(U)$.
 Since $A$ is connected and the  sheets are disjoint, open subsets of $X$ and $\varphi(A)$ is contained in their union,
