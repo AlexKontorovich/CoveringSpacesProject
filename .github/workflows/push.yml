@@ -110,15 +110,9 @@ jobs:
             MathlibDoc-${{ hashFiles('lake-manifest.json') }}-
             MathlibDoc-
 
-      # Build only your project's documentation (much faster)
-      - name: Build project documentation
-        run: ~/.elan/bin/lake build CoveringSpacesProject:docs
-        continue-on-error: true
-
-      # Fallback: build all docs if project-only build fails
-      - name: Build all documentation (fallback)
+      # Build documentation (using the reliable method for now)
+      - name: Build documentation
         run: make LAKEBIN='~/.elan/bin/lake' doc
-        if: failure()
 
       - name: Copy documentation to `docs/docs`
         run: |
