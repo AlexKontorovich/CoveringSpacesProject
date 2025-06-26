@@ -26,7 +26,7 @@ By Euler's Formula we have
 ${\rm exp}(\theta *I)= {\rm cos}(\theta)+{\rm sin}(\theta) *I.$
 It follows from the basic properties of sine and cosine that ${\rm exp}(2\pi*I)=1$ and that
  ${\rm exp}(\theta*I)\not= 1$ for $0<\theta<2\pi$.
-Thus, ${\rm exp}$ is periodic of period $2\pi *I$ and ${\rm exp}$ is periodic of period $w$ if and only if $w\in (2\pi *I)\Zee$.
+Thus, ${\rm exp}$ is periodic of period $2\pi *I$ and ${\rm exp}$ is periodic of period $w$ if and only if $w\in (2\pi *I)\Z$.
 \end{proof}
 %%-/
 
@@ -58,13 +58,13 @@ Then ${\rm exp}\colon S\to T$ and ${\rm log}\colon T\to S$ are inverse homeomorp
 /-%%
 \begin{proof}
 Since ${\rm exp}(z)\in \R^+$ if and only if ${\rm exp}({\rm Im}(z))\in \R^+$ if and only if
-${\rm Im}(z)\in (2\pi *I)\Zee$. Since every  element of $S$ has imaginary part strictly between $0$ and $2\pi$,
+${\rm Im}(z)\in (2\pi *I)\Z$. Since every  element of $S$ has imaginary part strictly between $0$ and $2\pi$,
 it follows that ${\rm exp}(S)\subset T$. Conversely, every element of $T$ can be written uniquely as
 $r{\rm exp}(\theta *I)$ with $r,\theta\in \R$, $r>0$, and $0<\theta<2\pi$. Since ${\rm log}(r{\rm exp}(\theta *I)$
 is ${\rm log}_{\R}(r)+\theta *I$. Thus, ${\rm log}(T)\subset S$.
 
 By standard results both ${\rm exp}$ and ${\rm log}|_T$ are continuous. Also, ${\rm exp}|_S$ is one-to-one
-since the imaginary part of any element of $S$ is strictly between $0$ and $2\pi$, so if $z\in S$ and for some $n\in \Zee$,
+since the imaginary part of any element of $S$ is strictly between $0$ and $2\pi$, so if $z\in S$ and for some $n\in \Z$,
  if $ z+2\pi n *Is\in S$, then $n=0$. Since ${\rm exp}|_S$ is one-to-one and ${\rm exp}({\rm log}(z)=z$ for all $z\in T$,
  it follows that ${\rm exp}\colon S\to T$ and ${\rm \log}\colon T\to S$ are inverse functions. Since each is continuous,
  they are inverse homeomorphisms.
@@ -73,20 +73,20 @@ since the imaginary part of any element of $S$ is strictly between $0$ and $2\pi
 
 /-%%
 \begin{definition}
-$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not= (2k+1)\pi \text{\ for\  any\ } k\in \Zee\}$.
+$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not= (2k+1)\pi \text{\ for\  any\ } k\in \Z\}$.
 \end{definition}
 %%-/
 
 /-%%
 \begin{lemma}
-$\varphi\colon S\times \Zee \to \C$ defined by $\varphi(z,k)=z+2k\pi *I$ is a homeomorphism
-$S\times \Zee\to \tilde S$.
+$\varphi\colon S\times \Z \to \C$ defined by $\varphi(z,k)=z+2k\pi *I$ is a homeomorphism
+$S\times \Z\to \tilde S$.
 \end{lemma}
 %%-/
 
 /-%%
 \begin{proof}
-Let $z=(r+\theta *I)\in \tilde S$. Then $\theta$ is not an odd multiple integral multiple of of $\pi$ so there is a unique $\theta_0\in (-\pi,\pi)$ for which there exists $k\in \Zee$ with $\theta-\theta_0= (2k\pi )$. Then $\varphi(r+\theta_0*I,k)$.
+Let $z=(r+\theta *I)\in \tilde S$. Then $\theta$ is not an odd multiple integral multiple of of $\pi$ so there is a unique $\theta_0\in (-\pi,\pi)$ for which there exists $k\in \Z$ with $\theta-\theta_0= (2k\pi )$. Then $\varphi(r+\theta_0*I,k)$.
 This show that $\varphi$ is onto. By the uniqueness of $k$ in the above argument, we see that $\varphi$ is also one-to-one.
 Lastly, it is given by a complex polynomial map so it is continuous. Lastly, $\tilde S$ is a union of disjoint open sets
 $$S_k= \{r+\theta *I | r,\theta\in \R \text{\ and\ } (2k-1)\pi <\theta< (2k+1)\pi$$
@@ -97,13 +97,13 @@ and the map is the homeomorphism that adds $2k\pi *I$. This shows that $\varphi$
 
 /-%%
 \begin{definition}
-Let $\rho\colon \tilde S\to \Zee$ send $x\in \tilde S$ to $p_2(\varphi^{-1}(z)$ where $p_2$ is the projection to the second factor.
+Let $\rho\colon \tilde S\to \Z$ send $x\in \tilde S$ to $p_2(\varphi^{-1}(z)$ where $p_2$ is the projection to the second factor.
 \end{definition}
 %%-/
 
 /-%%
 \begin{theorem}
-$\tilde S={\rm exp}^{-1}(T)$ and the map $\psi\colon \tilde S\to T\times \Zee$ given by $z\mapsto ({\rm exp}(z) ,\rho(z))$
+$\tilde S={\rm exp}^{-1}(T)$ and the map $\psi\colon \tilde S\to T\times \Z$ given by $z\mapsto ({\rm exp}(z) ,\rho(z))$
 is a homeomorphism and $p_1\circ \psi\tilde S\to T$ is the restriction to $\tilde S$ of ${\rm exp}$.
 \end{theorem}
 %%-/
@@ -111,8 +111,8 @@ is a homeomorphism and $p_1\circ \psi\tilde S\to T$ is the restriction to $\tild
 /-%%
 \begin{proof}
 By construction $p_1\circ \psi={\rm exp}+{\tilde S}$. To show  $\psi$ is a homeomorphism, it suffices to shwo that
-$\psi\circ \varphi\colon S\times \Zee\to T\times \Zee$ is a homeomorphism. But this map is product of
- ${\rm exp}\colon S\to T$ with the identity from $\Zee$ to $\Zee$. Being a product of homeomorphisms it is a homeomorphism.
+$\psi\circ \varphi\colon S\times \Z\to T\times \Z$ is a homeomorphism. But this map is product of
+ ${\rm exp}\colon S\to T$ with the identity from $\Z$ to $\Z$. Being a product of homeomorphisms it is a homeomorphism.
 \end{proof}
 %%-/
 
