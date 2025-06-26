@@ -1,6 +1,11 @@
 import Mathlib
 
 open TopologicalSpace Function
+
+open Complex Set
+
+local notation "π" => Real.pi
+
 /-%%
 We have ${\rm exp}\colon \C\to \C$ defined by
 $${\rm exp}(r+\theta *I)={\rm exp}_\R(r){\rm exp}(\theta * I)
@@ -11,14 +16,36 @@ This map satisfies ${\rm exp}(z+w)={\rm exp}(z)\cdot{\rm exp}(w)$.
 That is to say ${\rm exp}\colon \C\to \C^*$ is a homomorphism from the additive group of $\C$
 to the multiplicative group of $\C^*$.
 %%-/
+example (r θ : ℝ) :
+    exp (r + θ * I) =
+    Real.exp r * (cos θ + sin θ * I) := by
+  rw [exp_add]
+  rw [ofReal_exp]
+  rw [exp_mul_I]
 
 /-%%
-\begin{lemma}
+\begin{lemma}[periodicity]\label{periodicity}\lean{periodicity}\leanok
 ${\rm exp}\colon \C\to \C^*$ is periodic of period $2\pi i$ and with no smaller period. \end{lemma}
 %%-/
-
+lemma periodicity (z : ℂ) :
+    (∀ n : ℤ, exp (z + n * (2 * π) * I) = exp z)
+    ∧ ∀ (w : ℂ), exp w = exp z → ∃ n : ℤ, w = z + n * 2 * π * I := by
+  constructor
+  · intro n
+    rw [exp_add, exp_mul_I]
+    rw [cos_int_mul_two_pi n]
+    have : sin (n * (2 * π)) = sin (2 * n * π) := by
+      ring_nf
+    rw [this]
+    simp only [ne_eq, exp_ne_zero, not_false_eq_true, mul_eq_left₀, add_eq_left, mul_eq_zero,
+      I_ne_zero, or_false]
+    convert Complex.sin_int_mul_pi (2 * n)
+    norm_cast
+  · intro w hw
+    convert Complex.exp_eq_exp_iff_exists_int.mp hw using 4
+    ring
 /-%%
-\begin{proof}
+\begin{proof}\leanok
 Since, for $z,w\in \C$, we
 ${\rm exp}(z+w)={\rm exp}(z)\cdot{\rm exp}(w)$,  ${\rm exp}$ is periodic of period $w$ if and only if ${\rm exp}(w)=1$.
 Since $\|{\rm exp}(w)\|={\rm exp}_\R(Re(w))$, if ${\rm exp}(w)=1$ have real part equal to ${\rm Re}(w)=0$.
@@ -36,18 +63,34 @@ off the negative real axis  and semi-continuous along the negative
 real axis (excluding $0$) as we approach this axis from the upper half plan. Furthermore, for all $z\in \C^*$
 ${\rm exp}(log(z))=z$
 %%-/
+example (z : ℂ) (hz : z ≠ 0) :
+    exp (log z) = z := by
+  rw [exp_log hz]
 
 /-%%
-\begin{definition}
+\begin{definition}[strip]\label{strip}\lean{strip}\leanok
 Let $S\subset \C$ be the strip $\{(r+\theta *I)\}$ for $r,\theta\in \R$ and $-\pi<\theta <\pi$.
 \end{definition}
 %%-/
+def strip : Set ℂ :=
+--  { z | ∃ r θ : ℝ, z = r + θ * I ∧ -π < θ ∧ θ < π }
+  (univ : Set ℝ) ×ℂ Ioo (-π) π
+
+example : strip = { z | ∃ r θ : ℝ, z = r + θ * I ∧ -π < θ ∧ θ < π } := by
+  sorry
 
 /-%%
-\begin{definition}
+\begin{definition}[slitPlane']\label{slitPlane'}\lean{slitPlane'}\leanok
  Let $T\subset \C^*$ be $\C\setminus \{x\in \R|x \le 0\}$.
  \end{definition}
 %%-/
+def slitPlane' : Set ℂ :=
+  univ \ {x : ℂ | x.re ≤ 0 ∧ x.im = 0}
+
+example : slitPlane' = slitPlane := by
+  ext z
+  simp only [slitPlane', mem_diff, mem_univ, mem_setOf_eq, not_and, true_and, slitPlane, ne_eq]
+  sorry
 
 /-%%
 \begin{corollary}
