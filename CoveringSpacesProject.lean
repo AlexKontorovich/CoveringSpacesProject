@@ -4,3 +4,4 @@
 import «CoveringSpacesProject».SectionOne
 import «CoveringSpacesProject».SectionTwo
 import «CoveringSpacesProject».UniquePathLifting
+import «CoveringSpacesProject».ExpCovering
