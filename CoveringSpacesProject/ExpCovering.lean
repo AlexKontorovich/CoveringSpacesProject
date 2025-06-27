@@ -160,13 +160,13 @@ $\psi\circ \varphi\colon S\times \Z\to T\times \Z$ is a homeomorphism. But this 
 %%-/
 
 /-%%
-\begin{corollary}
+\begin{corollary}[triv_over_T]
 This defines a trivialization of ${\rm exp}$ over $T$.
 \end{corollary}
 %%-/
 
 /-%%
-\begin{proposition}
+\begin{proposition}[invariance]
 Suppose $f\colon E\to X$ is a map between topological spaces and $U]subset X$ is an open subset which is the base of a trivialization. Suppose also that there are homeomorphism $\varphi\colon X\to X$ and $\tilde \varphi\colon E\to E$
 with $f\circ\tilde\varphi =\varphi\circ f$. The $\varphi(U)$ is the base of a trivialization.
 \end{proposition}
@@ -197,7 +197,7 @@ Clearly ${\rm exp}(\tilde\mu(z)= \mu({\rm exp}(z)$ and $\mu(T)=T'$.
 %%-/
 
 /-%%
-\begin{corollary}
+\begin{corollary}[exp_CP]\label{exp_CP}
 ${\rm exp}\colon \C\to \C^* $ is a covering projection.
 \end{corollary}
 %%-/
@@ -207,4 +207,16 @@ ${\rm exp}\colon \C\to \C^* $ is a covering projection.
 $T\cup T'=\C^*$ and each of $T$ and $T'$ is the base of trivialization for ${\rm exp}$. Hence, every point
 of $\C^*$ lies in the base of a trivialization.
 \end{proof}
+%%-/
+/-%%
+
+\begin{corollary}[exp_UPL]\label{exp_UPL}
+Given a path $\omega\colon [a,b]\to \Cee^*$ and $\tilde a_0\in {\rm exp}^{-1}(\omega(a)$, there is a unique map
+$\tilde\omega\colon [a,b]\to \Cee$ with $\tilde\omega(a)=\tilde a_0$ and ${\rm exp}(\tilde\omega)=\omega$.
+\end{corollary}
+
+\begin{proof}
+By Corollary~\ref{exp_CP} and the basic result about covering projections.
+\end{proof}
+
 %%-/
