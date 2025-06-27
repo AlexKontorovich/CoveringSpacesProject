@@ -165,19 +165,14 @@ Thus, by Corollary~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding nu
 \end{proof}
 
 
-
-\begin{thm}[windingnumberthm]\label{windingnumberthm}
+We will state and prove the followig theorem:
 Let $f(z)=p(z)$ be a complex polynomial of degree $k>1$. Then for $R$ sufficiently large,
 the winding number of the path $[0,2\pi]\to \C$ given by $t\mapsto f(R{\rm exp}(t*I))$
 is a loop in $\C^*$ and has winding number $k$.
-\end{thm}
 
-
-\begin{proof} First some preliminary claims and lemmas.
-
-\begin{claim}[multiplyclaim]\label{multiplyclaim}
+\begin{lemma}[multiplyclaim]\label{multiplyclaim}
 Let $\omega$ be a loop in $\C^*$ and $a_0\in \C^*$. Then  $w(a_0\omega)=w(\omega)$.
-\end{claim}
+\end{lemma}
 
 \begin{proof}
 $\C^*$ is path connected so there is a path $a\colon [0,1]\to \C^*$
@@ -190,9 +185,9 @@ We write $f(z)=\sum_{i=0}^k\alpha_iz^{k-i}$ with $\alpha_0\not= 0$.
 Our loop is $f(R{\rm exp}(t*I)$. Multiplying this  $\alpha_0^{-1}$ and invoking Claim~\ref{multiplyclaim}
 we can replace $p(z)$ by $q(z)= z^k+\sum_{i=1}^k \alpha_i/\alpha_0z^{k-i}$.
 Define $\beta_i=\alpha_i/\alpha_0$.
-\begin{claim}
+\begin{lemma}
 For all $R$ sufficiently large $R^k>|\sum_{i=1}^k\beta_iz^{k-i}|$ for any $z$with $|z|=R$.
-\end{claim}
+\end{lemma}
 
 \begin{proof}
 Choose $R>\sum_{i=1}^k|\beta_j|$ and $R>1$.
@@ -205,6 +200,18 @@ $$
 Then by Lemma~\ref{walkingdog} for $R>{\rm max}(1,\sum_{i=1}^k|\beta_j|)$, the loop $f(R{\rm exp}(t*I)$
 and the loop $R{\rm exp}(t*I)$ have the same winding number. But according the Lemma~\ref{zk_windingnumber_k}
 the latter has winding number $k$.
+\end{proof}
+
+And now we prove the theorem.
+
+\begin{theorem}[windingnumberthm]\label{windingnumberthm}
+Let $f(z)=p(z)$ be a complex polynomial of degree $k>1$. Then for $R$ sufficiently large,
+the winding number of the path $[0,2\pi]\to \C$ given by $t\mapsto f(R{\rm exp}(t*I))$
+is a loop in $\C^*$ and has winding number $k$.
+\end{theorem}
+
+
+\begin{proof} First some preliminary claims and lemmas.
 \end{proof}
 
 \begin{corollary}
