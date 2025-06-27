@@ -211,8 +211,8 @@ of $\C^*$ lies in the base of a trivialization.
 /-%%
 
 \begin{corollary}[exp_UPL]\label{exp_UPL}
-Given a path $\omega\colon [a,b]\to \Cee^*$ and $\tilde a_0\in {\rm exp}^{-1}(\omega(a)$, there is a unique map
-$\tilde\omega\colon [a,b]\to \Cee$ with $\tilde\omega(a)=\tilde a_0$ and ${\rm exp}(\tilde\omega)=\omega$.
+Given a path $\omega\colon [a,b]\to \C^*$ and $\tilde a_0\in {\rm exp}^{-1}(\omega(a)$, there is a unique map
+$\tilde\omega\colon [a,b]\to \C$ with $\tilde\omega(a)=\tilde a_0$ and ${\rm exp}(\tilde\omega)=\omega$.
 \end{corollary}
 
 \begin{proof}
