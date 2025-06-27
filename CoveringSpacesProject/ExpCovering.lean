@@ -116,7 +116,7 @@ since the imaginary part of any element of $S$ is strictly between $0$ and $2\pi
 
 /-%%
 \begin{definition}
-$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not= (2k+1)\pi \text{\ for\  any\ } k\in \Z\}$.
+$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{ and } \theta\not= (2k+1)\pi \text{ for  any } k\in \Z\}$.
 \end{definition}
 %%-/
 
@@ -167,7 +167,7 @@ This defines a trivialization of ${\rm exp}$ over $T$.
 
 /-%%
 \begin{proposition}[invariance]
-Suppose $f\colon E\to X$ is a map between topological spaces and $U]subset X$ is an open subset which is the base of a trivialization. Suppose also that there are homeomorphism $\varphi\colon X\to X$ and $\tilde \varphi\colon E\to E$
+Suppose $f\colon E\to X$ is a map between topological spaces and $U \subset X$ is an open subset which is the base of a trivialization. Suppose also that there are homeomorphism $\varphi\colon X\to X$ and $\tilde \varphi\colon E\to E$
 with $f\circ\tilde\varphi =\varphi\circ f$. The $\varphi(U)$ is the base of a trivialization.
 \end{proposition}
 %%-/
@@ -190,8 +190,8 @@ Let $T'\subset \C^*$ be the complement of $\R^+$. Then $T'$ is the base of a tri
 
 /-%%
 \begin{proof}
-We have homeomorphism $\mu \colon \C^*\to \C^*$ that sends $z to {\rm exp}(\pi *I)z$
-and the homoeomorphism $\tilde \mu\colon \C\to \C$ defined by $\tilde mu(z)=z+\pi *I$
+We have homeomorphism $\mu \colon \C^* \to \C^*$ that sends $z \to {\rm exp}(\pi *I)z$
+and the homoeomorphism $\tilde \mu\colon \C\to \C$ defined by $\tilde \mu(z)=z+\pi *I$
 Clearly ${\rm exp}(\tilde\mu(z)= \mu({\rm exp}(z)$ and $\mu(T)=T'$.
 \end{proof}
 %%-/
