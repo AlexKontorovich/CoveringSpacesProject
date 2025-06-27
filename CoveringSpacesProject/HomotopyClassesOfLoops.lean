@@ -26,7 +26,7 @@ If $x,y\in {\rm exp}^{-1}(\omega(a)$, then
 The difference $\tilde\omega_y(b)-\tilde\omega_y(a) =\tilde\omega_x(b)-\tilde\omega_x(a)\in (2\pi *I)\Z$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\uses{periodicity}
 Since ${\rm exp}(\tilde\omega_x(b))={\rm exp}(\tilde \omega_x(a))$ by Lemma~\ref{periodicity}, it follows that
 $\tilde\omega_x(b)-\tilde\omega_x(a)\in (2\pi *I)\Z$.
 
@@ -63,7 +63,7 @@ Suppose that $\omega$ is homotopic to a constant loop. Then
 the winding number of $\omega$ is zero
 \end{corollary}
 
-\begin{proof}
+\begin{proof}\uses{equalwinding}
 By Lemma~\ref{equalwinding} the winding number of the loop $\omega$
 is equal to the winding number of a constant loop. By unique path lifting
 the lift of a constant loop is a constant path. Thus, the endpoints of the lift
@@ -95,7 +95,7 @@ If $\psi,\psi'\colon S^1\to \C^*$ are homotopic, then the winding numbers of
 $\psi$ and $\psi'$ are equal.
 \end{corollary}
 
-\begin{proof}
+\begin{proof}\uses{equalwinding, homotopic}
 By Lemmas~\ref{equalwinding} and~\ref{homotopic}.
 \end{proof}
 
@@ -116,7 +116,7 @@ If $\psi\colon S^1\to \C^*$ extends to a continuous map $\hat\psi\colon D^2\to \
 then the winding number of $\psi$ is zero.
 \end{corollary}
 
-\begin{proof}
+\begin{proof}\uses{bounds, S1homotopy, constpath}
 By Lemma~\ref{bounds} $\psi$ is homotopic to a constant map. By Corollary~\ref{S1homotopy}
 the winding number of $\psi$ is equal to the winding number of a constant map of $S^1\to \C^*$.
 The loop associated to a constant map of
@@ -143,7 +143,7 @@ Suppose that $\psi\colon S^1\to \C^*$ and $\psi'\colon S^1\to \C^*$ are maps
 and for each $z\in S^1$, we have $|\psi(z)-\psi'(z)|<|\psi(z)|$. Then $\psi$ and $\psi'$ are homotopic in $\C^*$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\uses{S1homotopy}
 Define a homotopy $H\colon [0,2\pi]\times I\to \C$ by
 $H(s,t)=t\psi'(s)+(1-t)\psi(s)$.
 We establish that $H(s,t)\not= 0$ for all $s\in [0,2\pi]$ and $t\in [0,1]$.
@@ -159,7 +159,7 @@ Suppose that $\psi,\psi'\colon S^1\to \C^*$ with $|\psi(z)-\psi'(z)| < |\psi(z)|
 for all $s\in [0,2\pi]$. Then $\psi$ and $\psi'$ have the same winding number.
 \end{corollary}
 
-\begin{proof}
+\begin{proof}\uses{walkingdog, S1homotopy}
 According to Lemma~\ref{walkingdog} $\psi$ and $\psi'$ are homotopic in $\C^*$.
 Thus, by Corollary~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding number.
 \end{proof}
@@ -174,7 +174,7 @@ is a loop in $\C^*$ and has winding number $k$.
 Let $\omega$ be a loop in $\C^*$ and $a_0\in \C^*$. Then  $w(a_0\omega)=w(\omega)$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\uses{walkingdog}
 $\C^*$ is path connected so there is a path $a\colon [0,1]\to \C^*$
 with $a(0)=a_0$ and $a(1)=1$. This gives a homotopy $a(t)\omega$
 between $a_0\omega$ an $\omega$. Thus, by Lemma~\ref{homotopic}
@@ -189,7 +189,7 @@ Define $\beta_i=\alpha_i/\alpha_0$.
 For all $R$ sufficiently large $R^k>|\sum_{i=1}^k\beta_iz^{k-i}|$ for any $z$with $|z|=R$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}\uses{walkingdog, zk_windingnumber_k}
 Choose $R>\sum_{i=1}^k|\beta_j|$ and $R>1$.
 Since $R>1$, we have
 $$
@@ -218,7 +218,7 @@ is a loop in $\C^*$ and has winding number $k$.
 Every complex polynomial of degree $k>0$ has a complex zero.
 \end{corollary}
 
-\begin{proof}
+\begin{proof}\uses{windingnumberthm, disk_ext_impies_wn_0}
 Suppose $p(z)$ is a complex polynomial of degree $k>0$ with no zero. According to
 Theorem~\ref{windingnumberthm}, the winding number of the restriction of $p(z)$ to a circle of radius $R$ sufficiently large is $k$. If $p(z)$ has no zero then the polynomial restricted to the disk of radius $R$ defines an extension
 of $t\mapsto p(R{\rm exp}(t*I)$ to a map from $\overline{D(0,R)}$ to $\C^*$. This is a contradiction, since by
