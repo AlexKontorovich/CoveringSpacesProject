@@ -193,7 +193,7 @@ For all $R$ sufficiently large $R^k>|\sum_{i=1}^k\beta_iz^{k-i}|$ for any $z$wit
 Choose $R>\sum_{i=1}^k|\beta_j|$ and $R>1$.
 Since $R>1$, we have
 $$
-|\sum_{i=1}^k\beta_iz^{k-i}| & \le & \sum_{i=1}^k|\beta_i|R^{k-i}\le (\sum_{i=1}^k|\beta_i|)R^{k-1}
+|\sum_{i=1}^k\beta_iz^{k-i}| \le \sum_{i=1}^k|\beta_i|R^{k-i}\le (\sum_{i=1}^k|\beta_i|)R^{k-1}
 < R^k.
 $$
 
