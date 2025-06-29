@@ -1,0 +1,38 @@
+{defn}
+{definition}
+
+{lem}
+{lemma}
+
+\Ar
+\R
+
+\Cee
+\C
+
+(uses\
+\uses
+
+\})
+}
+
+\Zee
+\Z
+
+{prop}
+{proposition}
+
+{cor}
+{corollary}
+
+[a,b]
+[ a, b ]
+
+[0,1]
+[ 0, 1 ]
+
+[0,2\pi]
+[ 0, 2\pi ]
+
+{thm}
+{theorem}

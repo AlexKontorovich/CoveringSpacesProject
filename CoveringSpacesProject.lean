@@ -3,6 +3,7 @@
 
 -- import «CoveringSpacesProject».SectionOne
 -- import «CoveringSpacesProject».SectionTwo
-import «CoveringSpacesProject».UniquePathLifting
-import «CoveringSpacesProject».ExpCovering
-import «CoveringSpacesProject».HomotopyClassesOfLoops
+--import «CoveringSpacesProject».UniquePathLifting
+--import «CoveringSpacesProject».ExpCovering
+--import «CoveringSpacesProject».HomotopyClassesOfLoops
+import «CoveringSpacesProject».RootsComplexPolynomials
