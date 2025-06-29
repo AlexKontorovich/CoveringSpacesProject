@@ -180,16 +180,16 @@ In Mathlib.
 \end{proof}
 %%-/
 
-/-%%
+/-% **Wrong delimiters on purpose**
 \begin{lemma}
 For all $x\in T$, $PBlog(x)\in \{z\in \C |-\pi < Im(z) < \pi\}$
 \end{lemma}
-%%-/
-/-%%
+%-/
+/-%
 \begin{proof}\uses{PBlog, expDef}
 In Mathlib.
 \end{proof}
-%%-/
+%-/
 
 /-%%
 
