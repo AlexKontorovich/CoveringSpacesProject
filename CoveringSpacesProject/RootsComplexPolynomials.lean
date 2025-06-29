@@ -331,7 +331,7 @@ with $f\circ\tilde\varphi =\varphi\circ f$. The $\varphi(U)$ is the base of a tr
 %%-/
 
 /-%%
-\begin{proof}uses{trivialization}
+\begin{proof}\uses{trivialization}
 Since $f\circ \tilde\varphi=\varphi\circ f$,  we have  $\tilde\varphi\colon f^{-1}(U)\to f^{-1}(\varphi(U))$.
 Since $\varphi$ and $\tilde\varphi$ are homeomorphisms the induced map
  $\tilde\varphi\colon f^{-1}(U) \to f^{-1}(\varphi(U))$ is a homeomorphism.
@@ -407,7 +407,7 @@ ${\rm exp}\colon \C\to \C $ is a covering projection over $Cstar$ with source $\
 
 /-%%
 
-\begin{proof}\uses{trivOverT, trivOverTprime, TcupTprimeCstar, IsCoverOn}
+\begin{proof}\uses{trivOverT, trivOverTprime, TcupTprimeCstar, IsCoveringOn}
 By Lemma~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Lemma~\ref{trivOverT} and Lemma~\ref{trivOverTprime} and each of $T$ and $T'$ is the base of trivialization for ${\rm exp}$ with non-trivial fiber. Hence, every point  of $Cstar$ lies in the base of a trivialization for ${\rm exp}$. By definition, this shows that ${\rm exp}\colon \C\to \C $ is a covering on $Cstar$.
 Since ${\rm exp}(z)\not=0$ for all $z\in \C$, it follows that ${\rm exp}^{-1}(Cstar)=\C$.
@@ -499,7 +499,7 @@ $w(\tilde\omega')=w(\tilde\omega)$.
 
 /-%%
 
-\begin{proof}\uses{deflift, defloop, periodicity, liftWN}
+\begin{proof}\uses{deflift, loop, periodicity, liftWN}
 By the Definition~\ref{deflift} we have
  ${\rm exp}(\tilde\omega(b))=\omega(b)$ and ${\rm exp}(\tilde\omega(a)=\omega(a)$.
  By Definition~\ref{loop} $\omega(b)=\omega(a)$. This gives ${\rm exp}(\tilde\omega(b))={\rm exp}(\tilde\omega(a))$.
@@ -549,7 +549,7 @@ If $\omega\colon [ a, b ]\to \C$ and $\omega'\colon [ a, b ]\to \C$  are loops w
 
 /-%%
 
-\begin{proof}\uses{diffpoint, constWNomega, expHPL}
+\begin{proof}\uses{diffendpoint, constWNomega, expHLP}
 Since $H$ is a homotopy of loops, $H(\{a\}\times I)=H(\{b\}\times I)$. Then the image of $H$ is contained in $Cstar$.
 Let $\mu\colon I \to \C$ be this path.
 By Corollary~\ref{expHLP} there  is a lift $\tilde H\colon [ a, b ]\times I$ of $H$ through ${\rm exp}$. Then $\tilde H|_{\{a\}\times I}$
@@ -573,7 +573,7 @@ the winding number of $\omega$ is zero
 
 /-%%
 
-\begin{proof}\uses{equalawinding, expUPL, WNloop}
+\begin{proof}\uses{equalwinding, expUPL, WNloop}
 By Lemma~\ref{equalwinding} the winding number of the loop $\omega$
 is equal to the winding number of a constant loop. By Lemma~\ref{expUPL}
 the lift of a constant loop through ${\rm exp}$ is a constant path. Thus, the endpoints of the lift of the constant loop
@@ -625,7 +625,7 @@ $\psi$ and $\psi'$ are equal.
 
 /-%%
 
-\begin{proof}\uses{equalwinding, S1homotopy}
+\begin{proof}\uses{equalwinding, homotopic}
 This is immediate from Lemmas~\ref{equalwinding}  and ~\ref{homotopic}, .
 \end{proof}
 %%-/
