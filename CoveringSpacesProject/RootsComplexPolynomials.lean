@@ -135,28 +135,27 @@ There is a $PBlog\colon \C\to \C$.
 noncomputable def PBlog (z : ℂ) : ℂ :=
   Complex.log z
 
-/-%%
+/-% **Wrong delimiters on purpose**
 
 \begin{lemma}\label{PBlogInverse}
 If $z\in \C$ and $z\not=0$ then ${\rm exp}(PBlog(z))=z$.
 \end{lemma}
-%%-/
-/-%%
 \begin{proof}\uses{PBlog, expDef}
 In Mathlib.
 \end{proof}
-%%-/
+%-/
 
 /-%%
 
 \begin{lemma}\label{ImPBlog}
- The image of $PBlog$ is contained in $\{z\in \C |-\pi < Im(z)\le \pi$
+The image of $PBlog$ is contained in $\{z\in \C |-\pi < Im(z)\le \pi\}$ and
+ for all $\{z\in \C | z\not=0\}$ ${\rm exp}(PBlog)(z)=z$.
 \end{lemma}
 %%-/
 
 /-%%
-\begin{proof}\uses{PBlog, expDef}
-In Mathlib.
+\begin{proof}\uses{PBlog, expDef, Eulersformula}
+This is immediate from Definition~\ref{PBlog} and Lemma~\ref{Eulersformula}.
 \end{proof}
 %%-/
 
@@ -175,8 +174,8 @@ $PBlog$ is continuous on $T$ and if $z\in T$ then $PBlog(z)\in \{z\in \C |-\pi <
 
 %%-/
 /-%%
-\begin{proof}\uses{PBlog, expDef}
-In Mathlib.
+\begin{proof}\uses{Eulersformula}
+By Lemma|~\ref{Eulersformula}  for $x\in T$  $Re(cos(x))\not=-1$ and hence $PBlog(x)\in S$.
 \end{proof}
 %%-/
 
@@ -240,7 +239,7 @@ Suppose that $z,w\in S$ and ${\rm exp}(z)={\rm exp}(w)$.
 By Lemma~\ref{periodicity}
  if ${\rm exp}(z)={\rm exp}{w}$ then there is an integer $n$ such that $z-w =2\pi *n*I$ If $z,w\in S$, then
  $-2\pi< Im(z)-Im(w)<2\pi$, so $z=w$. This shows that   ${\rm exp}|_S$ is one-to-one.
- Since ${\rm exp}|_S$ is one-to-one and ${\rm exp}({\rm PBlog}(z)=z$ for all $z\in T$,
+ Since ${\rm exp}|_S$ is one-to-one and ${\rm exp}({\rm PBlog}(z))=z$ for all $z\in T$,
  it follows that ${\rm exp}\colon S\to T$ and ${PBlog}\colon T\to S$ are inverse functions. Since each is continuous,
  they are inverse homeomorphisms.
 \end{proof}
@@ -249,7 +248,8 @@ By Lemma~\ref{periodicity}
 /-%%
 
 \begin{definition}\label{tildeSDef}
-$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not= (2k+1)\pi \text{\ for\  any\ } k\in \Z\}$.
+$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not=
+(2k+1)\pi \text{\ for\  any\ } k\in \Z\}$.
 \end{definition}
 %%-/
 
@@ -264,10 +264,9 @@ $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
 /-%%
 
 \begin{proof}\uses{stripDef, tildeSDef}
-Since under the translation action of $(2\pi)\Z$ on $\C$ by Definition~\ref{stripDef} the image of $S$ is the union
-of all strips $S(2n-1)\pi,2n+1\pi)$. By Definition~\ref{tildeSDef} this union is $\tilde S$. Thus we have a map $S\times \Z\to \tilde S$
-defined by $(z,n)\mapsto z+2\pi *n *I$. Since translation is a homeomorphism of $\C\to Cee$, this map is a local homeomorphism onto its image. If $n ,n'\in \Z$ with $n\not=n'$ then $S((2n-1)\pi,S(2n+1)\pi)\cap S((2n'-1)\pi,(2n'+1)\pi)=\emptyset$. Also $\tilde S=\cup_{n\in \Z}S((2n-1)\pi,(2n+1)\pi)$. It follows that
-$\varphi$ is a  homeomorphism.
+According to Definition~\ref{stripDef}  image of $S$ under the translation action of $(2\pi)\Z$ on $\C$   is the union
+of all strips $S(2n-1)\pi,(2n+1)\pi)$. By Definition~\ref{tildeSDef} this union is $\tilde S$. Thus we have a map $S\times \Z\to \tilde S$ defined by $(z,n)\mapsto z+2\pi *n *I$. Since translation is a homeomorphism of $\C\to \C$, this map is a local homeomorphism onto its image $\tilde S$. If $n ,n'\in \Z$ with $n\not=n'$ then $S((2n-1)\pi,(2n+1)\pi)\cap S((2n'-1)\pi,(2n'+1)\pi)=\emptyset$. Also $\tilde S=\coprod_{n\in \Z}S((2n-1)\pi,(2n+1)\pi)$. It follows that
+$\varphi$ is a bijective map and hence a  homeomorphism.
 \end{proof}
 %%-/
 
@@ -279,23 +278,23 @@ $\varphi$ is a  homeomorphism.
 
 
 \begin{definition}\label{widetildePBlogDef}
-Let $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ be defined by $\widetilde{PBlog}(z,n)=(Plog(z),n)$
+Let $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ be defined by $\widetilde{PBlog}(z,n)=(PBlog(z),n)$
 for all $z\in T$ and $n\in \Z$.
 \end{definition}
 %%-/
 
 /-%%
 
-\begin{lemma}\label{widetildePBlogHomeo}
+\begin{lemma}\label{widetildePBlogHomeo, PBlog}
 $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homeomorphism.
 \end{lemma}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{widetildePBlogDef, PBlogInverse}
+\begin{proof}\uses{widetildePBlogDef, inverseHomeo}
 By Definition~\ref{widetildePBlogDef} $\widetilde PBlog$ is the product of $PBlog\colon T\to S$ and ${\rm Id}_\Z\colon \Z\to\Z$.
-By Lemma~\ref{PBlogInverse} the first of these factors is a homeomorphism. Since ${\rm Id}_\Z$ is a homeomorphism.
+By Lemma~\ref{inverseHomeo} the first of these factors is a homeomorphism. Since ${\rm Id}_\Z$ is a homeomorphism.
 it follows from basic properties of homeomorphisms that the product $\widetilde{PBlog}$ is a homeomorphism
 \end{proof}
 %%-/
@@ -310,13 +309,13 @@ on $T$
 
 /-%%
 
-\begin{proof}\uses{tildeShomeo, ContPBlog, periodicity, trivialization}
-$\varphi$ is a homeomorphsm by Lemma~\ref{tildeShomeo}.
+\begin{proof}\uses{tildeShomeo, widetildePBlogHomeo, periodicity}
+$\varphi$ is a homeomorphism by Lemma~\ref{tildeShomeo}.
 By Lemma~\ref{widetildePBlogHomeo}    $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homemorphism.
 Thus, the composition $\varphi\circ\widetilde{PBlog}\colon T\times \Z\to \tilde S$ is a homeomorphism.
-For $(z,n)\int T\times \Z$,
-$${\rm exp}\circ\varphi\circ \widetilde{PBlog}(z,n)={\rm exp}(\varphi(PBlog(z),n)={\rm exp}(PBlog(z)+2\pi *n*I).$$
-By Lemma~\ref{periodicity}, ${\rm exp}(PBlog(z)+2\pi *n*I)={\rm exp}(PBlog(z)$, which by Lemma~\ref{PBlogInverse} equals $z$. This establishes that $\psi\colon T\times \Z \to \tilde S$ is a trivialization of ${\rm exp}\colon \C \to \C$ over $T$.
+For $(z,n)\in T\times \Z$,
+$${\rm exp}\circ\varphi\circ \widetilde{PBlog}(z,n)={\rm exp}(\varphi(PBlog(z),n)={\rm exp}(PBlog(z)+2\pi * n * I).$$
+By Lemma~\ref{periodicity}, ${\rm exp}(PBlog(z)+2\pi * n * I)={\rm exp}(PBlog(z)$, which by Lemma~\ref{widetildePBlogHomeo} equals $z$. This establishes that$\psi$ satisfies all  the conditions of the  Definition of Trivialization over the open set $T$.
 \end{proof}
 %%-/
 
@@ -361,10 +360,10 @@ $T'$ is the base of a trivialization for ${\rm exp}\colon \C\to \C$ with non-emp
 
 /-%%
 
-\begin{proof}\uses{homeoInv, trivOverT, splitPlane, TprimeDef}
+\begin{proof}\uses{multiplicativity, Eulersformula, homeoInv, trivOverT, splitPlane, TprimeDef}
 We have homeomorphism $\mu \colon \C\to \C$ that sends $z \to {\rm exp}(\pi *I)z$
 and the homeomorphism $\tilde \mu\colon \C\to \C$ defined by $\tilde \mu(z)=z+\pi *I$
-Clearly ${\rm exp}(\tilde\mu(z)= \mu({\rm exp}(z))$ and by Definition~\ref{splitPlane} and Definition~\ref{TprimeDef}
+Clearly  by Lemma~\ref{multiplicativity} and Lemma~\ref{Eulersformula} ${\rm exp}(\tilde\mu(z)= \mu({\rm exp}(z))$. By Definition~\ref{splitPlane} and Definition~\ref{TprimeDef}
 $\mu(T)=T'$. The result now follows from Lemma~\ref{homeoInv} and Proposition~\ref{trivOverT}.
 \end{proof}
 %%-/
@@ -380,7 +379,7 @@ For $x\in \C$ with $x\not= 0$, either $x\in T$ or $x\in T'$.
 
 \begin{proof}\uses{splitPlane, TprimeDef}
 Suppose that $x\in \C$ and $x\not= 0$. Then either $Re(x)> 0$ or $Re(x)\le 0$. If $Re(x)>0$, then by Definition~\ref{splitPlane} $x\in T$. if $Re(x)< 0$ then by Definition~\ref{TprimeDef} $x\in T'$. Finally, if $Re(z)=0$
-and $z\not=0$, the $Im(z)\not= 0$ and $z\in T$.
+and $z\not=0$, then $Im(z)\not= 0$ and $z\in T$.
 \end{proof}
 %%-/
 
@@ -407,11 +406,12 @@ ${\rm exp}\colon \C\to \C $ is a covering projection over $Cstar$ with source $\
 
 /-%%
 
-\begin{proof}\uses{trivOverT, trivOverTprime, TcupTprimeCstar, IsCoveringOn}
-By Lemma~\ref{TcupTprimeCstar}
-$T\cup T'= Cstar$. By Lemma~\ref{trivOverT} and Lemma~\ref{trivOverTprime} and each of $T$ and $T'$ is the base of trivialization for ${\rm exp}$ with non-trivial fiber. Hence, every point  of $Cstar$ lies in the base of a trivialization for ${\rm exp}$. By definition, this shows that ${\rm exp}\colon \C\to \C $ is a covering on $Cstar$.
+\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, PBlogInverse, IsCoveringOn}
+By Corollary~\ref{TcupTprimeCstar}
+$T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime} and each of $T$ and $T'$ is the base of trivialization for ${\rm exp}$ with non-trivial fiber. Hence, every point  of $Cstar$ lies in the base of a trivialization for ${\rm exp}$. By definition, this shows that ${\rm exp}\colon \C\to \C $ is a covering on $Cstar$.
 Since ${\rm exp}(z)\not=0$ for all $z\in \C$, it follows that ${\rm exp}^{-1}(Cstar)=\C$.
-\end{proof}
+Lastly, by Lemma~\ref{ImPBlog} if $z\in\C$ and $z\not= 0$ then ${\rm exp}(PBlog)(z)=z$.
+This proves that ${\rm exp}$ is onto $\{z\in \C | z\not=0\}$, which by Lemma~\ref{Cstar}, is equal to $Cstar$.\end{proof}
 %%-/
 
 /-%%
@@ -435,6 +435,12 @@ By Corollary~\ref{expCP} and the basic result about covering projections.
 \begin{corollary}\label{expHLP}
 ${\rm exp}$ satisfies the homotopy lifting property on $Cstar$.
 \end{corollary}
+%%-/
+
+/-%%
+\begin{proof}\uses{expCP}
+This is immediate from Corollary~\ref{expCP} and the theorem that covering projections have the homotopy lifting property.
+\end{proof}
 %%-/
 
 /-%%
@@ -489,10 +495,10 @@ as guaranteed by Corollary~\ref{expUPL}.
 /-%%
 
 \begin{lemma}\label{diffendpoint}
-Let $\omega\colon [a, b]\to \C$ with $\omega(t)\in Cstar$ for all $t\in [a ,b]$.
+Let $\omega\colon [ a, b]\to \C$ with $\omega(t)\in Cstar$ for all $t\in [ a ,b]$.
 Suppose that $\tilde\omega$ and $\tilde\omega'$ are lifts of $\omega$ through ${\rm exp}$.
-Then $w(\tilde\omega)\in (2\pi * I)\Z$ and there is an integer $k$ such that for all $t\in [a, b]$
-$\tilde\omega'(t)-\tilde\omega(t)= 2\pi *n*I$. In particular,
+Then $w(\tilde\omega)\in (2\pi * I)\Z$ and there is an integer $k$ such that for all $t\in [a ,b]$
+$\tilde\omega'(t)-\tilde\omega(t)= 2\pi *k*I$. In particular,
 $w(\tilde\omega')=w(\tilde\omega)$.
 \end{lemma}
 %%-/
@@ -503,14 +509,14 @@ $w(\tilde\omega')=w(\tilde\omega)$.
 By the Definition~\ref{deflift} we have
  ${\rm exp}(\tilde\omega(b))=\omega(b)$ and ${\rm exp}(\tilde\omega(a)=\omega(a)$.
  By Definition~\ref{loop} $\omega(b)=\omega(a)$. This gives ${\rm exp}(\tilde\omega(b))={\rm exp}(\tilde\omega(a))$.
- By Lemma~\ref{periodicity}, there is $n\in \Z$, such that $\tilde\omega(b)-\tilde\omega(b)=2\pi*n* I$.
+ By Lemma~\ref{periodicity}, there is $k\in \Z$, such that $\tilde\omega(b)-\tilde\omega(b)=2\pi*k* I$.
 
 
-If $\tilde\omega'$ is another lift of $\omega$, then for every $t\in [ a, b]$, since ${\rm exp}(\tilde\omega'(t))={\rm exp}(\tilde\omega(t))$, there is an integer $n(t)\in \Z$ with  $\tilde\omega'(t)-\tilde\omega_x(t)=2\pi n(t)*I$.
+If $\tilde\omega'$ is another lift of $\omega$, then for every $t\in [ a, b]$, since ${\rm exp}(\tilde\omega'(t))={\rm exp}(\tilde\omega(t))$, there is an integer $n(t)\in \Z$ with  $\tilde\omega'(t)-\tilde\omega_x(t)=2\pi k(t)*I$.
 Since $\tilde\omega'$ and $\tilde\omega$ are continuous functions of $t$ so is $n(t)$. Since the $[ a, b]$ is connected and $\Z$ is discrete, $n(t)$ is a constant function; i.e., there is an integer $n$ such that for all $t\in [ a, b]$, we have
-$\tilde\omega'(t)=\tilde\omega(t)+n$.
+$\tilde\omega'(t)=\tilde\omega(t)+k$.
 Thus, by Definition~\ref{liftWN} we have
-$$w(\tilde\omega')=\tilde\omega'(b)-\tilde\omega'(a)=\tilde \omega(b)+n-(\tilde\omega(a)+n)=\tilde\omega(b)-\tilde\omega(a)=w(\tilde\omega).$$
+$$w(\tilde\omega')=\tilde\omega'(b)-\tilde\omega'(a)=\tilde \omega(b)+k-(\tilde\omega(a)+k)=\tilde\omega(b)-\tilde\omega(a)=w(\tilde\omega).$$
  \end{proof}
 %%-/
 
@@ -549,14 +555,14 @@ If $\omega\colon [ a, b ]\to \C$ and $\omega'\colon [ a, b ]\to \C$  are loops w
 
 /-%%
 
-\begin{proof}\uses{diffendpoint, constWNomega, expHLP}
-Since $H$ is a homotopy of loops, $H(\{a\}\times I)=H(\{b\}\times I)$. Then the image of $H$ is contained in $Cstar$.
+\begin{proof}\uses{homotopyloop, diffendpoint, constWNomega, expHLP}
+By Definition~\ref{homotopyloop} $H(\{a\}\times I)=H(\{b\}\times I)$. Then the image of $H$ is contained in $Cstar$.
 Let $\mu\colon I \to \C$ be this path.
-By Corollary~\ref{expHLP} there  is a lift $\tilde H\colon [ a, b ]\times I$ of $H$ through ${\rm exp}$. Then $\tilde H|_{\{a\}\times I}$
+By Corollary~\ref{expHLP} there  is a lift $\tilde H\colon [ a, b]\times I$ of $H$ through ${\rm exp}$. Then $\tilde H|_{\{a\}\times I}$
 and $\tilde H|_{\{b\}\times I}$ are two liftings of $\mu$. So by Lemma~\ref{diffendpoint} there is $n\in \Z$ such that
 $\tilde H(b,t)-\tilde H(a,t)=2\pi * n *I$. Evaluating at $t=0$ gives $\tilde H(b,0)-\tilde H(a,0)=2\pi n* I$.
 Since $\tilde H(s,0)$ is a lift of $\omega$,  by Definition~\ref{WNloop} $w(\omega)=n$.
-Evaluating at $t=1$ gives $\tilde H(b,1)\tilde H(a,1)=2\pi n *I)$. Since $\tilde H(s,1)$ is a lift of $\omega'$, by Definition~\ref{WNloop}
+Evaluating at $t=1$ gives $\tilde H(b,1)-\tilde H(a,1)=2\pi n *I$. Since $\tilde H(s,1)$ is a lift of $\omega'$, by Definition~\ref{WNloop}
 $w(\omega')=n$.
 \end{proof}
 %%-/
@@ -625,8 +631,10 @@ $\psi$ and $\psi'$ are equal.
 
 /-%%
 
-\begin{proof}\uses{equalwinding, homotopic}
-This is immediate from Lemmas~\ref{equalwinding}  and ~\ref{homotopic}, .
+\begin{proof}\uses{WNS1, equalwinding, homotopic}
+By Definition~\ref{WNS1} we need only show that the winding numbers of the paths associated to $\psi$ and $\psi'$
+are equal
+This is immediate from Lemmas~\ref{equalwinding}  and ~\ref{homotopic}.
 \end{proof}
 %%-/
 
@@ -694,7 +702,7 @@ Define $\tilde\omega(t)=\tilde\alpha_0+kt *I$ for $[0\le t\le 2\pi$.
 Then by Lemma~\ref{multiplicativity}
 $${\rm exp}(\tilde\alpha_0 +kt*I)=\alpha_0 R^k{\rm exp} (kt*I).$$
 By Definition~\ref{deflift} this means that $\tilde\omega$ is a lift of $\omega$ through ${\rm exp}$.
-By Definition~\ref{WNloop}  $w(\omega)=(2\pi k*I-0)/2\pi *I=k$.
+By Definition~\ref{WNloop}  $w(\omega)=(2\pi k*I-0)/2\pi * I * k$.
 By Definition~\ref{WNS1}, this means that the winding number of $\psi_{\alpha_0,k}$ is $k$.
 \end{proof}
 
@@ -720,7 +728,7 @@ We establish that $H(s,t)\not= 0$ for all $s\in [ 0, 2\pi ]$ and $t\in [ 0, 1 ]$
 For $s$ every point $|\psi(s)-(t\psi(s)-(1-t)\psi'(s)|=|(1-t)(\psi-\psi')|$. Since $0\le t\le 1$, $0\le (1-t)\le 1$.
 Then, $|\psi(s)-H(s,t)|=|\psi(s)-(t\psi(s)-(1-t)\psi'(s)|=(1-t)|\psi(s)-\psi'(s)|<|\psi(s)|$. So $H(s,t)\not=0$ for all $s\in [ a, b ]$ and all $t\in[ 0, 1 ]$.
 
-Consequently, $H$ is a homotopy of loops  from $\psi$ to $\psi'$ whose image lies in $\C^*$. By Lemma~\ref{S1homotopy} the $w(\psi)=w(\psi')$.
+Consequently, $H$ is a homotopy of loops  from $\psi$ to $\psi'$ whose image lies in $Cstar$. By Lemma~\ref{S1homotopy} the $w(\psi)=w(\psi')$.
 \end{proof}
 %%-/
 
@@ -735,7 +743,7 @@ for all $s\in [ 0, 2\pi ]$. Then $\psi$ and $\psi'$ have the same winding number
 /-%%
 
 \begin{proof}\uses{walkingdog, S1homotopy}
-According to Lemma~\ref{walkingdog} there is a homotopy from $\psi$ to $\psi'$ with image in  $Cstar$.
+According to Lemma~\ref{walkingdog} there is a homotopy of loops from $\psi$ to $\psi'$ with image in  $Cstar$.
 Thus, by Corollary~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding number.
 \end{proof}
 %%-/
@@ -776,7 +784,7 @@ is a loop  with winding number $k$.
 
 \begin{proof}\uses{zkWNk, zkdominates, walkingdog}
 By Lemma~\ref{zkdominates} for $R>{\rm max}(1,\sum_{i=1}^k|\beta_j|)$ , and for any $z\in \C$ with $|z|=R$
-$||\alpha_0 R^k|>|p(z)-\alpha_0z^k|$. By Lemma~\ref{walkingdog} the loops $\alpha_0R{\rm exp}(k t *I))$ and
+$|p(z)-\alpha_0z^k| <||\alpha_0 R^k|$. By Lemma~\ref{walkingdog} the loops $\alpha_0R{\rm exp}(k t *I))$ and
 $p(R{\rm exp}( t *I)$ defined on $0\le t\le 2\pi$ have the same winding number.
 
 But according the Lemma~\ref{zkWNk}
