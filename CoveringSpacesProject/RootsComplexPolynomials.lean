@@ -604,7 +604,7 @@ The winding number of a map $\rho\colon S^1\to \C$ with $\rho(z)\in Cstar$ for a
 
 /-%%
 
-\begin{lemma}\label{homotopic, constpath}
+\begin{lemma}\label{homotopic}
 If $\psi, \psi'\colon S^1\to X$ are homotopic by a homotopy whose image lies in a subset $U$ of $X$  the loops
  associated to $\psi$ and $\psi$ are $\omega$ and $\omega'$, then there is a homotopy $H$ of loops whose image lies in $U$.
 \end{lemma}
@@ -649,7 +649,7 @@ are the same.
 %%-/
 
 /-%%
-\begin{proof}
+\begin{proof}\uses{constpath}
 Suppose there is $\hat f\colon D^2\to X$ with $\hat f|_{S^1}=f$,
 Define a continuous map $J\colon S^1\times [ 0, 1 ]\to D^2$ by
 $(z,t)\mapsto (1-t)z$. Then $\hat f\circ J(z,0)= f(z)$ and $\hat f\circ J(z,1)=\hat f(0)$ for all $z\in S^1$.
