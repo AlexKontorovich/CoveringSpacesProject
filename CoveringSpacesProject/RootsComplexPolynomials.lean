@@ -127,35 +127,35 @@ lemma periodicity : Function.Periodic Defexp (2 * π * I) := by
 
 /-%%
 
-\begin{definition}\label{PBlog}\lean{PBlog}\leanok
-There is a $PBlog\colon \C\to \C$.
+\begin{definition}\label{DefPBlog}\lean{DefPBlog}\leanok
+There is a $DefPBlog\colon \C\to \C$.
 \end{definition}
 %%-/
 
-noncomputable def PBlog (z : ℂ) : ℂ :=
+noncomputable def DefPBlog (z : ℂ) : ℂ :=
   Complex.log z
 
 /-% **Wrong delimiters on purpose**
 
-\begin{lemma}\label{PBlogInverse}
-If $z\in \C$ and $z\not=0$ then ${\rm exp}(PBlog(z))=z$.
+\begin{lemma}\label{DefPBlogInverse}
+If $z\in \C$ and $z\not=0$ then ${\rm exp}(DefPBlog(z))=z$.
 \end{lemma}
-\begin{proof}\uses{PBlog, Defexp}
+\begin{proof}\uses{DefPBlog, Defexp}
 In Mathlib.
 \end{proof}
 %-/
 
 /-%%
 
-\begin{lemma}\label{ImPBlog}
-The image of $PBlog$ is contained in $\{z\in \C |-\pi < Im(z)\le \pi\}$ and
- for all $\{z\in \C | z\not=0\}$ ${\rm exp}(PBlog)(z)=z$.
+\begin{lemma}\label{ImDefPBlog}
+The image of $DefPBlog$ is contained in $\{z\in \C |-\pi < Im(z)\le \pi\}$ and
+ for all $\{z\in \C | z\not=0\}$ ${\rm exp}(DefPBlog)(z)=z$.
 \end{lemma}
 %%-/
 
 /-%%
-\begin{proof}\uses{PBlog, Defexp, Eulersformula}
-This is immediate from Definition~\ref{PBlog} and Lemma~\ref{Eulersformula}.
+\begin{proof}\uses{DefPBlog, Defexp, Eulersformula}
+This is immediate from Definition~\ref{DefPBlog} and Lemma~\ref{Eulersformula}.
 \end{proof}
 %%-/
 
@@ -168,24 +168,24 @@ $T=\{z\in \C |Re(z)>0 \cup Im(z)\not= 0\}$
 
 /-%%
 
-\begin{lemma}\label{ContPBlog}
-$PBlog$ is continuous on $T$ and if $z\in T$ then $PBlog(z)\in \{z\in \C |-\pi < Im(z) <\pi\}$.
+\begin{lemma}\label{ContDefPBlog}
+$DefPBlog$ is continuous on $T$ and if $z\in T$ then $DefPBlog(z)\in \{z\in \C |-\pi < Im(z) <\pi\}$.
 \end{lemma}
 
 %%-/
 /-%%
 \begin{proof}\uses{Eulersformula}
-By Lemma|~\ref{Eulersformula}  for $x\in T$  $Re(cos(x))\not=-1$ and hence $PBlog(x)\in S$.
+By Lemma|~\ref{Eulersformula}  for $x\in T$  $Re(cos(x))\not=-1$ and hence $DefPBlog(x)\in S$.
 \end{proof}
 %%-/
 
 /-% **Wrong delimiters on purpose**
 \begin{lemma}
-For all $x\in T$, $PBlog(x)\in \{z\in \C |-\pi < Im(z) < \pi\}$
+For all $x\in T$, $DefPBlog(x)\in \{z\in \C |-\pi < Im(z) < \pi\}$
 \end{lemma}
 %-/
 /-%
-\begin{proof}\uses{PBlog, Defexp}
+\begin{proof}\uses{DefPBlog, Defexp}
 In Mathlib.
 \end{proof}
 %-/
@@ -228,19 +228,19 @@ Then ${\rm exp}\colon S\to T$ and ${\rm log}\colon T\to S$ are inverse homeomorp
 %%-/
 
 /-%%
-\begin{proof}\uses{stripDef, Eulersformula, Contexp, ContPBlog, periodicity}
+\begin{proof}\uses{stripDef, Eulersformula, Contexp, ContDefPBlog, periodicity}
 By Lemma~\ref{Eulersformula} ${\rm exp}(z)\in \R^-$ if and only if ${\rm exp}({\rm Im}(z))\in \R^-$ if and only if
 ${\rm Im}(z)\in (\pi *I)+(2\pi)\Z$. Since, by Definition~\ref{stripDef} every  element of $S$ has imaginary part strictly between $-\pi$ and $\pi$,
 it follows that ${\rm exp}(S)\subset T$.
-Conversely, by Lemma~\ref{ContPBlog} if $z\in T$ then $PBlog(z)\in S$.
+Conversely, by Lemma~\ref{ContDefPBlog} if $z\in T$ then $DefPBlog(z)\in S$.
 
-By Lemma~\ref{Contexp} ${\rm exp}$ is continuous and, by Lemma~\ref{ContPBlog}, $PBlog$ is continuous on $T$.
+By Lemma~\ref{Contexp} ${\rm exp}$ is continuous and, by Lemma~\ref{ContDefPBlog}, $DefPBlog$ is continuous on $T$.
 Suppose that $z,w\in S$ and ${\rm exp}(z)={\rm exp}(w)$.
 By Lemma~\ref{periodicity}
  if ${\rm exp}(z)={\rm exp}{w}$ then there is an integer $n$ such that $z-w =2\pi *n*I$ If $z,w\in S$, then
  $-2\pi< Im(z)-Im(w)<2\pi$, so $z=w$. This shows that   ${\rm exp}|_S$ is one-to-one.
- Since ${\rm exp}|_S$ is one-to-one and ${\rm exp}({\rm PBlog}(z))=z$ for all $z\in T$,
- it follows that ${\rm exp}\colon S\to T$ and ${PBlog}\colon T\to S$ are inverse functions. Since each is continuous,
+ Since ${\rm exp}|_S$ is one-to-one and ${\rm exp}({\rm DefPBlog}(z))=z$ for all $z\in T$,
+ it follows that ${\rm exp}\colon S\to T$ and ${DefPBlog}\colon T\to S$ are inverse functions. Since each is continuous,
  they are inverse homeomorphisms.
 \end{proof}
 %%-/
@@ -277,45 +277,45 @@ $\varphi$ is a bijective map and hence a  homeomorphism.
 
 
 
-\begin{definition}\label{widetildePBlogDef}
-Let $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ be defined by $\widetilde{PBlog}(z,n)=(PBlog(z),n)$
+\begin{definition}\label{widetildeDefPBlogDef}
+Let $\widetilde{DefPBlog}\colon T\times \Z\to S\times \Z$ be defined by $\widetilde{DefPBlog}(z,n)=(DefPBlog(z),n)$
 for all $z\in T$ and $n\in \Z$.
 \end{definition}
 %%-/
 
 /-%%
 
-\begin{lemma}\label{widetildePBlogHomeo}
-$\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homeomorphism.
+\begin{lemma}\label{widetildeDefPBlogHomeo}
+$\widetilde{DefPBlog}\colon T\times \Z\to S\times \Z$ is a homeomorphism.
 \end{lemma}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{widetildePBlogDef, inverseHomeo}
-By Definition~\ref{widetildePBlogDef} $\widetilde PBlog$ is the product of $PBlog\colon T\to S$ and ${\rm Id}_\Z\colon \Z\to\Z$.
+\begin{proof}\uses{widetildeDefPBlogDef, inverseHomeo}
+By Definition~\ref{widetildeDefPBlogDef} $\widetilde DefPBlog$ is the product of $DefPBlog\colon T\to S$ and ${\rm Id}_\Z\colon \Z\to\Z$.
 By Lemma~\ref{inverseHomeo} the first of these factors is a homeomorphism. Since ${\rm Id}_\Z$ is a homeomorphism.
-it follows from basic properties of homeomorphisms that the product $\widetilde{PBlog}$ is a homeomorphism
+it follows from basic properties of homeomorphisms that the product $\widetilde{DefPBlog}$ is a homeomorphism
 \end{proof}
 %%-/
 
 /-%%
 
 \begin{proposition}\label{trivOverT}
-The composition $\psi=varphi\circ\widetilde{PBlog}\colon T\times \Z\to \tilde S$ defines a trivialization of ${\rm exp}$
+The composition $\psi=varphi\circ\widetilde{DefPBlog}\colon T\times \Z\to \tilde S$ defines a trivialization of ${\rm exp}$
 on $T$
 \end{proposition}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{tildeShomeo, widetildePBlogHomeo, periodicity}
+\begin{proof}\uses{tildeShomeo, widetildeDefPBlogHomeo, periodicity}
 $\varphi$ is a homeomorphism by Lemma~\ref{tildeShomeo}.
-By Lemma~\ref{widetildePBlogHomeo}    $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homemorphism.
-Thus, the composition $\varphi\circ\widetilde{PBlog}\colon T\times \Z\to \tilde S$ is a homeomorphism.
+By Lemma~\ref{widetildeDefPBlogHomeo}    $\widetilde{DefPBlog}\colon T\times \Z\to S\times \Z$ is a homemorphism.
+Thus, the composition $\varphi\circ\widetilde{DefPBlog}\colon T\times \Z\to \tilde S$ is a homeomorphism.
 For $(z,n)\in T\times \Z$,
-$${\rm exp}\circ\varphi\circ \widetilde{PBlog}(z,n)={\rm exp}(\varphi(PBlog(z),n)={\rm exp}(PBlog(z)+2\pi * n * I).$$
-By Lemma~\ref{periodicity}, ${\rm exp}(PBlog(z)+2\pi * n * I)={\rm exp}(PBlog(z)$, which by Lemma~\ref{widetildePBlogHomeo} equals $z$. This establishes that$\psi$ satisfies all  the conditions of the  Definition of Trivialization over the open set $T$.
+$${\rm exp}\circ\varphi\circ \widetilde{DefPBlog}(z,n)={\rm exp}(\varphi(DefPBlog(z),n)={\rm exp}(DefPBlog(z)+2\pi * n * I).$$
+By Lemma~\ref{periodicity}, ${\rm exp}(DefPBlog(z)+2\pi * n * I)={\rm exp}(DefPBlog(z)$, which by Lemma~\ref{widetildeDefPBlogHomeo} equals $z$. This establishes that$\psi$ satisfies all  the conditions of the  Definition of Trivialization over the open set $T$.
 \end{proof}
 %%-/
 
@@ -406,11 +406,11 @@ ${\rm exp}\colon \C\to \C $ is a covering projection over $Cstar$ with source $\
 
 /-%%
 
-\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, PBlogInverse, DefIsCoveringOn}
+\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImDefPBlog, TcupTprimeCstar, DefPBlogInverse, DefIsCoveringOn}
 By Corollary~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime} and each of $T$ and $T'$ is the base of trivialization for ${\rm exp}$ with non-trivial fiber. Hence, every point  of $Cstar$ lies in the base of a trivialization for ${\rm exp}$. By definition, this shows that ${\rm exp}\colon \C\to \C $ is a covering on $Cstar$.
 Since ${\rm exp}(z)\not=0$ for all $z\in \C$, it follows that ${\rm exp}^{-1}(Cstar)=\C$.
-Lastly, by Lemma~\ref{ImPBlog} if $z\in\C$ and $z\not= 0$ then ${\rm exp}(PBlog)(z)=z$.
+Lastly, by Lemma~\ref{ImDefPBlog} if $z\in\C$ and $z\not= 0$ then ${\rm exp}(DefPBlog)(z)=z$.
 This proves that ${\rm exp}$ is onto $\{z\in \C | z\not=0\}$, which by Lemma~\ref{Cstar}, is equal to $Cstar$.\end{proof}
 %%-/
 
