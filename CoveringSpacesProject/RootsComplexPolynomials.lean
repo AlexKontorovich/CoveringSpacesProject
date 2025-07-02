@@ -48,13 +48,13 @@ def IsCoveringOn := IsCoveringMapOn proj
 
 /-%%
 
-\begin{definition}\label{expDef}\lean{expDef}\leanok
+\begin{definition}\label{Defexp}\lean{Defexp}\leanok
 ${\rm exp}\colon \C\to \C$ defined by
 the usual power series.
 \end{definition}
 %%-/
 
-noncomputable def expDef : ℂ → ℂ := Complex.exp
+noncomputable def Defexp : ℂ → ℂ := Complex.exp
 
 /-%%
 
@@ -62,10 +62,10 @@ noncomputable def expDef : ℂ → ℂ := Complex.exp
 ${\rm exp}\colon \C\to \C$ is continuous.
 \end{lemma}
 %%-/
-lemma Contexp : Continuous expDef := by
+lemma Contexp : Continuous Defexp := by
   apply Complex.continuous_exp
 /-%%
-\begin{proof}\uses{expDef}
+\begin{proof}\uses{Defexp}
   In Mathlib.
 \end{proof}
 %%-/
@@ -81,12 +81,12 @@ for $r,\theta\in \R$.
 %%-/
 
 lemma Eulersformula (r θ : ℝ) :
-    expDef (r + θ * I) = expDef r * Complex.exp (θ * I) := by
-  unfold expDef
+    Defexp (r + θ * I) = Defexp r * Complex.exp (θ * I) := by
+  unfold Defexp
   rw [Complex.exp_add, Complex.exp_mul_I]
 
 /-%%
-\begin{proof}\uses{expDef}\leanok
+\begin{proof}\uses{Defexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -98,12 +98,12 @@ lemma Eulersformula (r θ : ℝ) :
 %%-/
 
 lemma multiplicativity (z w : ℂ) :
-    expDef (z + w) = expDef z * expDef w := by
-  unfold expDef
+    Defexp (z + w) = Defexp z * Defexp w := by
+  unfold Defexp
   rw [Complex.exp_add]
 
 /-%%
-\begin{proof}\uses{expDef}\leanok
+\begin{proof}\uses{Defexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -115,11 +115,11 @@ ${\rm exp}\colon \C\to \C$ is periodic of period $2\pi i$ and with no smaller pe
 \end{lemma}
 %%-/
 
-lemma periodicity : Function.Periodic expDef (2 * π * I) := by
-  unfold expDef
+lemma periodicity : Function.Periodic Defexp (2 * π * I) := by
+  unfold Defexp
   apply Complex.exp_periodic
 /-%%
-\begin{proof}\uses{expDef}\leanok
+\begin{proof}\uses{Defexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -140,7 +140,7 @@ noncomputable def PBlog (z : ℂ) : ℂ :=
 \begin{lemma}\label{PBlogInverse}
 If $z\in \C$ and $z\not=0$ then ${\rm exp}(PBlog(z))=z$.
 \end{lemma}
-\begin{proof}\uses{PBlog, expDef}
+\begin{proof}\uses{PBlog, Defexp}
 In Mathlib.
 \end{proof}
 %-/
@@ -154,7 +154,7 @@ The image of $PBlog$ is contained in $\{z\in \C |-\pi < Im(z)\le \pi\}$ and
 %%-/
 
 /-%%
-\begin{proof}\uses{PBlog, expDef, Eulersformula}
+\begin{proof}\uses{PBlog, Defexp, Eulersformula}
 This is immediate from Definition~\ref{PBlog} and Lemma~\ref{Eulersformula}.
 \end{proof}
 %%-/
@@ -185,7 +185,7 @@ For all $x\in T$, $PBlog(x)\in \{z\in \C |-\pi < Im(z) < \pi\}$
 \end{lemma}
 %-/
 /-%
-\begin{proof}\uses{PBlog, expDef}
+\begin{proof}\uses{PBlog, Defexp}
 In Mathlib.
 \end{proof}
 %-/
