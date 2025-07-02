@@ -285,7 +285,7 @@ for all $z\in T$ and $n\in \Z$.
 
 /-%%
 
-\begin{lemma}\label{widetildePBlogHomeo, PBlog}
+\begin{lemma}\label{widetildePBlogHomeo}
 $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homeomorphism.
 \end{lemma}
 %%-/
