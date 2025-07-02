@@ -604,7 +604,7 @@ The winding number of a map $\rho\colon S^1\to \C$ with $\rho(z)\in Cstar$ for a
 
 /-%%
 
-\begin{lemma}\label{homotopic}
+\begin{lemma}\label{homotopic, constpath}
 If $\psi, \psi'\colon S^1\to X$ are homotopic by a homotopy whose image lies in a subset $U$ of $X$  the loops
  associated to $\psi$ and $\psi$ are $\omega$ and $\omega'$, then there is a homotopy $H$ of loops whose image lies in $U$.
 \end{lemma}
