@@ -37,14 +37,14 @@ def trivialization := Trivialization F proj
 
 /-%%
 
-\begin{definition}\label{IsCoveringOn}\lean{IsCoveringOn}\leanok
+\begin{definition}\label{DefIsCoveringOn}\lean{DefIsCoveringOn}\leanok
 Let
 $f\colon X\to Y$ be a continuous map and $A\subset Y$. Then $f$ is an even cover on $A\subset X$
 if every $a\in A$ has a neighborhood which is contained in the target of a trivialization
 \end{definition}
 %%-/
 
-def IsCoveringOn := IsCoveringMapOn proj
+def DefIsCoveringOn := IsCoveringMapOn proj
 
 /-%%
 
@@ -406,7 +406,7 @@ ${\rm exp}\colon \C\to \C $ is a covering projection over $Cstar$ with source $\
 
 /-%%
 
-\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, PBlogInverse, IsCoveringOn}
+\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, PBlogInverse, DefIsCoveringOn}
 By Corollary~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime} and each of $T$ and $T'$ is the base of trivialization for ${\rm exp}$ with non-trivial fiber. Hence, every point  of $Cstar$ lies in the base of a trivialization for ${\rm exp}$. By definition, this shows that ${\rm exp}\colon \C\to \C $ is a covering on $Cstar$.
 Since ${\rm exp}(z)\not=0$ for all $z\in \C$, it follows that ${\rm exp}^{-1}(Cstar)=\C$.
