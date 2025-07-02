@@ -644,7 +644,7 @@ for all $z\in S^1$  is the winding number of the associated loop.
 If $f\colon S^1to \Cee$ is a constant map to a point $z\in Cstar$, then $w(f)=0$.
 \end{lem}
 
-\begin{proof}(uses\{S1loop, DefWNS1, constpath\})
+\begin{proof}\uses{S1loop, DefWNS1, constpath}
 By Definition~\ref{S1loop} the loop associated with the constant map $f\colon S^1\to Cstar$ is a constant loop
 at a point of $Cstar$. By Lemma~\ref{DefWNS1} the winding number of $f$ is equal to the winding number of the constant loop at $f(S^1)\in Cstar$. By Lemma~\ref{constpath} this winding number is zero.
 \end{proof}
@@ -707,7 +707,7 @@ the image of $\hat f$ contained in $Cstar$. Then the winding $w(\rho)=0$.
 /-%%
 
 
-\begin{proof}(uses\{S1homotopy, constS1\})
+\begin{proof}\uses{S1homotopy, constS1}
 Define a continuous map $J\colon S^1\times [0,1]\to D^2$ by
 $(z,t)\mapsto (1-t)z$. Then $\hat f\circ J(z,0)= \rho(z)$ and
 $\hat f\circ J(z,1)=\hat f(0)$ for all $z\in S^1$.
