@@ -48,7 +48,7 @@ def IsCoveringOn := IsCoveringMapOn proj
 
 /-%%
 
-\begin{definition}\label{expDef}
+\begin{definition}\label{expDef}\leanok
 ${\rm exp}\colon \C\to \C$ defined by
 the usual power series.
 \end{definition}
@@ -103,7 +103,7 @@ lemma multiplicativity (z w : ℂ) :
   rw [Complex.exp_add]
 
 /-%%
-\begin{proof}\uses{expDef}
+\begin{proof}\uses{expDef}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -119,7 +119,7 @@ lemma periodicity : Function.Periodic expDef (2 * π * I) := by
   unfold expDef
   apply Complex.exp_periodic
 /-%%
-\begin{proof}\uses{expDef}
+\begin{proof}\uses{expDef}\leanok
   In Mathlib.
 \end{proof}
 %%-/
