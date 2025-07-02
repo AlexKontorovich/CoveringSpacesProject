@@ -48,7 +48,7 @@ def IsCoveringOn := IsCoveringMapOn proj
 
 /-%%
 
-\begin{definition}\label{expDef}\leanok
+\begin{definition}\label{expDef}\lean{expDef}\leanok
 ${\rm exp}\colon \C\to \C$ defined by
 the usual power series.
 \end{definition}
