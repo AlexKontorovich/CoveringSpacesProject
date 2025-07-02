@@ -86,7 +86,7 @@ lemma Eulersformula (r θ : ℝ) :
   rw [Complex.exp_add, Complex.exp_mul_I]
 
 /-%%
-\begin{proof}\uses{expDef}
+\begin{proof}\uses{expDef}\leanok
   In Mathlib.
 \end{proof}
 %%-/
