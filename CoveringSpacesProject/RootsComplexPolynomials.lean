@@ -637,7 +637,7 @@ $\omega\colon [ 0, 2\pi  ]\to X$ is defined by $\omega(t)=\psi(CSexp(it))$.
 
 \begin{lemma}\label{sameImage}
  Let $ρ : S^1→ \C$ be a map with $ρ(z)∈ Cstar$ for all $z∈ S^1$.
- Let $ω₡ [ 0,2\pi ]→ \C$ be the loop associated with $ρ$.
+ Let $ω\colon [ 0,2\pi ]→ \C$ be the loop associated with $ρ$.
  Then the image of $ω$ is contained in $Cstar$.
 \end{lemma}
 
@@ -680,7 +680,7 @@ of the constant loop at $f(S^1)\in Cstar$. By Lemma~\ref{constpath} this winding
 /-%%
 
 \begin{lemma}\label{S1homotopy}
-Let $\psi, \psi'\colon S^1\to \C$ be maps and $H : S^1→ \C$ a homotopy H : S^1→ \C$ between them
+Let $\psi, \psi'\colon S^1\to \C$ be maps and $H : S^1→ \C$ a homotopy $H : S^1→ \C$ between them
 whose image lies in  $Cstar$. Then the winding numbers of $\psi$ and $\psi'$ are equal.
 \end{lemma}
 %%-/
