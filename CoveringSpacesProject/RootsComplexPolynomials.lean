@@ -184,7 +184,7 @@ $Re(cos(x))\not=-1$ and hence by Lemma~\ref{ImPBlog} $PBlog(x)\in S$.
 \end{proof}
 %%-/
 
-/-% **Wrong delimiters on purpose**
+
 
 
 /-%%
