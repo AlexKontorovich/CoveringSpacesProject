@@ -635,11 +635,11 @@ $\omega\colon [ 0, 2\pi  ]\to X$ is defined by $\omega(t)=\psi(CSexp(it))$.
 
 /-%%
 
-\begin{lem}\label{sameImage}
+\begin{lemma}\label{sameImage}
  Let $ρ : S^1→ \C$ be a map with $ρ(z)∈ Cstar$ for all $z∈ S^1$.
  Let $ω₡ [ 0,2\pi ]→ \C$ be the loop associated with $ρ$.
  Then the image of $ω$ is contained in $Cstar$.
-\end{lem}
+\end{lemma}
 
 %%-/
 
@@ -663,9 +663,9 @@ for all $z\in S^1$  is the winding number of the associated loop.
 
 /-%%
 
-\begin{lem}\label{constS1}
+\begin{lemma}\label{constS1}
 If $f\colon S^1\to \C$ is a constant map to a point $z\in Cstar$, then $w(f)=0$.
-\end{lem}
+\end{lemma}
 
 \begin{proof}\uses{DefS1loop, DefWNS1, constpath}
 By Definition~\ref{DefS1loop} the loop associated with the constant map $f\colon S^1\to Cstar$
