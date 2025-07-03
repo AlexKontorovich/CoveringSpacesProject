@@ -617,7 +617,7 @@ $w(\omega')=w(ω)$.
 \begin{corollary}\label{constpath}
 Suppose that $\omega\colon [ a, b ]\to \C$ is a loop and $\omega(t)\in Cstar$
 for all $t\in [ a, b ]$.
-Suppose that $H\colon [ a, b ]\times [ 0, 1 ]\to \C$ is a  homotopy of loops
+Suppofse that $H\colon [ a, b ]\times [ 0, 1 ]\to \C$ is a  homotopy of loops
 from $\omega$  to a constant loop
 and $H(t,s)\in Cstar$ for all $(t,s)\in [ a, b ]\times [ 0, 1 ]$. Then
 the winding number of $\omega$ is zero
@@ -646,7 +646,7 @@ $\omega\colon [ 0, 2π  ]\to X$ is defined by $\omega(t)=\psi(CSexp(it))$.
 
 \begin{lem}\label{sameImage}
  Let $ρ : S^1→ \C$ be a map with $ρ(z)∈ Cstar$ for all $z∈ S^1$.
- Let $ω₡ [ 0,2\pi ]→ \C$ be the loop associated with $ρ$.
+ Let $ω$ be the loop associated with $ρ$.
  Then the image of $ω$ is contained in $Cstar$.
 \end{lem}
 
@@ -689,7 +689,7 @@ of the constant loop at $f(S^1)\in Cstar$. By Lemma~\ref{constpath} this winding
 /-%%
 
 \begin{lemma}\label{S1homotopy}
-Let $\psi, \psi'\colon S^1\to ℂ$ be maps and $H : S^1→ ℂ$ a homotopy H : S^1→ ℂ$ between them
+Let $\psi, \psi'\colon S^1\to ℂ$ be maps and $H : S^1→ ℂ$ a homotopy between them
 whose image lies in  $Cstar$. Then the winding numbers of $\psi$ and $\psi'$ are equal.
 \end{lemma}
 %%-/
@@ -725,7 +725,7 @@ the image of $\hat f$ contained in $Cstar$. Then the winding $w(\rho)=0$.
 
 
 \begin{proof}\uses{S1homotopy, constS1}
-Define a continuous map $J\colon S^1\times [0,1]\to D^2$ by
+Define a continuous map $J\colon S^1\times [ 0,1 ]\to D^2$ by
 $(z,t)\mapsto (1-t)z$. Then $\hat f\circ J(z,0)= \rho(z)$ and
 $\hat f\circ J(z,1)=\hat f(0)$ for all $z\in S^1$.
 This is a homotopy in $Cstar$ from $\rho$ to a constant map of $S^1\to Cstar$.
@@ -733,12 +733,12 @@ By Lemma~\ref{S1homotopy} the winding number of $\rho$ is equal to the winding n
 of a constant map $S^1\to C\star$.
 By Lemma~\ref{constS1}, the winding number of a constant
 map $S^1\to \hat f(0)\in Cstar$ is zero.
-\end{proof}
+
 
 
 
 Since there is a homotopy $H$ from $\rho$
-to a constant map with image in $Cstar$, it follows from Corollary~\ref{S1homotopy}
+to a constant map with image in $Cstar$, it follows from Lemma~\ref{S1homotopy}
 that the winding number of $\rho$ is zero.
 \end{proof}
 
@@ -851,7 +851,7 @@ is a map $S^1→ ℂ$  with image contained in $Cstar$ and with winding number $
 \end{theorem}
 
 
-\begin{proof}\uses{zkWNk, zkdominates, sameWN}
+\begin{proof}\uses{zkWNk, zkdominates,sameWN}
 By Lemma~\ref{zkdominates} for $R>{\rm max}(1,\sum_{i=1}^k|\beta_j|)$,
 and for any $z\in \C$ with $|z|=R$
 $|f(z)-\alpha_0z^k| <|\alpha_0 R^k|$. By Lemma~\ref{sameWN} the maps $\alpha_0*R*CSexp(k t *I)$ and
