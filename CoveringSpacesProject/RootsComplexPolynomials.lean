@@ -410,12 +410,12 @@ The image of $CSexp$ is  $Cstar$.
 
 /-%%
 
-\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar,
-PBlogInverse, DefIsCoveringOn}
+\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, DefIsCoveringOn}
 By Corollary~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime}
 $CSexp$ is trivial on $T$ and on $T'$. Hence, every point  of $Cstar$ lies
-in the base of a trivialization for $CSexp$. By definition, this shows that $CSexp\colon \C\to \C $ is a covering on $Cstar$.
+in the base of a trivialization for $CSexp$. By definition, this shows that
+$CSexp\colon \C\to \C $ is a covering on $Cstar$.
 Since $CSexp(z)\not=0$ for all $z\in \C$, it follows that $CSexp^{-1}(Cstar)=\C$.
 Lastly, by Lemma~\ref{ImPBlog} if $z\in\C$ and $z\not= 0$ then $CSexp(PBlog)(z)=z$.
 This proves that $CSexp$ is onto $\{z\in \C | z\not=0\}$, which by Lemma~\ref{Cstar},
@@ -584,13 +584,13 @@ with $H(t,s)\in Cstar$ for all $t\in [ a, b ]$ and $s\in[ 0, 1 ]$, then $w(\omeg
 
 /-%%
 
-\begin{proof}\uses{homotopyloop, diffendpoint, constWNomega, expHLP}
+\begin{proof}\uses{homotopyloop, diffinitpoint, constWNomega, expHLP}
 By Definition~\ref{homotopyloop} for all $\{t∈ ℝ : 0≤t≤1\}$ $H(a,t)=H(b,t)$.
 Let $\mu\colon \{t∈ ℝ : 0≤t≤1\} \to \C$ be the path $μ(t)=H(a,t)$.
 By Corollary~\ref{expHLP} since the image of $H$ is contained in $Cstar$,
 there  is a lift $\tilde H\colon [ a, b]\times I$ of $H$ through $CSexp$.
 Then $\tilde H|_{\{a\}\times I}$
-and $\tilde H|_{\{b\}\times I}$ are two liftings of $\mu$. So by Lemma~\ref{diffendpoint}
+and $\tilde H|_{\{b\}\times I}$ are two liftings of $\mu$. So by Lemma~\ref{diffinitpoint}
 there is $n\in \Z$ such that
 $\tilde H(b,1)-\tilde H(b,0)=\tilde H(a,1)-\tilde H(a,0)$.
 Rewriting we have
@@ -680,7 +680,7 @@ of the constant loop at $f(S^1)\in Cstar$. By Lemma~\ref{constpath} this winding
 /-%%
 
 \begin{lemma}\label{S1homotopy}
-Let $\psi, \psi'\colon S^1\to ℂ$ be maps and $H : S^1→ ℂ$ a homotopy H : S^1→ ℂ$ between them
+Let $\psi, \psi'\colon S^1\to \C$ be maps and $H : S^1→ \C$ a homotopy H : S^1→ \C$ between them
 whose image lies in  $Cstar$. Then the winding numbers of $\psi$ and $\psi'$ are equal.
 \end{lemma}
 %%-/
@@ -688,7 +688,7 @@ whose image lies in  $Cstar$. Then the winding numbers of $\psi$ and $\psi'$ are
 /-%%
 
 \begin{proof}\uses{DefS1loop, equalwinding, DefWNS1 }
-Let $H\colon S^1\times I\to ℂ$ be a homotopy from $\psi$ to $\psi'$ whose image lies in $Cstar$.
+Let $H\colon S^1\times I\to \C$ be a homotopy from $\psi$ to $\psi'$ whose image lies in $Cstar$.
 Let $ω$ and $ω'$ be the loops associated to $ψ$ and $ψ'$ respectively
 Define $\hat H\colon [ 0, 2\pi  ]\times [ 0, 1 ]\to X$ by
 $\hat H(t,s)=H(CSexp(it),s)$. Then by Definition~\ref{DefS1loop} $\hat H$ is a homotopy from
@@ -846,7 +846,7 @@ $$
 Let $p(z)$ be a complex polynomial of degree $k>1$. Then for $R$ sufficiently large,
 the winding number of the map $f : S^1\to \C$ given by
 $f(RCSexp(t*I)) = p(RCSexp(t*I))$
-is a map $S^1→ ℂ$  with image contained in $Cstar$ and with winding number $k$.
+is a map $S^1→ \C$  with image contained in $Cstar$ and with winding number $k$.
 \end{theorem}
 
 
