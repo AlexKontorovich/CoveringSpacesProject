@@ -356,7 +356,7 @@ noncomputable def inverseHomeo :
           simp [splitPlane]
 
 /-%%
-\begin{proof}\uses{Defstrip, Sstrip, Eulersformula, Contexp, ContPBlog, periodicity}\leanok
+\begin{proof}\uses{Defstrip, Sstrip, Eulersformula, Contexp, ContPBlog, periodicity, CSexpInS}\leanok
 By Lemma~\ref{Eulersformula} $CSexp(z)\in \R^-$ if and only if $CSexp({\rm Im}(z))\in \R^-$ if and
 only if
 ${\rm Im}(z)\in {\pi +(2\pi )\Z⦄$. Since, by Definition~\ref{Defstrip} for  $z∈ S$
