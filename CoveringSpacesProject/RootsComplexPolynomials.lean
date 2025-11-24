@@ -241,7 +241,7 @@ def Defstrip (a b : ℝ) : Set ℂ :=
   {z : ℂ | a < im z ∧ im z < b}
 
 /-%%
-\begin{definition}\label{Sstrip}\leanok
+\begin{definition}\label{Sstrip}\lean{Sstrip}\uses{Defstrip}\leanok
 Define $S\subset \C$ by $S=S(-\pi ,\pi )$.
 \end{definition}
 %%-/
@@ -356,10 +356,10 @@ noncomputable def inverseHomeo :
           simp [splitPlane]
 
 /-%%
-\begin{proof}\uses{Defstrip, Sstrip, Eulersformula, Contexp, ContPBlog, periodicity}\leanok
+\begin{proof}\uses{Sstrip, Eulersformula, Contexp, ContPBlog, periodicity, CSexpInS}\leanok
 By Lemma~\ref{Eulersformula} $CSexp(z)\in \R^-$ if and only if $CSexp({\rm Im}(z))\in \R^-$ if and
 only if
-${\rm Im}(z)\in {\pi +(2\pi )\Z⦄$. Since, by Definition~\ref{Defstrip} for  $z∈ S$
+$\{\rm Im}(z)\in {\pi +(2\pi )\Z\}$. Since, by Definition~\ref{Defstrip} for  $z∈ S$
 $-\pi < Im(z) < \pi $.
 It follows that $CSexp(S)\subset T$.
 Conversely, by Lemma~\ref{ContPBlog} if $z\in T$ then $PBlog(z)\in S$.
@@ -398,7 +398,7 @@ $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
 
 /-%%
 
-\begin{proof}\uses{Defstrip, DeftildeS, Sstrip}
+\begin{proof}\uses{DeftildeS, Sstrip}
 According to Definition~\ref{Defstrip}  image of $S$ under the translation action of $(2\pi )\Z$ on $\C$
 is the union
 of all strips $S(2n-1)\pi ,(2n+1)\pi )$. By Definition~\ref{DeftildeS} this union is $\tilde S$.
