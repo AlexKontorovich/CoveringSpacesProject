@@ -137,16 +137,22 @@ There is a map $PBlog\colon \C\to \C$.
 noncomputable def PBlog (z : ℂ) : ℂ := Complex.log z
 
 /-%%
-\begin{lemma}\label{ImPBlog}
+\begin{lemma}\label{ImPBlog}\lean{ImPBlog}\leanok
 The image of $PBlog$ is contained in $\{z\in \C |-\pi < Im(z)\le \pi \}$
  and
  for all $\{z\in \C | z\not=0\}$ $CSexp(PBlog(z))=z$.
 \end{lemma}
 %%-/
-
+lemma ImPBlog (z : ℂ) (hz : z ≠ 0) :
+    CSexp (PBlog z) = z ∧ -π < im (PBlog z) ∧ im (PBlog z) ≤ π := by
+  unfold PBlog CSexp
+  split_ands
+  · exact exp_log hz
+  · exact neg_pi_lt_log_im z
+  · exact log_im_le_pi z
 
 /-%%
-\begin{proof}\uses{DefPBlog, Defexp, Eulersformula}
+\begin{proof}\uses{DefPBlog, Defexp, Eulersformula}\leanok
 This is immediate from Definition~\ref{DefPBlog} and Lemma~\ref{Eulersformula}.
 \end{proof}
 %%-/
