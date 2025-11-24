@@ -158,22 +158,24 @@ This is immediate from Definition~\ref{DefPBlog} and Lemma~\ref{Eulersformula}.
 %%-/
 
 /-%%
-
-\begin{definition}\label{splitPlane}
+\begin{definition}\label{splitPlane}\lean{splitPlane}\leanok
 $T=\{z\in \C |Re(z)>0 \cup Im(z)\not= 0\}$
 \end{definition}
 %%-/
 
-/-%%
+def splitPlane : Set ℂ := {z : ℂ | re z > 0 ∨ im z ≠ 0}
 
+/-%%
 \begin{lemma}\label{ContPBlog}
 $PBlog$ is continuous on $T$ and if $z\in T$ then
 $PBlog(z)\in \{z\in \C |-\pi  < Im(z) < \pi \}$.
 \end{lemma}
-
 %%-/
+
+
+
 /-%%
-\begin{proof}\uses{Eulersformula, ImPBlog}
+\begin{proof}\uses{Eulersformula, ImPBlog, splitPlane}
 By Lemma~\ref{Eulersformula}  for $x\in T$
 $Re(cos(x))\not=-1$ and hence by Lemma~\ref{ImPBlog} $PBlog(x)\in S$.
 \end{proof}
