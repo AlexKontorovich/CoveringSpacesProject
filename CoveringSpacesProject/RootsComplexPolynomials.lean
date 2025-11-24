@@ -379,10 +379,10 @@ they are inverse homeomorphisms.
 %%-/
 
 /-%%
-\begin{definition}\label{DeftildeS}\lean{DeftildeS}\leanok
-$\tilde S\subset \C$ is the subset
-$\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not=
-(2k+1)\pi  \text{\ for\  any\ } k\in \Z\}$.
+
+\begin{definition}\label{DeftildeS}
+$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not=
+(2k+1)\pi  \text{ for any } k\in \Z\}$.
 \end{definition}
 %%-/
 
@@ -562,7 +562,7 @@ The image of $CSexp$ is  $Cstar$.
 \begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, DefIsCoveringOn}
 By Corollary~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime}
-$CSexp$ is trivial on $T$ and on $T'$. Hence, every point  of $Cstar$ lies
+$CSexp$ is a trivialization on $T$ and on $T'$. Hence, every point  of $Cstar$ lies
 in the base of a trivialization for $CSexp$. By definition, this shows that
 $CSexp\colon \C\to \C $ is a covering on $Cstar$.
 Since $CSexp(z)\not=0$ for all $z\in \C$, it follows that $CSexp^{-1}(Cstar)=\C$.
@@ -674,7 +674,7 @@ By the Definition~\ref{deflift} we have
  Thus, $CSexp(\tilde\omega(b))=CSexp(\tilde\omega(a))$.
  By Lemma~\ref{periodicity}, there is $k\in \Z$,
  such that $\tilde\omega(b)-\tilde\omega(b)=2\pi *k* I$.
- By Lemma~\ref{DefWNlift}, the winding number of $\tilde\omega$ is $k$
+ By Definition~\ref{DefWNlift}, the winding number of $\tilde\omega$ is $k$
 
 
 Let $\tilde\omega'$ be another lift of $\omega$. Since
@@ -740,7 +740,6 @@ By Corollary~\ref{expHLP} since the image of $H$ is contained in $Cstar$,
 there  is a lift $\tilde H\colon [ a, b]\times I$ of $H$ through $CSexp$.
 Then $\tilde H|_{\{a\}\times I}$
 and $\tilde H|_{\{b\}\times I}$ are two liftings of $\mu$. So by Lemma~\ref{diffinitpoint}
-there is $n\in \Z$ such that
 $\tilde H(b,1)-\tilde H(b,0)=\tilde H(a,1)-\tilde H(a,0)$.
 Rewriting we have
 $⁀ H(b,1)-⁀ H(a,1)= \tilde H(b,0)-\tilde H(a,0)$.
@@ -756,7 +755,7 @@ $w(\omega')=w(ω)$.
 \begin{corollary}\label{constpath}
 Suppose that $\omega\colon [ a, b ]\to \C$ is a loop and $\omega(t)\in Cstar$
 for all $t\in [ a, b ]$.
-Suppofse that $H\colon [ a, b ]\times [ 0, 1 ]\to \C$ is a  homotopy of loops
+Suppose that $H\colon [ a, b ]\times [ 0, 1 ]\to \C$ is a  homotopy of loops
 from $\omega$  to a constant loop
 and $H(t,s)\in Cstar$ for all $(t,s)\in [ a, b ]\times [ 0, 1 ]$. Then
 the winding number of $\omega$ is zero
@@ -796,7 +795,7 @@ $\omega\colon [ 0, 2\pi  ]\to X$ is defined by $\omega(t)=\psi(CSexp(it))$.
 
 \begin{proof}\uses{DefS1loop}
 Let $ω \colon [ 0, 2\pi  ] \to \C$ be the loop associated to $ρ$.
-Then by Definition~\ref{DefS1loop} $ω(t)=ρ(2\pi * t *I)∈ Cstar$.
+Then by Definition~\ref{DefS1loop} for all $t∈ [ 0 ,1 ]$ $ω(t)=ρ(2\pi * t *I)∈ Cstar$.
 \end{proof}
 
 %%-/
@@ -958,7 +957,7 @@ for all $s\in [ 0, 2\pi  ]$. Then $\psi$ and $\psi'$ have the same winding numbe
 \begin{proof}\uses{walkingdog, S1homotopy}
 By Lemma~\ref{walkingdog}, there is a homotopy $H$ from $\psi$ to $\psi'$ whose image lies in
 $Cstar$.
-Thus, by Corollary~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding number.
+Thus, by Lemma~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding number.
 \end{proof}
 %%-/
 
@@ -992,21 +991,21 @@ $$
 /-%%
 
 \begin{theorem}\label{WNthm}
-Let $p(z)$ be a complex polynomial of degree $k>1$. Then for $R$ sufficiently large,
-the winding number of the map $f : S^1\to \C$ given by
-$f(RCSexp(t*I)) = p(RCSexp(t*I))$
-is a map $S^1→ \C$  with image contained in $Cstar$ and with winding number $k$.
+Let $p(z)$ be a complex polynomial of degree $k>1$ given by $p(z)=\sum_{i=0}^k\alpha_iz^{k-i}$ with
+$α_i∈ℂ$ for all $i$ and $α_0\not= 0$. Then for $R$ sufficiently large,
+ the map $f : S^1\to \C$ given by
+$f(z)= p(R* z)$ for $z\in S^1$ has winding number $k$.
 \end{theorem}
 
 
 \begin{proof}\uses{zkWNk, zkdominates,sameWN}
 By Lemma~\ref{zkdominates} for $R>{\rm max}(1,\sum_{i=1}^k|\beta_j|)$,
-and for any $z\in \C$ with $|z|=R$
-$|f(z)-\alpha_0z^k| <|\alpha_0 R^k|$. By Lemma~\ref{sameWN} the maps $\alpha_0*R*CSexp(k t *I)$ and
-$f$ have the same winding number.
+and for any $z\in \C$ with $|z|=1$
+$|\alpha_0(R*z)^k-f(z)| <|\alpha_0 R^k|$. By Lemma~\ref{sameWN} the maps defined on $S^1$ by
+$z ↦\alpha_0*(R* z)^k$ and by $f$ have the same winding number.
 
 But according the Lemma~\ref{zkWNk}
-the   winding number of the map $z\mapsto \alpha_0R^kCSexp(kt*I)$ is $k$.
+the   winding number of the map $S^1\mapsto \C$ given by $z\mapsto \alpha_0(R*z)^k=(α_0R^k)*z^k$ is $k$.
 Thus, the winding number of $f$ is also $k$.
 \end{proof}
 
