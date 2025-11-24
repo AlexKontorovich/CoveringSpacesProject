@@ -7,14 +7,14 @@ open Complex Set
 local notation "π" => Real.pi
 
 /-%%
-
 \section{Results from LEAN}
 %%-/
-
 
 /-%%
 Here are basic definitions and results already in LEAN:
 %%-/
+
+section trivializations
 
 variable {X Y F : Type*} [TopologicalSpace X] [TopologicalSpace Y] [TopologicalSpace F]
   (proj : X → Y)
@@ -47,8 +47,9 @@ if every $a\in A$ has a neighborhood which is contained in the target of a trivi
 
 def IsCoveringOn := IsCoveringMapOn proj
 
-/-%%
+end trivializations
 
+/-%%
 \begin{definition}\label{Defexp}\lean{CSexp}\leanok
 $CSexp\colon \C\to \C$ defined by
 the usual power series.
@@ -63,8 +64,10 @@ noncomputable def CSexp : ℂ → ℂ := Complex.exp
 $CSexp\colon \C\to \C$ is continuous.
 \end{lemma}
 %%-/
+
 lemma Contexp : Continuous exp := by
   apply Complex.continuous_exp
+
 /-%%
 \begin{proof}\uses{Defexp}\leanok
   In Mathlib.
@@ -73,7 +76,6 @@ lemma Contexp : Continuous exp := by
 
 
 /-%%
-
 \begin{lemma}\label{Eulersformula}\lean{Eulersformula}\leanok
 $$CSexp(r+\theta *I)=exp_\R(r)*CSexp(\theta * I)
 =exp_\R(r)*({\rm cos}(\theta+{\rm sin}(\theta)*I),$$
@@ -110,7 +112,6 @@ lemma multiplicativity (z w : ℂ) :
 %%-/
 
 /-%%
-
 \begin{lemma}\label{periodicity}\lean{periodicity}\leanok
 $CSexp\colon \C\to \C$ is periodic of period $2\pi  i$ and with no smaller period.
 \end{lemma}
@@ -128,7 +129,6 @@ lemma periodicity (x y : ℂ) : CSexp x = CSexp y ↔ ∃ (n : ℤ), x = y + n *
 
 
 /-%%
-
 \begin{definition}\label{DefPBlog}\lean{DefPBlog}\leanok
 There is a map $PBlog\colon \C\to \C$.
 \end{definition}
@@ -166,16 +166,41 @@ $T=\{z\in \C |Re(z)>0 \cup Im(z)\not= 0\}$
 def splitPlane : Set ℂ := {z : ℂ | re z > 0 ∨ im z ≠ 0}
 
 /-%%
-\begin{lemma}\label{ContPBlog}
+Missing Mathlib lemma:
+if `z.re ≥ 0 ∨ z.im ≠ 0` then `log z.im < π`.
+%%-/
+
+/-%%
+\begin{lemma}\label{ContPBlog}\lean{ContPBlog}\leanok
 $PBlog$ is continuous on $T$ and if $z\in T$ then
 $PBlog(z)\in \{z\in \C |-\pi  < Im(z) < \pi \}$.
 \end{lemma}
 %%-/
 
-
+lemma ContPBlog :
+    ContinuousOn PBlog splitPlane ∧ ∀ (z : ℂ) (hz : z ∈ splitPlane),
+    -π < im (PBlog z) ∧ im (PBlog z) < π := by
+  unfold splitPlane
+  unfold PBlog
+  split_ands
+  · intro z hz
+    simp only [gt_iff_lt, ne_eq, mem_setOf_eq] at hz
+    apply ContinuousAt.continuousWithinAt
+    exact continuousAt_clog hz
+  · intro z hz
+    simp only [gt_iff_lt, ne_eq, mem_setOf_eq] at hz
+    split_ands
+    · exact neg_pi_lt_log_im z
+    · rw [Complex.log_im]
+      refine arg_lt_pi_iff.mpr ?_
+      cases' hz with hRe hIm
+      · left
+        linarith
+      · right
+        exact hIm
 
 /-%%
-\begin{proof}\uses{Eulersformula, ImPBlog, splitPlane}
+\begin{proof}\uses{Eulersformula, ImPBlog, splitPlane}\leanok
 By Lemma~\ref{Eulersformula}  for $x\in T$
 $Re(cos(x))\not=-1$ and hence by Lemma~\ref{ImPBlog} $PBlog(x)\in S$.
 \end{proof}
@@ -184,40 +209,154 @@ $Re(cos(x))\not=-1$ and hence by Lemma~\ref{ImPBlog} $PBlog(x)\in S$.
 /-%%
 \section{$CSexp\colon \C\to \C$ is a covering projection on $Cstar$}
 
-\begin{definition}\label{Cstar}
+\begin{definition}\label{Cstar}\lean{Cstar}\leanok
 $Cstar=\{z\in \C | z\not= 0\}$
 \end{definition}
-
 %%-/
+
+def Cstar : Set ℂ := {z : ℂ | z ≠ 0}
 
 /-%%
 \begin{definition}\label{deflift}
 Let $f\colon X\to Y$ be a continuous map between topological spaces and $\alpha\colon A\to Y$
 a continuous map. A lift of $\alpha$ through $f$ is a continuous map $\tilde\alpha\colon A\to X$
 such that
-$f\circ \tilde\alpha =f$.
+$f\circ \tilde\alpha = \alpha$.
 \end{definition}
 %%-/
 
-/-%%
+def deflift {A X Y : Type*} [TopologicalSpace A] [TopologicalSpace X] [TopologicalSpace Y]
+  {f : X → Y} (hf : Continuous f) {α : A → Y} (hα : Continuous α)
+  {tildeα : A → X} :
+  Prop := Continuous tildeα ∧ f ∘ tildeα = α
 
-\begin{definition}\label{Defstrip}
-For any $a, b\in \R$ with $a < b$ we define $S(a,b)=\{z\in \C | a < Im{z} < b⦄$.
+/-%%
+\begin{definition}\label{Defstrip}\leanok
+For any $a, b\in \R$ (in practice, we assume $a < b$), we define
+$S(a,b)=\{z\in \C | a < Im{z} < b\}$.
+\end{definition}
+%%-/
+
+def Defstrip (a b : ℝ) : Set ℂ :=
+  {z : ℂ | a < im z ∧ im z < b}
+
+/-%%
+\begin{definition}\label{Sstrip}\leanok
 Define $S\subset \C$ by $S=S(-\pi ,\pi )$.
 \end{definition}
+%%-/
 
+def Sstrip : Set ℂ := Defstrip (-π) π
+
+/-%%
+\begin{lemma}\label{CSexpInS}\lean{CSexpInS}\leanok
+For $w\in S$, $CSexp(w)\in T$.
+\end{lemma}
+%%-/
+
+theorem CSexpInS {w : ℂ} (hw : w ∈ Sstrip) :
+    CSexp w ∈ splitPlane := by
+  unfold CSexp splitPlane
+  unfold Sstrip Defstrip at hw
+  simp only [gt_iff_lt, ne_eq, mem_setOf_eq]
+  simp only [mem_setOf_eq] at hw
+  by_contra h
+  push_neg at h
+  rw [Complex.exp_im] at h
+  have := h.2
+  have : Real.sin w.im = 0 := by
+    have h2 := Real.exp_pos w.re
+    apply (mul_eq_zero_iff_left ?_).mp this
+    linarith
+  rw [Real.sin_eq_zero_iff] at this
+  obtain ⟨k, hk⟩ := this
+  rw [← hk] at hw
+  have keq : k = 0 := by
+    have pi : 0 < π := by exact Real.pi_pos
+    have h1 : -1 < (k : ℝ) := by
+      have : -π < (k : ℝ) * π := hw.1
+      rw [← neg_one_mul π] at this
+      rwa [mul_lt_mul_iff_of_pos_right pi] at this
+    have h2 : (k : ℝ) < 1 := by
+      have : (k : ℝ) * π < π := hw.2
+      apply (mul_lt_mul_iff_of_pos_right pi (b := (k : ℝ)) (c := 1)).1
+      simp [one_mul, this]
+    norm_cast at h1 h2
+    omega
+  rw [keq] at hk
+  simp only [Int.cast_zero, zero_mul] at hk
+  have := h.1
+  rw [Complex.exp_re] at this
+  rw [← hk] at this
+  simp only [Real.cos_zero, mul_one] at this
+  linarith [Real.exp_pos w.re]
+
+/-%%
+\begin{proof}\uses{Sstrip, splitPlane, CSexp}\leanok
+A calculation.
+\end{proof}
 %%-/
 
 /-%%
-
-\begin{proposition}\label{inverseHomeo}
+\begin{proposition}\label{inverseHomeo}\lean{inverseHomeo}\leanok
 Then $CSexp\colon S\to T$ and $PBlog\colon T\to S$ are inverse homeomorphisms.
 \end{proposition}
-
 %%-/
 
+noncomputable def inverseHomeo :
+    Homeomorph Sstrip splitPlane where
+      toFun := fun w ↦ by
+        let z := CSexp w
+        have hz : z ∈ splitPlane := by
+          unfold splitPlane
+          simp only [gt_iff_lt, ne_eq, mem_setOf_eq]
+          apply CSexpInS
+          exact w.2
+        exact ⟨z, hz⟩
+      invFun := fun w ↦ by
+        obtain ⟨w₀, hw₀⟩ := w
+        set z := PBlog w₀ with zDef
+        have hz : z ∈ Sstrip := by
+          unfold Sstrip Defstrip
+          simp only [mem_setOf_eq]
+          rw [zDef]
+          exact ContPBlog.2 w₀ hw₀
+        exact ⟨z, hz⟩
+      left_inv w := by
+        simp only
+        ext
+        simp only
+        unfold PBlog CSexp
+        have := w.2
+        unfold Sstrip Defstrip at this
+        apply log_exp
+        · exact this.1
+        · linarith [this.2]
+      right_inv z := by
+        simp only
+        ext
+        simp only
+        refine (ImPBlog z ?_).1
+        unfold splitPlane at z
+        have := z.2
+        intro h
+        rw [h] at this
+        simp at this
+      continuous_toFun := by
+        apply Continuous.subtype_mk
+        exact Continuous.comp Complex.continuous_exp continuous_subtype_val
+      continuous_invFun := by
+        apply Continuous.subtype_mk
+        unfold PBlog
+        change Continuous (Complex.log ∘ (fun x : splitPlane => (x : ℂ)))
+        apply ContinuousOn.comp_continuous (s := splitPlane)
+        · exact ContPBlog.1
+        · exact continuous_subtype_val
+        · intro x
+          simp [splitPlane]
+
 /-%%
-\begin{proof}\uses{Defstrip, Eulersformula, Contexp, ContPBlog, periodicity}
+\begin{proof}\uses{Defstrip, Sstrip, Eulersformula, Contexp, ContPBlog, periodicity}\leanok
 By Lemma~\ref{Eulersformula} $CSexp(z)\in \R^-$ if and only if $CSexp({\rm Im}(z))\in \R^-$ if and
 only if
 ${\rm Im}(z)\in {\pi +(2\pi )\Z⦄$. Since, by Definition~\ref{Defstrip} for  $z∈ S$
@@ -240,15 +379,17 @@ they are inverse homeomorphisms.
 %%-/
 
 /-%%
-
-\begin{definition}\label{DeftildeS}
-$\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not=
+\begin{definition}\label{DeftildeS}\lean{DeftildeS}\leanok
+$\tilde S\subset \C$ is the subset
+$\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not=
 (2k+1)\pi  \text{\ for\  any\ } k\in \Z\}$.
 \end{definition}
 %%-/
 
-/-%%
+def DeftildeS : Set ℂ :=
+  {z : ℂ | ∀ (k : ℤ), im z ≠ (2 * k + 1) * π}
 
+/-%%
 \begin{lemma}\label{tildeShomeo}
 Define $\varphi\colon S\times \Z \to \C$  by $\varphi(z,k)=z+2k\pi  *I$. Then
 $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
@@ -257,7 +398,7 @@ $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
 
 /-%%
 
-\begin{proof}\uses{Defstrip, DeftildeS}
+\begin{proof}\uses{Defstrip, DeftildeS, Sstrip}
 According to Definition~\ref{Defstrip}  image of $S$ under the translation action of $(2\pi )\Z$ on $\C$
 is the union
 of all strips $S(2n-1)\pi ,(2n+1)\pi )$. By Definition~\ref{DeftildeS} this union is $\tilde S$.
