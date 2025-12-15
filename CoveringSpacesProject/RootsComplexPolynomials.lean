@@ -4,6 +4,21 @@ open TopologicalSpace Function
 
 open Complex Set
 
+/-
+ADD TO MATHLIB!! near `isConnected_range`
+-/
+theorem isConnected_range_of_continuousOn {α : Type*} {β : Type*} [TopologicalSpace α] [TopologicalSpace β] {s : Set α} {f : α → β} (h : ContinuousOn f s) (hs : IsConnected s) :
+IsConnected (f '' s) := by
+
+sorry
+
+theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) : ∃ k : ℤ, s = {k} := by
+  sorry
+
+theorem ContinuousOn.coe {f : ℝ → ℤ} {s : Set ℝ} (h : ContinuousOn (fun x ↦ (f x : ℂ)) s) : ContinuousOn f s := by
+  sorry
+
+
 local notation "π" => Real.pi
 
 /-%%
@@ -217,7 +232,7 @@ $Cstar=\{z\in \C | z\not= 0\}$
 def Cstar : Set ℂ := {z : ℂ | z ≠ 0}
 
 /-%%
-\begin{definition}\label{deflift}
+\begin{definition}\label{deflift}\lean{deflift}\leanok
 Let $f\colon X\to Y$ be a continuous map between topological spaces and $\alpha\colon A\to Y$
 a continuous map. A lift of $\alpha$ through $f$ is a continuous map $\tilde\alpha\colon A\to X$
 such that
@@ -226,12 +241,12 @@ $f\circ \tilde\alpha = \alpha$.
 %%-/
 
 def deflift {A X Y : Type*} [TopologicalSpace A] [TopologicalSpace X] [TopologicalSpace Y]
-  {f : X → Y} (hf : Continuous f) {α : A → Y} (hα : Continuous α)
-  {tildeα : A → X} :
+  (f : X → Y) (α : A → Y)
+  (tildeα : A → X) :
   Prop := Continuous tildeα ∧ f ∘ tildeα = α
 
 /-%%
-\begin{definition}\label{Defstrip}\leanok
+\begin{definition}\label{Defstrip}\lean{Defstrip}\leanok
 For any $a, b\in \R$ (in practice, we assume $a < b$), we define
 $S(a,b)=\{z\in \C | a < Im{z} < b\}$.
 \end{definition}
@@ -605,13 +620,15 @@ have the homotopy lifting property.
 
 \section{Homotopy Classes of Loops and maps of $S^1$ into $Cstar$}
 
-\begin{definition}\label{loop}
+\begin{definition}\label{loop}\lean{loop}\leanok
 Let $X$ be a topological space and $a, b ∈ ℝ$ with $b > a$.  A loop in $X$ is a map
 $\omega\colon [ a, b]\to X$ with $\omega(b)=\omega(a)$.  A loop is {\em based at $x_0\in X$} if
 $\omega(a)=x_0$.
 \end{definition}
-
 %%-/
+
+def loop {X : Type*} [TopologicalSpace X] (a b : ℝ) (ω : ℝ → X) : Prop :=
+  ω b = ω a
 
 /-%%
 
@@ -644,29 +661,147 @@ as guaranteed by Corollary~\ref{expUPL}.
 
 /-%%
 
- \begin{definition}\label{DefWNlift}
- Suppose given a loop $\omega\colon a\colon [a, b]\to \C$
- with $\omega(t)\in Cstar$ for all $t\in [a, b]$,
- and given a lift $\tilde\omega$ of $\omega$ through $CSexp$
- the {\em winding number} of the lift $\tilde\omega$,
- denoted $w(\tilde\omega)$,
- is $(\tilde\omega_x(b)-\tilde\omega_x(a))/2\pi  *I$.
+\begin{definition}\label{DefWNlift}\lean{DefWNlift}\leanok
+Suppose given a loop $\omega\colon a\colon [a, b]\to \C$
+with $\omega(t)\in Cstar$ for all $t\in [a, b]$,
+and given a lift $\tilde\omega$ of $\omega$ through $CSexp$
+the {\em winding number} of the lift $\tilde\omega$,
+denoted $w(\tilde\omega)$,
+is $(\tilde\omega_x(b)-\tilde\omega_x(a))/2\pi  *I$.
 \end{definition}
 %%-/
 
+noncomputable def DefWNlift (a b : ℝ)
+-- (ω : ℝ → ℂ)
+-- (hω : loop a b ω)
+--  (hCstar : ∀ t ∈ Icc a b, ω t ∈ Cstar)
+  (tildeω : ℝ → ℂ)
+--  (hlift : deflift CSexp ω tildeω)
+  :
+  ℂ :=
+  (tildeω b - tildeω a) / (2 * Real.pi * I)
+
+
 /-%%
 
-\begin{lemma}\label{diffinitpoint}
-Let $\omega\colon [ a, b]\to \C$ with $\omega(t)\in Cstar$ for all $t\in [ a ,b]$.
+\begin{lemma}\label{diffinitpoint}\lean{diffinitpoint}\leanok
+Let $\omega\colon [a, b]\to \C$ be continuous with $\omega(t)\in Cstar$ for all $t\in [a ,b]$.
 Suppose that $\tilde\omega$ and $\tilde\omega'$ are lifts of $\omega$
 through $CSexp$.
-Then $w(\tilde\omega)\in \Z$ and $w(\tilde\omega')=w(\tilde\omega)$.
+Then DefWNlift$(\tilde\omega)\in \Z$ and DefWNlift$(\tilde\omega')=$DefWNlift$(\tilde\omega)$.
 \end{lemma}
 %%-/
 
-/-%%
+lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
+    --(ωCont : ContinuousOn ω (Icc a b))
+    (hω : loop a b ω)
+    --(hCstar : ∀ t ∈ Icc a b, ω t ∈ Cstar)
+    (tildeω tildeω' : ℝ → ℂ)
+    (hlift : deflift CSexp ω tildeω)
+    (hlift' : deflift CSexp ω tildeω') :
+    ∃ (k : ℤ), DefWNlift a b tildeω = k ∧ DefWNlift a b tildeω' = k := by
+  unfold deflift at hlift hlift'
+  unfold loop at hω
+  unfold DefWNlift
+  have h : ∀ t, CSexp (tildeω t) = CSexp (tildeω' t) := by
+    intro t
+    change (CSexp ∘ tildeω) t = (CSexp ∘ tildeω') t
+    rw [hlift.2, hlift'.2]
+  have h' : ∀ t, ∃ n : ℤ, tildeω' t - tildeω t = 2 * π * n * I := by
+    intro t
+    specialize h t
+    choose n hn using (periodicity (tildeω' t) (tildeω t)).1 h.symm
+    use n
+    rw [hn]
+    ring
+  choose n hn using h'
+  have nCont : ContinuousOn n (Icc a b) := by
+    have h1 : ContinuousOn tildeω (Icc a b) := hlift.1.continuousOn
+    have h2 : ContinuousOn tildeω' (Icc a b) := hlift'.1.continuousOn
+    have hdiff : ContinuousOn (fun t => tildeω' t - tildeω t) (Icc a b) :=
+      ContinuousOn.sub h2 h1
+    have htot : ContinuousOn (fun t => (tildeω' t - tildeω t) / (2 * π * I)) (Icc a b) := by
+      apply ContinuousOn.div_const hdiff
+    have setEqOn : Set.EqOn (fun t => (tildeω' t - tildeω t) / (2 * π * I)) (fun t => n t) (Icc a b) := by
+      intro t ht
+      simp only
+      rw [hn t]
+      have : (2 : ℂ) * π * I ≠ 0 := by
+        norm_cast
+        have : (π : ℝ) ≠ 0 := by exact Real.pi_ne_zero
+        norm_num
+        exact this
+      field_simp
+      ring_nf
+    have := (continuousOn_congr setEqOn).1 htot
+    exact ContinuousOn.coe this
+  have nConst : ∃ k : ℤ, ∀ t ∈ Icc a b, n t = k := by
+    have : IsConnected (Icc a b) := by
+      exact isConnected_Icc hab
+    have := isConnected_range_of_continuousOn nCont this
+    have := Singleton_of_isConnected_SetInt this
+    choose k hk using this
+    use k
+    intro t ht
+    have : n t ∈ n '' Icc a b := Set.mem_image_of_mem n ht
+    rw [hk] at this
+    simpa [mem_singleton_iff] using this
 
-\begin{proof}\uses{deflift, loop, periodicity, DefWNlift}
+  obtain ⟨k, hk⟩ := nConst
+
+  let tildea := tildeω a
+  let tildeb := tildeω b
+  let tildea' := tildeω' a
+  let tildeb' := tildeω' b
+
+  have f1 : tildea' - tildea = tildeb' - tildeb := by
+    unfold tildea tildeb tildea' tildeb'
+    rw [hn a, hn b]
+    rw [hk a (⟨by linarith, by linarith⟩), hk b (⟨by linarith, by linarith⟩)]
+  have f2 : tildeb' - tildea' = tildeb - tildea := by
+    calc tildeb' - tildea'
+    = (tildeb' - tildeb) + (tildeb - tildea') := by ring
+    _ = (tildeb' - tildeb) + (tildeb - tildea) - (tildea' - tildea) := by ring
+    _ = (tildeb' - tildeb) - (tildea' - tildea) + (tildeb - tildea) := by ring
+    _ = (tildeb - tildea) := by rw [f1]; ring
+
+  have h1 : CSexp (tildeω b) = CSexp (tildeω a) := by
+    have := hlift.2
+    change (CSexp ∘ tildeω) b = (CSexp ∘ tildeω) a
+    rwa [this]
+  have h1' : CSexp (tildeω' b) = CSexp (tildeω' a) := by
+    have := hlift'.2
+    change (CSexp ∘ tildeω') b = (CSexp ∘ tildeω') a
+    rwa [this]
+
+  choose ℓ hℓ using (periodicity (tildeω b) (tildeω a)).mp h1
+  use ℓ
+  split_ands
+  · rw [hℓ]
+    ring_nf
+    have : I ≠ 0 := by norm_num
+    have : (π : ℂ) ≠ 0 := by
+      norm_cast
+      exact Real.pi_ne_zero
+    field_simp
+    rw [show ℓ * π * I * I = - (ℓ * π) by ring_nf; norm_cast; simp]
+    norm_cast
+    ring_nf
+  · rw [f2]
+    unfold tildeb tildea
+    rw [hℓ]
+    ring_nf
+    have : I ≠ 0 := by norm_num
+    have : (π : ℂ) ≠ 0 := by
+      norm_cast
+      exact Real.pi_ne_zero
+    field_simp
+    rw [show ℓ * π * I * I = - (ℓ * π) by ring_nf; norm_cast; simp]
+    norm_cast
+    ring_nf
+
+/-%%
+\begin{proof}\uses{deflift, loop, periodicity, DefWNlift}\leanok
 By the Definition~\ref{deflift} we have
  $CSexp(\tilde\omega(b))=\omega(b)$ and $CSexp(\tilde\omega(a)=\omega(a)$.
  By Definition~\ref{loop} $\omega(b)=\omega(a)$.
