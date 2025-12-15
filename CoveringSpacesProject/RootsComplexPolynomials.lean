@@ -359,7 +359,7 @@ noncomputable def inverseHomeo :
 \begin{proof}\uses{Sstrip, Eulersformula, Contexp, ContPBlog, periodicity, CSexpInS}\leanok
 By Lemma~\ref{Eulersformula} $CSexp(z)\in \R^-$ if and only if $CSexp({\rm Im}(z))\in \R^-$ if and
 only if
-$\{\rm Im}(z)\in {\pi +(2\pi )\Z\}$. Since, by Definition~\ref{Defstrip} for  $z∈ S$
+$\{ {\rm Im}(z)\in \{\pi +(2\pi )\Z\} \}$. Since, by Definition~\ref{Defstrip} for  $z∈ S$,
 $-\pi < Im(z) < \pi $.
 It follows that $CSexp(S)\subset T$.
 Conversely, by Lemma~\ref{ContPBlog} if $z\in T$ then $PBlog(z)\in S$.
@@ -368,7 +368,7 @@ By Lemma~\ref{Contexp} $CSexp$ is continuous and,
 by Lemma~\ref{ContPBlog}, $PBlog$ is continuous on $T$.
 Suppose that $z,w\in S$ and $CSexp(z)=CSexp(w)$.
 By Lemma~\ref{periodicity}
-there is an integer $n$ such that $z-w =2\pi  *n*I$ and
+there is an integer $n$ such that $z-w =2\pi  * n * I$ and
 $-2\pi < Im(z)-Im(w)<2\pi $. It follows that $n=0$ and hence that $z=w$. This shows that   $CSexp|_S$ is one-to-one.
 Since $CSexp|_S$ is one-to-one and $CSexp({\rm PBlog}(z))=z$
 for all $z\in T$,
@@ -397,7 +397,6 @@ $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
 %%-/
 
 /-%%
-
 \begin{proof}\uses{DeftildeS, Sstrip}
 According to Definition~\ref{Defstrip}  image of $S$ under the translation action of $(2\pi )\Z$ on $\C$
 is the union
