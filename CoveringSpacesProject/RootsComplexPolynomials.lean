@@ -4,19 +4,16 @@ open TopologicalSpace Function
 
 open Complex Set
 
-/-
-ADD TO MATHLIB!! near `isConnected_range`
--/
 theorem isConnected_range_of_continuousOn {α : Type*} {β : Type*} [TopologicalSpace α] [TopologicalSpace β] {s : Set α} {f : α → β} (h : ContinuousOn f s) (hs : IsConnected s) :
 IsConnected (f '' s) := by
+exact IsConnected.image hs f h
 
+
+theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) (hs' : s.Nonempty) : ∃ k : ℤ, s = {k} := by
 sorry
 
-theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) : ∃ k : ℤ, s = {k} := by
-  sorry
-
 theorem ContinuousOn.coe {f : ℝ → ℤ} {s : Set ℝ} (h : ContinuousOn (fun x ↦ (f x : ℂ)) s) : ContinuousOn f s := by
-  sorry
+sorry
 
 
 local notation "π" => Real.pi
@@ -739,7 +736,9 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
     have : IsConnected (Icc a b) := by
       exact isConnected_Icc hab
     have := isConnected_range_of_continuousOn nCont this
-    have := Singleton_of_isConnected_SetInt this
+    have nne : (n '' Icc a b).Nonempty := by
+      exact IsConnected.nonempty this
+    have := Singleton_of_isConnected_SetInt this nne
     choose k hk using this
     use k
     intro t ht
