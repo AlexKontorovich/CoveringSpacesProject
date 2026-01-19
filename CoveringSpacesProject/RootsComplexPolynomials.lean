@@ -392,7 +392,7 @@ they are inverse homeomorphisms.
 
 /-%%
 
-\begin{definition}\label{DeftildeS}
+\begin{definition}\label{DeftildeS}\leanok
 $\tilde S\subset \C$ is the subset $\{r+\theta* I|r,\theta\in \R \text{\ and\ } \theta\not=
 (2k+1)\pi  \text{ for any } k\in \Z\}$.
 \end{definition}
@@ -402,14 +402,198 @@ def DeftildeS : Set ℂ :=
   {z : ℂ | ∀ (k : ℤ), im z ≠ (2 * k + 1) * π}
 
 /-%%
-\begin{lemma}\label{tildeShomeo}
+\begin{lemma}\label{tildeShomeo}\lean{tildeShomeo}\uses{DeftildeS, Sstrip}\leanok
 Define $\varphi\colon S\times \Z \to \C$  by $\varphi(z,k)=z+2k\pi  *I$. Then
 $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
 \end{lemma}
 %%-/
 
+-- Key lemma: the argument to floor is never an integer
+lemma floor_arg_not_int (w : ↑DeftildeS) :
+    (w.val.im + π) / (2 * π) ∉ Set.range (Int.cast : ℤ → ℝ) := by
+  intro ⟨k, hk⟩
+  have hw := w.prop k
+  simp only [DeftildeS, Set.mem_setOf_eq] at hw
+  field_simp at hk
+  have hw' := w.prop (k - 1)
+  apply hw'
+  have hpi := Real.pi_pos
+  have : (w.val).im = ↑k * (2 * π) - π := by linarith
+  rw [this]
+  push_cast
+  linarith
+
+lemma continuous_floor_arg :
+    Continuous (fun w : DeftildeS => ⌊((w.val).im + π) / (2 * π)⌋) := by
+  rw [← IsLocallyConstant.iff_continuous]
+  rw [IsLocallyConstant.iff_isOpen_fiber]
+  intro n
+  -- Show {w : DeftildeS | ⌊(w.im + π)/(2π)⌋ = n} is open
+  have : (fun w : ↑DeftildeS => ⌊((w.val).im + π) / (2 * π)⌋) ⁻¹' {n} =
+         Subtype.val ⁻¹' {z : ℂ | (2 * n - 1) * π < z.im ∧ z.im < (2 * n + 1) * π} := by
+    ext w
+    simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_setOf_eq]
+    constructor
+    · intro h
+      have hpi : (0 : ℝ) < π := Real.pi_pos
+      have h2pi : (0 : ℝ) < 2 * π := by linarith
+      have hne := floor_arg_not_int w
+      have h1 : (n : ℝ) ≤ ((w.val).im + π) / (2 * π) := by
+        rw [← h]
+        exact Int.floor_le (((w.val).im + π) / (2 * π))
+      have h2 : ((w.val).im + π) / (2 * π) < n + 1 := by
+        rw [← h]
+        exact Int.lt_floor_add_one (((w.val).im + π) / (2 * π))
+      split_ands
+      · have h1' : (n : ℝ) < ((w.val).im + π) / (2 * π) := h1.lt_of_ne' (fun heq => hne ⟨n, heq.symm⟩)
+        rw [lt_div_iff₀] at h1'
+        · linarith
+        · linarith
+      · rw [div_lt_iff₀] at h2
+        · linarith
+        · linarith
+    · intro ⟨h1, h2⟩
+      have hpi : (0 : ℝ) < π := Real.pi_pos
+      have h2pi : (0 : ℝ) < 2 * π := by linarith
+      rw [Int.floor_eq_iff]
+      split_ands
+      · rw [le_div_iff₀]
+        · linarith
+        · linarith
+      · rw [div_lt_iff₀] <;> linarith
+  rw [this]
+  apply IsOpen.preimage continuous_subtype_val
+  apply IsOpen.inter
+  · exact isOpen_lt continuous_const continuous_im
+  · exact isOpen_lt continuous_im continuous_const
+
+noncomputable def tildeShomeo :
+    Homeomorph (Sstrip × ℤ) DeftildeS where
+      toFun := fun ⟨z, n⟩ ↦ by
+        set w := z + (2 * n : ℂ) * π * I with wDef
+        have hw : w ∈ DeftildeS := by
+          obtain ⟨z₀, hz₀⟩ := z
+          unfold DeftildeS
+          simp only [ne_eq, mem_setOf_eq]
+          intro k h
+          rw [wDef] at h
+          simp only [add_im, mul_im, mul_re, re_ofNat, intCast_re, im_ofNat, intCast_im, mul_zero,
+            sub_zero, ofReal_re, zero_mul, add_zero, ofReal_im, I_im, mul_one, I_re] at h
+          unfold Sstrip Defstrip at hz₀
+          simp only [mem_setOf_eq] at hz₀
+          set m := k - n with hm
+          have h' : z₀.im = (2 * m + 1) * π := by rw [hm]; push_cast; linarith
+          rw [h'] at hz₀
+          -- Let m = k - n
+          -- From hz₀.1: -π < (2m + 1)π  →  -1 < 2m + 1  →  m > -1
+          -- From hz₀.2: (2m + 1)π < π  →  2m + 1 < 1    →  m < 0
+          -- Since m : ℤ, this is impossible (no integer in (-1, 0))
+          have h1 : (-1 : ℝ) < 2 * m + 1 := by
+            have := hz₀.1
+            have hpi := Real.pi_pos
+            nlinarith
+          have h1 : -1 < 2 * m + 1 := by
+            exact_mod_cast h1
+          have h2 : (2 : ℝ) * m + 1 < 1 := by
+            have := hz₀.2
+            nlinarith
+          have h2 : 2 * m + 1 < 1 := by exact_mod_cast h2
+          -- From h1: m > -1, from h2: m < 0
+          have hm_gt : m > -1 := by linarith
+          have hm_lt : m < 0 := by linarith
+          -- No integer in (-1, 0)
+          omega
+        exact ⟨w, hw⟩
+      invFun := fun w ↦ by
+        obtain ⟨w₀, hw₀⟩ := w
+        set θ := im w₀ with θDef
+        set n := Int.floor ((θ + π) / (2 * π)) with nDef
+        set z := w₀ - (2 * (n : ℝ)) * π * I with zDef
+        have hz : z ∈ Sstrip := by
+          unfold Sstrip Defstrip
+          simp only [mem_setOf_eq]
+          have hpi : (0 : ℝ) < π := Real.pi_pos
+          have h2pi : (0 : ℝ) < 2 * π := by linarith
+          -- Get the floor inequalities
+          have hn_le : (n : ℝ) ≤ (θ + π) / (2 * π) := Int.floor_le _
+          have hn_lt : (θ + π) / (2 * π) < n + 1 := Int.lt_floor_add_one _
+          -- Compute z.im
+          have hz_im : z.im = θ - 2 * n * π := by
+            simp only [zDef, sub_im, mul_im, ofReal_im, ofReal_re, I_im, I_re]
+            ring_nf
+            simp only [ofReal_intCast, mul_re, intCast_re, ofReal_re, intCast_im, ofReal_im,
+              mul_zero, sub_zero, re_ofNat, mul_im, zero_mul, add_zero, im_ofNat]
+            rw [θDef]
+            linarith
+          rw [hz_im]
+          constructor
+          · -- -π < θ - 2 * n * π
+            -- From hn_le: n ≤ (θ + π) / (2π), need to show strict
+            have hne : (θ + π) / (2 * π) ≠ n := fun heq => by
+              have : θ = (2 * n - 1) * π := by field_simp at heq; linarith
+              have : θ = (2 * (n - 1) + 1) * π := by linarith
+              exact hw₀ (n - 1) (by rw [← θDef, this]; push_cast; ring)
+            have hlt : (n : ℝ) < (θ + π) / (2 * π) := hn_le.lt_of_ne' hne
+            rw [lt_div_iff₀ h2pi] at hlt
+            linarith
+          · -- θ - 2 * n * π < π
+            rw [div_lt_iff₀ h2pi] at hn_lt
+            linarith
+        exact ⟨⟨z, hz⟩,n⟩
+      left_inv w := by
+        obtain ⟨⟨z, hz⟩, n⟩ := w
+        simp only [Subtype.mk.injEq, Prod.mk.injEq]
+        -- hz : -π < z.im ∧ z.im < π
+        -- Need: z + 2nπi - 2⌊...⌋πi = z  and  ⌊...⌋ = n
+        -- The key is showing ⌊(z.im + 2nπ + π)/(2π)⌋ = n
+
+        have hpi : (0 : ℝ) < π := Real.pi_pos
+        have h2pi : (0 : ℝ) < 2 * π := by linarith
+
+        -- Compute the imaginary part of w₀ = z + 2nπi
+        have hw_im : (↑z + 2 * ↑n * ↑π * I : ℂ).im = z.im + 2 * n * π := by
+          simp [mul_im, I_im, I_re, ofReal_re, ofReal_im]
+
+        -- Show that ⌊(z.im + 2nπ + π)/(2π)⌋ = n
+        have hfloor : ⌊(z.im + 2 * n * π + π) / (2 * π)⌋ = n := by
+          rw [Int.floor_eq_iff]
+          obtain ⟨hz_lo, hz_hi⟩ := hz
+          constructor
+          · -- n ≤ (z.im + 2 * n * π + π) / (2 * π)
+            rw [le_div_iff₀ h2pi]
+            linarith
+          · -- (z.im + 2 * n * π + π) / (2 * π) < n + 1
+            rw [div_lt_iff₀ h2pi]
+            linarith
+        constructor
+        · -- z + 2nπi - 2nπi = z
+          simp only [hw_im, hfloor]
+          norm_cast
+          ring
+        · -- ⌊...⌋ = n
+          simp only [hw_im, hfloor]
+      right_inv z := by
+        obtain ⟨z, hz⟩ := z
+        simp only [Subtype.mk.injEq]
+        -- Need to show: (z - 2nπi) + 2nπi = z
+        -- This is just algebra
+        norm_cast
+        ring
+      continuous_toFun := by
+        -- Approach 1: Use continuity of the underlying function
+        refine Continuous.subtype_mk ?_ _
+        continuity
+      continuous_invFun := by
+        -- The key lemma you need:
+        -- If (θ + π) / (2π) ∉ ℤ for all θ in your domain, then floor is locally constant
+
+        refine Continuous.prodMk ?_ ?_
+        · have := continuous_floor_arg
+          continuity
+        · exact continuous_floor_arg
+
 /-%%
-\begin{proof}\uses{DeftildeS, Sstrip}
+\begin{proof}\uses{DeftildeS, Sstrip}\leanok
 According to Definition~\ref{Defstrip}  image of $S$ under the translation action of $(2\pi )\Z$ on $\C$
 is the union
 of all strips $S(2n-1)\pi ,(2n+1)\pi )$. By Definition~\ref{DeftildeS} this union is $\tilde S$.
