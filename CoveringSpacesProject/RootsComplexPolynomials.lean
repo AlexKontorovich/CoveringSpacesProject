@@ -1,19 +1,51 @@
 import Mathlib
 
+--- TODO : make a glossary of everything we're defining here, to be able to quickly access everything...
+
 open TopologicalSpace Function
 
 open Complex Set
+
+/-%%
+\begin{lemma}\label{isConnectedRangeContinuousOn}\lean{isConnected_range_of_continuousOn}\leanok
+The image of a connected set under a continuous map is connected.
+\end{lemma}
+%%-/
 
 theorem isConnected_range_of_continuousOn {α : Type*} {β : Type*} [TopologicalSpace α] [TopologicalSpace β] {s : Set α} {f : α → β} (h : ContinuousOn f s) (hs : IsConnected s) :
 IsConnected (f '' s) := by
 exact IsConnected.image hs f h
 
+/-%%
+\begin{lemma}\label{SingletonConnectedInt}\lean{Singleton_of_isConnected_SetInt}
+Any nonempty connected subset of $\mathbb Z$ is a singleton.
+\end{lemma}
+%%-/
+
 
 theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) (hs' : s.Nonempty) : ∃ k : ℤ, s = {k} := by
-sorry
+  rcases hs' with ⟨k, hk⟩
+  have hsSub : s.Subsingleton := by
+    intro x hx y hy
+    haveI : PreconnectedSpace s := Subtype.preconnectedSpace hs.isPreconnected
+    haveI : Subsingleton s := PreconnectedSpace.trivial_of_discrete
+    exact congrArg Subtype.val (Subsingleton.elim (⟨x, hx⟩ : s) ⟨y, hy⟩)
+  exact ⟨k, hsSub.eq_singleton_of_mem hk⟩
+
+/-%%
+\begin{lemma}\label{ContinuousOnCoeInt}\lean{ContinuousOn.coe}
+If a map into $\mathbb Z$ is continuous after coercion to $\C$, then it is continuous.
+\end{lemma}
+%%-/
 
 theorem ContinuousOn.coe {f : ℝ → ℤ} {s : Set ℝ} (h : ContinuousOn (fun x ↦ (f x : ℂ)) s) : ContinuousOn f s := by
-sorry
+  have hReal : ContinuousOn (fun x ↦ (f x : ℝ)) s := by
+    simpa using (Complex.continuous_re.continuousOn.comp (s := s) (t := Set.univ) h (by
+      intro x hx
+      simp))
+  have hCast : ContinuousOn (((↑) : ℤ → ℝ) ∘ f) s := by
+    simpa [Function.comp] using hReal
+  exact (Int.isClosedEmbedding_coe_real.isEmbedding.continuousOn_iff).2 hCast
 
 
 local notation "π" => Real.pi
@@ -408,20 +440,31 @@ $\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
 \end{lemma}
 %%-/
 
--- Key lemma: the argument to floor is never an integer
-lemma floor_arg_not_int (w : ↑DeftildeS) :
-    (w.val.im + π) / (2 * π) ∉ Set.range (Int.cast : ℤ → ℝ) := by
+/-%%
+\begin{lemma}\label{floorArgNotInt}\lean{floor_arg_not_int}\leanok
+For each $w\in \tilde S$, the number $\frac{\Im(w)+\pi}{2\pi}$ is not an integer.
+\end{lemma}
+%%-/
+
+lemma floor_arg_not_int {w : ℂ} (hw : w ∈ DeftildeS) :
+    (w.im + π) / (2 * π) ∉ Set.range (Int.cast : ℤ → ℝ) := by
   intro ⟨k, hk⟩
-  have hw := w.prop k
+  have hw' := hw k
   simp only [DeftildeS, Set.mem_setOf_eq] at hw
   field_simp at hk
-  have hw' := w.prop (k - 1)
-  apply hw'
+  have hw'' := hw (k - 1)
+  apply hw''
   have hpi := Real.pi_pos
-  have : (w.val).im = ↑k * (2 * π) - π := by linarith
+  have : (w).im = ↑k * (2 * π) - π := by linarith
   rw [this]
   push_cast
   linarith
+
+/-%%
+\begin{lemma}\label{continuousFloorArg}\lean{continuous_floor_arg}\leanok
+The map $w\mapsto\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$ is continuous on $\tilde S$.
+\end{lemma}
+%%-/
 
 lemma continuous_floor_arg :
     Continuous (fun w : DeftildeS => ⌊((w.val).im + π) / (2 * π)⌋) := by
@@ -437,7 +480,7 @@ lemma continuous_floor_arg :
     · intro h
       have hpi : (0 : ℝ) < π := Real.pi_pos
       have h2pi : (0 : ℝ) < 2 * π := by linarith
-      have hne := floor_arg_not_int w
+      have hne := floor_arg_not_int w.prop
       have h1 : (n : ℝ) ≤ ((w.val).im + π) / (2 * π) := by
         rw [← h]
         exact Int.floor_le (((w.val).im + π) / (2 * π))
@@ -467,130 +510,184 @@ lemma continuous_floor_arg :
   · exact isOpen_lt continuous_const continuous_im
   · exact isOpen_lt continuous_im continuous_const
 
-noncomputable def tildeShomeo :
-    Homeomorph (Sstrip × ℤ) DeftildeS where
-      toFun := fun ⟨z, n⟩ ↦ by
-        set w := z + (2 * n : ℂ) * π * I with wDef
-        have hw : w ∈ DeftildeS := by
-          obtain ⟨z₀, hz₀⟩ := z
-          unfold DeftildeS
-          simp only [ne_eq, mem_setOf_eq]
-          intro k h
-          rw [wDef] at h
-          simp only [add_im, mul_im, mul_re, re_ofNat, intCast_re, im_ofNat, intCast_im, mul_zero,
-            sub_zero, ofReal_re, zero_mul, add_zero, ofReal_im, I_im, mul_one, I_re] at h
-          unfold Sstrip Defstrip at hz₀
-          simp only [mem_setOf_eq] at hz₀
-          set m := k - n with hm
-          have h' : z₀.im = (2 * m + 1) * π := by rw [hm]; push_cast; linarith
-          rw [h'] at hz₀
-          -- Let m = k - n
-          -- From hz₀.1: -π < (2m + 1)π  →  -1 < 2m + 1  →  m > -1
-          -- From hz₀.2: (2m + 1)π < π  →  2m + 1 < 1    →  m < 0
-          -- Since m : ℤ, this is impossible (no integer in (-1, 0))
-          have h1 : (-1 : ℝ) < 2 * m + 1 := by
-            have := hz₀.1
-            have hpi := Real.pi_pos
-            nlinarith
-          have h1 : -1 < 2 * m + 1 := by
-            exact_mod_cast h1
-          have h2 : (2 : ℝ) * m + 1 < 1 := by
-            have := hz₀.2
-            nlinarith
-          have h2 : 2 * m + 1 < 1 := by exact_mod_cast h2
-          -- From h1: m > -1, from h2: m < 0
-          have hm_gt : m > -1 := by linarith
-          have hm_lt : m < 0 := by linarith
-          -- No integer in (-1, 0)
-          omega
-        exact ⟨w, hw⟩
-      invFun := fun w ↦ by
-        obtain ⟨w₀, hw₀⟩ := w
-        set θ := im w₀ with θDef
-        set n := Int.floor ((θ + π) / (2 * π)) with nDef
-        set z := w₀ - (2 * (n : ℝ)) * π * I with zDef
-        have hz : z ∈ Sstrip := by
-          unfold Sstrip Defstrip
-          simp only [mem_setOf_eq]
-          have hpi : (0 : ℝ) < π := Real.pi_pos
-          have h2pi : (0 : ℝ) < 2 * π := by linarith
-          -- Get the floor inequalities
-          have hn_le : (n : ℝ) ≤ (θ + π) / (2 * π) := Int.floor_le _
-          have hn_lt : (θ + π) / (2 * π) < n + 1 := Int.lt_floor_add_one _
-          -- Compute z.im
-          have hz_im : z.im = θ - 2 * n * π := by
-            simp only [zDef, sub_im, mul_im, ofReal_im, ofReal_re, I_im, I_re]
-            ring_nf
-            simp only [ofReal_intCast, mul_re, intCast_re, ofReal_re, intCast_im, ofReal_im,
-              mul_zero, sub_zero, re_ofNat, mul_im, zero_mul, add_zero, im_ofNat]
-            rw [θDef]
-            linarith
-          rw [hz_im]
-          constructor
-          · -- -π < θ - 2 * n * π
-            -- From hn_le: n ≤ (θ + π) / (2π), need to show strict
-            have hne : (θ + π) / (2 * π) ≠ n := fun heq => by
-              have : θ = (2 * n - 1) * π := by field_simp at heq; linarith
-              have : θ = (2 * (n - 1) + 1) * π := by linarith
-              exact hw₀ (n - 1) (by rw [← θDef, this]; push_cast; ring)
-            have hlt : (n : ℝ) < (θ + π) / (2 * π) := hn_le.lt_of_ne' hne
-            rw [lt_div_iff₀ h2pi] at hlt
-            linarith
-          · -- θ - 2 * n * π < π
-            rw [div_lt_iff₀ h2pi] at hn_lt
-            linarith
-        exact ⟨⟨z, hz⟩,n⟩
-      left_inv w := by
-        obtain ⟨⟨z, hz⟩, n⟩ := w
-        simp only [Subtype.mk.injEq, Prod.mk.injEq]
-        -- hz : -π < z.im ∧ z.im < π
-        -- Need: z + 2nπi - 2⌊...⌋πi = z  and  ⌊...⌋ = n
-        -- The key is showing ⌊(z.im + 2nπ + π)/(2π)⌋ = n
+/-%%
+\begin{definition}\label{tildeShomeoToFun}\lean{tildeShomeo_toFun}\leanok
+Define $\varphi\colon \C\times \Z\to \C$ by $\varphi(z,n)=z+2n\pi i$.
+\end{definition}
+%%-/
 
-        have hpi : (0 : ℝ) < π := Real.pi_pos
-        have h2pi : (0 : ℝ) < 2 * π := by linarith
+noncomputable def tildeShomeo_toFun (zn : ℂ × ℤ) : ℂ :=
+  zn.1 + (2 * zn.2 : ℂ) * π * I
 
-        -- Compute the imaginary part of w₀ = z + 2nπi
-        have hw_im : (↑z + 2 * ↑n * ↑π * I : ℂ).im = z.im + 2 * n * π := by
-          simp [mul_im, I_im, I_re, ofReal_re, ofReal_im]
+/-%%
+\begin{lemma}\label{tildeShomeoToFunMem}\lean{tildeShomeo_toFun_mem}\leanok
+If $z\in S$, then $\varphi(z,n)\in \tilde S$.
+\end{lemma}
+%%-/
 
-        -- Show that ⌊(z.im + 2nπ + π)/(2π)⌋ = n
-        have hfloor : ⌊(z.im + 2 * n * π + π) / (2 * π)⌋ = n := by
-          rw [Int.floor_eq_iff]
-          obtain ⟨hz_lo, hz_hi⟩ := hz
-          constructor
-          · -- n ≤ (z.im + 2 * n * π + π) / (2 * π)
-            rw [le_div_iff₀ h2pi]
-            linarith
-          · -- (z.im + 2 * n * π + π) / (2 * π) < n + 1
-            rw [div_lt_iff₀ h2pi]
-            linarith
-        constructor
-        · -- z + 2nπi - 2nπi = z
-          simp only [hw_im, hfloor]
-          norm_cast
-          ring
-        · -- ⌊...⌋ = n
-          simp only [hw_im, hfloor]
-      right_inv z := by
-        obtain ⟨z, hz⟩ := z
-        simp only [Subtype.mk.injEq]
-        -- Need to show: (z - 2nπi) + 2nπi = z
-        -- This is just algebra
-        norm_cast
-        ring
-      continuous_toFun := by
-        -- Approach 1: Use continuity of the underlying function
-        refine Continuous.subtype_mk ?_ _
-        continuity
-      continuous_invFun := by
-        -- The key lemma you need:
-        -- If (θ + π) / (2π) ∉ ℤ for all θ in your domain, then floor is locally constant
+lemma tildeShomeo_toFun_mem {zn : ℂ × ℤ} (hzn : zn.1 ∈ Sstrip) : tildeShomeo_toFun zn ∈ DeftildeS := by
+  obtain ⟨z, n⟩ := zn
+  unfold DeftildeS tildeShomeo_toFun
+  simp only [ne_eq, mem_setOf_eq]
+  intro k h
+  simp only [add_im, mul_im, mul_re, re_ofNat, intCast_re, im_ofNat, intCast_im, mul_zero,
+    sub_zero, ofReal_re, zero_mul, add_zero, ofReal_im, I_im, mul_one, I_re] at h
+  unfold Sstrip Defstrip at hzn
+  simp only [mem_setOf_eq] at hzn
+  set m := k - n with hm
+  have h' : z.im = (2 * m + 1) * π := by rw [hm]; push_cast; linarith
+  rw [h'] at hzn
+  have h1 : (-1 : ℝ) < 2 * m + 1 := by nlinarith [Real.pi_pos, hzn.1]
+  have h2 : (2 : ℝ) * m + 1 < 1 := by nlinarith [Real.pi_pos, hzn.2]
+  have h1 : -1 < 2 * m + 1 := by exact_mod_cast h1
+  have h2 : 2 * m + 1 < 1 := by exact_mod_cast h2
+  omega
 
-        refine Continuous.prodMk ?_ ?_
-        · have := continuous_floor_arg
-          continuity
-        · exact continuous_floor_arg
+/-%%
+\begin{definition}\label{tildeShomeoFloor}\lean{tildeShomeo_floor}\leanok
+Define $N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$.
+\end{definition}
+%%-/
+
+noncomputable def tildeShomeo_floor (w : ℂ) : ℤ := ⌊(w.im + π) / (2 * π)⌋
+
+/-%%
+\begin{definition}\label{tildeShomeoInvFunComplex}\lean{tildeShomeo_invFun_complex}\leanok
+Define $\tilde\varphi^{-1}_{\C}(w)=w-2N(w)\pi i$.
+\end{definition}
+%%-/
+
+noncomputable def tildeShomeo_invFun_complex (w : ℂ) : ℂ :=
+  w - (2 * (tildeShomeo_floor w : ℝ)) * π * I
+
+/-%%
+\begin{lemma}\label{tildeShomeoInvFunMem}\lean{tildeShomeo_invFun_mem}\leanok
+If $w\in \tilde S$, then $\tilde\varphi^{-1}_{\C}(w)\in S$.
+\end{lemma}
+%%-/
+
+lemma tildeShomeo_invFun_mem {w : ℂ} (hw : w ∈ DeftildeS) : tildeShomeo_invFun_complex w ∈ Sstrip := by
+  unfold Sstrip Defstrip tildeShomeo_invFun_complex tildeShomeo_floor
+  simp only [mem_setOf_eq]
+  have hpi : (0 : ℝ) < π := Real.pi_pos
+  have h2pi : (0 : ℝ) < 2 * π := by linarith
+  set n := ⌊(w.im + π) / (2 * π)⌋
+  have hn_le : (n : ℝ) ≤ (w.im + π) / (2 * π) := Int.floor_le _
+  have hn_lt : (w.im + π) / (2 * π) < n + 1 := Int.lt_floor_add_one _
+  have hz_im : (w - (2 * (n : ℝ)) * ↑π * I).im = w.im - 2 * n * π := by
+    simp only [sub_im, mul_im, ofReal_im, ofReal_re, I_im, I_re]
+    ring_nf
+    simp only [ofReal_intCast, mul_re, intCast_re, ofReal_re, intCast_im, ofReal_im,
+      mul_zero, sub_zero, re_ofNat, mul_im, zero_mul, add_zero, im_ofNat]
+  rw [hz_im]
+  constructor
+  · have hne : (w.im + π) / (2 * π) ≠ n := fun heq => by
+      have : w.im = (2 * n - 1) * π := by field_simp at heq; linarith
+      have : w.im = (2 * (n - 1) + 1) * π := by linarith
+      exact hw (n - 1) (by rw [this]; push_cast; ring)
+    have hlt : (n : ℝ) < (w.im + π) / (2 * π) := (Int.floor_le _).lt_of_ne' hne
+    rw [lt_div_iff₀ h2pi] at hlt; linarith
+  · rw [div_lt_iff₀ h2pi] at hn_lt; linarith
+
+/-%%
+\begin{definition}\label{tildeShomeoInvFun}\lean{tildeShomeo_invFun}\leanok
+Define $\tilde\varphi^{-1}(w)=(\tilde\varphi^{-1}_{\C}(w),N(w))\in \C\times \Z$.
+\end{definition}
+%%-/
+
+noncomputable def tildeShomeo_invFun (w : ℂ) : ℂ × ℤ :=
+  (tildeShomeo_invFun_complex w, tildeShomeo_floor w)
+
+/-%%
+\begin{definition}\label{tildeShomeoInvFunLift}\lean{tildeShomeo_invFun_lift}\leanok
+Restrict $\tilde\varphi^{-1}$ to a map $\tilde S\to S\times \Z$.
+\end{definition}
+%%-/
+
+noncomputable def tildeShomeo_invFun_lift (w : DeftildeS) : Sstrip × ℤ :=
+  (⟨tildeShomeo_invFun_complex w.1, tildeShomeo_invFun_mem w.2⟩, tildeShomeo_floor w)
+
+/-%%
+\begin{lemma}\label{tildeShomeoLeftInv}\lean{tildeShomeo_left_inv}\leanok
+The maps $\tilde\varphi$ and $\tilde\varphi^{-1}$ are left inverses on $S\times \Z$.
+\end{lemma}
+%%-/
+
+lemma tildeShomeo_left_inv (zn : Sstrip × ℤ) :
+    tildeShomeo_invFun_lift
+      (⟨tildeShomeo_toFun (zn.1.1, zn.2), tildeShomeo_toFun_mem zn.1.2⟩ : DeftildeS) = zn := by
+  rcases zn with ⟨⟨z, hz⟩, n⟩
+  have h2pi : (0 : ℝ) < 2 * π := by nlinarith [Real.pi_pos]
+  have hfloor : ⌊(z.im + 2 * n * π + π) / (2 * π)⌋ = n := by
+    rw [Int.floor_eq_iff]
+    constructor
+    · rw [le_div_iff₀ h2pi]
+      linarith [hz.1]
+    · rw [div_lt_iff₀ h2pi]
+      linarith [hz.2]
+  apply Prod.ext
+  · ext
+    simp [tildeShomeo_invFun_lift, tildeShomeo_invFun_complex, tildeShomeo_floor,
+      tildeShomeo_toFun, hfloor]
+  · simp [tildeShomeo_invFun_lift, tildeShomeo_floor, tildeShomeo_toFun, hfloor]
+
+/-%%
+\begin{lemma}\label{tildeShomeoRightInv}\lean{tildeShomeo_right_inv}\leanok
+The maps $\tilde\varphi$ and $\tilde\varphi^{-1}$ are right inverses on $\tilde S$.
+\end{lemma}
+%%-/
+
+lemma tildeShomeo_right_inv (w : DeftildeS) :
+    (⟨tildeShomeo_toFun (tildeShomeo_invFun w), tildeShomeo_toFun_mem (tildeShomeo_invFun_mem w.2)⟩ : DeftildeS) = w := by
+  rcases w with ⟨w, hw⟩
+  ext
+  simp [tildeShomeo_toFun, tildeShomeo_invFun, tildeShomeo_invFun_complex]
+
+/-%%
+\begin{lemma}\label{tildeShomeoContinuousToFun}\lean{tildeShomeo_continuous_toFun}\leanok
+The forward map $S\times \Z\to \tilde S$ is continuous.
+\end{lemma}
+%%-/
+
+lemma tildeShomeo_continuous_toFun : Continuous (fun zn : Sstrip × ℤ =>
+    (⟨tildeShomeo_toFun (zn.1.1, zn.2), tildeShomeo_toFun_mem zn.1.2⟩ : DeftildeS)) := by
+  refine Continuous.subtype_mk ?_ ?_
+  have hz : Continuous (fun zn : Sstrip × ℤ => (zn.1.1 : ℂ)) :=
+    continuous_subtype_val.comp continuous_fst
+  have hn : Continuous (fun zn : Sstrip × ℤ => (zn.2 : ℂ)) :=
+    (continuous_of_discreteTopology : Continuous (fun n : ℤ => (n : ℂ))).comp continuous_snd
+  have hterm : Continuous (fun zn : Sstrip × ℤ => (2 : ℂ) * (zn.2 : ℂ) * π * I) := by
+    exact (((continuous_const.mul hn).mul continuous_const).mul continuous_const)
+  simpa [tildeShomeo_toFun] using hz.add hterm
+
+/-%%
+\begin{lemma}\label{tildeShomeoContinuousInvFun}\lean{tildeShomeo_continuous_invFun}\leanok
+The inverse map $\tilde S\to S\times \Z$ is continuous.
+\end{lemma}
+%%-/
+
+lemma tildeShomeo_continuous_invFun : Continuous tildeShomeo_invFun_lift := by
+  refine Continuous.prodMk ?_ ?_
+  · refine Continuous.subtype_mk ?_ ?_
+    have hfloor_int : Continuous (fun w : DeftildeS => tildeShomeo_floor w.1) := by
+      simpa [tildeShomeo_floor] using continuous_floor_arg
+    have hfloor_c : Continuous (fun w : DeftildeS => (tildeShomeo_floor w.1 : ℂ)) :=
+      (continuous_of_discreteTopology : Continuous (fun n : ℤ => (n : ℂ))).comp hfloor_int
+    have hterm : Continuous (fun w : DeftildeS => (2 : ℂ) * (tildeShomeo_floor w.1 : ℂ) * π * I) := by
+      exact (((continuous_const.mul hfloor_c).mul continuous_const).mul continuous_const)
+    have hterm' : Continuous (fun w : DeftildeS => (2 * (tildeShomeo_floor w.1 : ℝ)) * π * I) := by
+      simpa [Int.cast_ofNat, Int.cast_mul, Int.cast_two, mul_assoc, mul_left_comm, mul_comm] using hterm
+    simpa [tildeShomeo_invFun_complex, mul_assoc, mul_left_comm, mul_comm] using
+      continuous_subtype_val.sub hterm'
+  · simpa [tildeShomeo_invFun_lift, tildeShomeo_floor] using continuous_floor_arg
+
+noncomputable def tildeShomeo : Homeomorph (Sstrip × ℤ) DeftildeS where
+  toFun zn := ⟨tildeShomeo_toFun (zn.1.1, zn.2), tildeShomeo_toFun_mem zn.1.2⟩
+  invFun := tildeShomeo_invFun_lift
+  left_inv := tildeShomeo_left_inv
+  right_inv := tildeShomeo_right_inv
+  continuous_toFun := tildeShomeo_continuous_toFun
+  continuous_invFun := tildeShomeo_continuous_invFun
 
 /-%%
 \begin{proof}\uses{DeftildeS, Sstrip}\leanok
@@ -608,30 +705,189 @@ $\varphi$ is a bijective map and hence a  homeomorphism.
 
 /-%%
 
-\begin{definition}\label{DefwidetildePBlog}
+\begin{definition}\label{DefwidetildePBlog}\leanok
 Let $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$
 be defined by $\widetilde{PBlog}(z,n)=(PBlog(z),n)$
 for all $z\in T$ and $n\in \Z$.
 \end{definition}
 %%-/
 
-/-%%
+noncomputable def DefwidetildePBlog :
+    splitPlane × ℤ → Sstrip × ℤ
+  | (z, n) => (inverseHomeo.invFun z, n)
 
-\begin{lemma}\label{widetildePBlogHomeo}
+/-%%
+\begin{lemma}\label{widetildePBlogHomeo}\leanok
 $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homeomorphism.
 \end{lemma}
 %%-/
 
+noncomputable def widetildePBlogHomeo :
+    Homeomorph (splitPlane × ℤ) (Sstrip × ℤ) := inverseHomeo.symm.prodCongr (Homeomorph.refl _)
+
 /-%%
 
 \begin{proof}\uses{DefwidetildePBlog, inverseHomeo}
-By Definition~\ref{DefwidetildePBlog} $\widetilde PBlog$
+By Definition~\ref{DefwidetildePBlog}\leanok
+$\widetilde PBlog$
 is the product of $PBlog\colon T\to S$
 and ${\rm Id}_\Z\colon \Z\to\Z$.
 By Lemma~\ref{inverseHomeo} the first of these factors
 is a homeomorphism. Since ${\rm Id}_\Z$ is a homeomorphism.
 it follows from basic properties of homeomorphisms that the
 product $\widetilde{PBlog}$ is a homeomorphism.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{splitPlaneIsOpen}\lean{splitPlane_isOpen}\uses{splitPlane}\leanok
+The set $T=\{z\in \C \mid \Re(z)>0 \text{ or } \Im(z)\neq 0\}$ is open.
+\end{lemma}
+%%-/
+
+lemma splitPlane_isOpen : IsOpen splitPlane := by
+  unfold splitPlane
+  refine IsOpen.union ?_ ?_
+  · exact isOpen_lt continuous_const continuous_re
+  · exact isOpen_ne_fun continuous_im continuous_const
+
+/-%%
+\begin{proof}\uses{splitPlane}\leanok
+By Definition~\ref{splitPlane}, $T$ is the union of
+$\{z\mid \Re(z)>0\}$ and $\{z\mid \Im(z)\neq 0\}$.
+Both are open: the first is an open strict inequality set,
+and the second is the complement of the closed set $\{\Im(z)=0\}$.
+Hence $T$ is open.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{memDeftildeOfMemSource}\lean{mem_Deftilde_of_mem_source}\uses{Defexp, splitPlane, DeftildeS}\leanok
+If $x\in CSexp^{-1}(T)$, then $x\in \widetilde S$.
+\end{lemma}
+%%-/
+
+lemma mem_Deftilde_of_mem_source {x : ℂ} (hx : x ∈ CSexp ⁻¹' splitPlane) : x ∈ DeftildeS := by
+  intro k hk
+  have hx' : (CSexp x).re > 0 ∨ (CSexp x).im ≠ 0 := by
+    simpa [splitPlane, Set.mem_preimage] using hx
+  have harg : (2 * (k : ℝ) + 1) * π = ((2 * k + 1 : ℤ) : ℝ) * π := by
+    push_cast
+    ring_nf
+  have him0 : (CSexp x).im = 0 := by
+    unfold CSexp
+    rw [Complex.exp_im, hk]
+    rw [harg]
+    simpa using (Real.sin_int_mul_pi (2 * k + 1))
+  have hre_not_pos : ¬ (CSexp x).re > 0 := by
+    unfold CSexp
+    rw [Complex.exp_re, hk]
+    rw [harg]
+    have hcos : Real.cos ((((2 * k + 1 : ℤ) : ℝ) * π)) = -1 := by
+      have hk' : (((2 * k + 1 : ℤ) : ℝ) * π) = π + k * (2 * π) := by
+        push_cast
+        ring_nf
+      rw [hk', Real.cos_add_int_mul_two_pi, Real.cos_pi]
+    rw [hcos]
+    have hpos : 0 < Real.exp x.re := Real.exp_pos _
+    linarith
+  exact (hx'.elim hre_not_pos (fun him => him him0))
+
+/-%%
+\begin{proof}\uses{Defexp, splitPlane, DeftildeS}\leanok
+By contradiction, suppose $\Im(x)=(2k+1)\pi$ for some $k\in \Z$.
+Then $\Im(CSexp(x))=0$ and $\Re(CSexp(x))<0$, so $CSexp(x)\notin T$.
+This contradicts $x\in CSexp^{-1}(T)$.
+Hence no odd multiple of $\pi$ occurs as $\Im(x)$, i.e. $x\in\widetilde S$.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{CSexpTildeShomeoInvFunComplex}\lean{CSexp_tildeShomeo_invFun_complex}\uses{periodicity, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+For every $x\in \C$, one has
+$CSexp(\tilde\varphi^{-1}_{\C}(x))=CSexp(x)$.
+\end{lemma}
+%%-/
+
+lemma CSexp_tildeShomeo_invFun_complex (x : ℂ) :
+    CSexp (tildeShomeo_invFun_complex x) = CSexp x := by
+  apply (periodicity _ _).2
+  refine ⟨-(tildeShomeo_floor x), ?_⟩
+  unfold tildeShomeo_invFun_complex
+  simp [sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+
+/-%%
+\begin{proof}\uses{periodicity, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+By Definition~\ref{tildeShomeoInvFunComplex},
+$\tilde\varphi^{-1}_{\C}(x)=x-2N(x)\pi i$, where $N(x)$ is an integer
+(Definition~\ref{tildeShomeoFloor}).
+By periodicity of $CSexp$ (Lemma~\ref{periodicity}),
+shifting by an integer multiple of $2\pi i$ does not change the value.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{PBlogCSexpEqTildeShomeoInvFunComplex}\lean{PBlog_CSexp_eq_tildeShomeo_invFun_complex}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexpTildeShomeoInvFunComplex}\leanok
+If $x\in CSexp^{-1}(T)$, then
+$PBlog(CSexp(x))=\tilde\varphi^{-1}_{\C}(x)$.
+\end{lemma}
+%%-/
+
+lemma PBlog_CSexp_eq_tildeShomeo_invFun_complex {x : ℂ}
+    (hx : x ∈ CSexp ⁻¹' splitPlane) :
+    PBlog (CSexp x) = tildeShomeo_invFun_complex x := by
+  have hxDeftilde : x ∈ DeftildeS := mem_Deftilde_of_mem_source hx
+  have hxS : tildeShomeo_invFun_complex x ∈ Sstrip := tildeShomeo_invFun_mem hxDeftilde
+  have hlog : PBlog (CSexp (tildeShomeo_invFun_complex x)) = tildeShomeo_invFun_complex x := by
+    exact congrArg Subtype.val (inverseHomeo.left_inv ⟨tildeShomeo_invFun_complex x, hxS⟩)
+  simpa [CSexp_tildeShomeo_invFun_complex x] using hlog
+
+/-%%
+\begin{proof}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexpTildeShomeoInvFunComplex}\leanok
+From Lemma~\ref{memDeftildeOfMemSource}, $x\in \widetilde S$.
+Then Lemma~\ref{tildeShomeoInvFunMem} gives
+$\tilde\varphi^{-1}_{\C}(x)\in S$.
+Applying the left-inverse identity from Lemma~\ref{inverseHomeo} to
+$\tilde\varphi^{-1}_{\C}(x)$ gives
+$PBlog(CSexp(\tilde\varphi^{-1}_{\C}(x)))=\tilde\varphi^{-1}_{\C}(x)$.
+Finally use Lemma~\ref{CSexpTildeShomeoInvFunComplex}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{floorShiftPBlog}\lean{floor_shift_PBlog}\uses{ContPBlog}\leanok
+For $z\in T$ and $n\in \Z$,
+\[
+\left\lfloor\frac{\Im(PBlog(z)+2n\pi i)+\pi}{2\pi}\right\rfloor=n.
+\]
+\end{lemma}
+%%-/
+
+lemma floor_shift_PBlog (z : ℂ) (hz : z ∈ splitPlane) (n : ℤ) :
+    ⌊((PBlog z + (2 * n : ℂ) * π * I).im + π) / (2 * π)⌋ = n := by
+  have hzIm : -π < im (PBlog z) ∧ im (PBlog z) < π := (ContPBlog.2 z hz)
+  have h2pi : (0 : ℝ) < 2 * π := by linarith [Real.pi_pos]
+  have him : (PBlog z + (2 * n : ℂ) * π * I).im = (PBlog z).im + 2 * n * π := by
+    simp [mul_assoc, mul_left_comm, mul_comm]
+  rw [Int.floor_eq_iff]
+  constructor
+  · rw [le_div_iff₀ h2pi]
+    rw [him]
+    linarith [hzIm.1]
+  · rw [div_lt_iff₀ h2pi]
+    rw [him]
+    linarith [hzIm.2]
+
+/-%%
+\begin{proof}\uses{ContPBlog}\leanok
+By Lemma~\ref{ContPBlog}, for $z\in T$ we have
+$-\pi<\Im(PBlog(z))<\pi$.
+Hence
+$2n\pi-\pi<\Im(PBlog(z)+2n\pi i)<2n\pi+\pi$,
+which is exactly the interval characterization of
+\[
+\left\lfloor\frac{\Im(PBlog(z)+2n\pi i)+\pi}{2\pi}\right\rfloor=n.
+\]
 \end{proof}
 %%-/
 
@@ -643,6 +899,106 @@ a trivialization of $CSexp$
 on $T$
 \end{proposition}
 %%-/
+
+noncomputable def trivOverT : Trivialization ℤ CSexp where
+  toFun := fun x => (CSexp x, ⌊(x.im + π) / (2 * π)⌋)
+  invFun := fun x => PBlog x.1 + (2 * x.2 : ℂ) * π * I
+  source := CSexp ⁻¹' splitPlane  -- = DeftildeS
+  target := splitPlane ×ˢ ⊤
+  baseSet := splitPlane
+  open_baseSet := splitPlane_isOpen
+  source_eq := by rfl
+  target_eq := by rfl
+  proj_toFun := by
+    intro p hp
+    simp
+  map_source' := by
+    intro x hx
+    exact ⟨hx, trivial⟩
+  map_target' := by
+    intro x hx
+    rcases x with ⟨z, n⟩
+    have hz : z ∈ splitPlane := hx.1
+    change CSexp (PBlog z + (2 * n : ℂ) * π * I) ∈ splitPlane
+    have hz0 : z ≠ 0 := by
+      intro hz0
+      have hz' : z.re > 0 ∨ z.im ≠ 0 := by simpa [splitPlane] using hz
+      rw [hz0] at hz'
+      simp at hz'
+    have hperiod : CSexp ((2 * n : ℂ) * π * I) = 1 := by
+      unfold CSexp
+      have hmul : ((2 * n : ℂ) * π * I) = (n : ℂ) * (2 * π * I) := by ring
+      rw [hmul, Complex.exp_int_mul_two_pi_mul_I]
+    have hexp : CSexp (PBlog z + (2 * n : ℂ) * π * I) = z := by
+      calc
+        CSexp (PBlog z + (2 * n : ℂ) * π * I)
+            = CSexp (PBlog z) * CSexp ((2 * n : ℂ) * π * I) := multiplicativity _ _
+        _ = z * CSexp ((2 * n : ℂ) * π * I) := by rw [(ImPBlog z hz0).1]
+        _ = z * 1 := by rw [hperiod]
+        _ = z := by simp
+    simpa [hexp] using hz
+  continuousOn_toFun := by
+    refine (Contexp.continuousOn).prodMk ?_
+    rw [continuousOn_iff_continuous_restrict]
+    let g : (CSexp ⁻¹' splitPlane) → DeftildeS := fun x => ⟨x.1, mem_Deftilde_of_mem_source x.2⟩
+    have hg : Continuous g :=
+      Continuous.subtype_mk continuous_subtype_val (fun x => mem_Deftilde_of_mem_source x.2)
+    have hfloor : Continuous (fun w : DeftildeS => ⌊((w.val).im + π) / (2 * π)⌋) :=
+      continuous_floor_arg
+    simpa [Set.restrict, g] using hfloor.comp hg
+  continuousOn_invFun := by
+    have hlog : ContinuousOn (fun x : ℂ × ℤ => PBlog x.1) (splitPlane ×ˢ (⊤ : Set ℤ)) := by
+      refine ContPBlog.1.comp continuousOn_fst ?_
+      intro x hx
+      exact hx.1
+    have hsnd : Continuous (fun x : ℂ × ℤ => (x.2 : ℂ)) :=
+      (continuous_of_discreteTopology : Continuous (fun n : ℤ => (n : ℂ))).comp continuous_snd
+    have hshift : ContinuousOn (fun x : ℂ × ℤ => (2 * x.2 : ℂ) * π * I) (splitPlane ×ˢ (⊤ : Set ℤ)) :=
+      ((((continuous_const.mul hsnd).mul continuous_const).mul continuous_const)).continuousOn
+    exact hlog.add hshift
+  left_inv' := by
+    intro x hx
+    have hPB : PBlog (CSexp x) = tildeShomeo_invFun_complex x :=
+      PBlog_CSexp_eq_tildeShomeo_invFun_complex hx
+    have hPB' : PBlog (CSexp x) = x - (2 * (⌊(x.im + π) / (2 * π)⌋ : ℝ)) * π * I := by
+      simpa [tildeShomeo_floor, tildeShomeo_invFun_complex] using hPB
+    calc
+      PBlog (CSexp x) + (2 * (⌊(x.im + π) / (2 * π)⌋ : ℂ)) * π * I
+          = (x - (2 * (⌊(x.im + π) / (2 * π)⌋ : ℝ)) * π * I)
+              + (2 * (⌊(x.im + π) / (2 * π)⌋ : ℂ)) * π * I := by
+                simp [hPB']
+      _ = x := by
+        norm_cast
+        ring_nf
+  right_inv' := by
+    intro x hx
+    rcases x with ⟨z, n⟩
+    have hz : z ∈ splitPlane := hx.1
+    have hz0 : z ≠ 0 := by
+      intro hz0
+      have hz' : z.re > 0 ∨ z.im ≠ 0 := by simpa [splitPlane] using hz
+      rw [hz0] at hz'
+      simp at hz'
+    have hperiod : CSexp ((2 * n : ℂ) * π * I) = 1 := by
+      unfold CSexp
+      have hmul : ((2 * n : ℂ) * π * I) = (n : ℂ) * (2 * π * I) := by ring
+      rw [hmul, Complex.exp_int_mul_two_pi_mul_I]
+    have hexp : CSexp (PBlog z + (2 * n : ℂ) * π * I) = z := by
+      calc
+        CSexp (PBlog z + (2 * n : ℂ) * π * I)
+            = CSexp (PBlog z) * CSexp ((2 * n : ℂ) * π * I) := multiplicativity _ _
+        _ = z * CSexp ((2 * n : ℂ) * π * I) := by rw [(ImPBlog z hz0).1]
+        _ = z * 1 := by rw [hperiod]
+        _ = z := by simp
+    have hfloor : ⌊((PBlog z + (2 * n : ℂ) * π * I).im + π) / (2 * π)⌋ = n :=
+      floor_shift_PBlog z hz n
+    refine Prod.ext ?_ ?_
+    · exact hexp
+    · simpa [mul_assoc, mul_left_comm, mul_comm] using hfloor
+  open_source := by
+    simpa [CSexp] using splitPlane_isOpen.preimage Contexp
+  open_target := by
+    simpa [Set.top_eq_univ] using splitPlane_isOpen.prod isOpen_univ
 
 /-%%
 
@@ -663,14 +1019,11 @@ the conditions of the  Definition~\ref{trivialization} on $T⊆ $.
 %%-/
 
 /-%%
-
-
 \begin{lemma}\label{homeoInv}
 Suppose $f\colon E\to X$ is a map between topological spaces and $U\subset X$ is an open subset
 and there is a trivialization for $f$ on $U$. Suppose also that there are homeomorphisms $\varphi\colon X\to X$ and $\tilde \varphi\colon E\to E$
 with $f\circ\tilde\varphi =\varphi\circ f$. The there is a trivialization for $f$ on $\varphi(U)$.
 \end{lemma}
-
 %%-/
 
 /-%%
