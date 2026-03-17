@@ -105,7 +105,7 @@ def trivialization := Trivialization F proj
 
 /-%%
 
-\begin{definition}\label{DefIsCoveringOn}\lean{IsCoveringOn}\leanok
+\begin{definition}\label{IsCoveringOn}\lean{IsCoveringOn}\leanok
 Let
 $f\colon X\to Y$ be a continuous map and $A\subset Y$. Then $f$ is an even cover on $A\subset X$
 if every $a\in A$ has a neighborhood which is contained in the target of a trivialization
@@ -486,7 +486,7 @@ $\tilde S$.
 %%-/
 
 /-%%
-\begin{lemma}\label{continuousFloorArg}\lean{continuous_floor_arg}\leanok
+\begin{lemma}\label{continuous_floor_arg}\lean{continuous_floor_arg}\leanok
 The map $w\mapsto\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$ is continuous on $\tilde S$.
 \end{lemma}
 %%-/
@@ -600,7 +600,7 @@ Therefore $\varphi(z,n)\in\tilde S$.
 %%-/
 
 /-%%
-\begin{definition}\label{tildeShomeoFloor}\lean{tildeShomeo_floor}\leanok
+\begin{definition}\label{tildeShomeo_floor}\lean{tildeShomeo_floor}\leanok
 Define $N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$.
 \end{definition}
 %%-/
@@ -617,7 +617,7 @@ noncomputable def tildeShomeo_invFun_complex (w : ℂ) : ℂ :=
   w - (2 * (tildeShomeo_floor w : ℝ)) * π * I
 
 /-%%
-\begin{lemma}\label{tildeShomeoInvFunMem}\lean{tildeShomeo_invFun_mem}\leanok
+\begin{lemma}\label{tildeShomeo_invFun_mem}\lean{tildeShomeo_invFun_mem}\leanok
 If $w\in \tilde S$, then $\tilde\varphi^{-1}_{\C}(w)\in S$.
 \end{lemma}
 %%-/
@@ -646,7 +646,7 @@ lemma tildeShomeo_invFun_mem {w : ℂ} (hw : w ∈ DeftildeS) : tildeShomeo_invF
   · rw [div_lt_iff₀ h2pi] at hn_lt; linarith
 
 /-%%
-\begin{proof}\uses{DeftildeS, Sstrip, tildeShomeoFloor, tildeShomeo_invFun_complex, floor_arg_not_int}\leanok
+\begin{proof}\uses{DeftildeS, Sstrip, tildeShomeo_floor, tildeShomeo_invFun_complex, floor_arg_not_int}\leanok
 Set $N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$. By the defining inequalities for the floor
 function,
 $$
@@ -663,7 +663,7 @@ the condition defining $S$.
 %%-/
 
 /-%%
-\begin{definition}\label{tildeShomeoInvFun}\lean{tildeShomeo_invFun}\leanok
+\begin{definition}\label{tildeShomeo_invFun}\lean{tildeShomeo_invFun}\leanok
 Define $\tilde\varphi^{-1}(w)=(\tilde\varphi^{-1}_{\C}(w),N(w))\in \C\times \Z$.
 \end{definition}
 %%-/
@@ -705,7 +705,7 @@ lemma tildeShomeo_left_inv (zn : Sstrip × ℤ) :
   · simp [tildeShomeo_invFun_lift, tildeShomeo_floor, tildeShomeo_toFun, hfloor]
 
 /-%%
-\begin{proof}\uses{Sstrip, tildeShomeo_toFun, tildeShomeo_invFun_lift, tildeShomeoFloor, tildeShomeo_invFun_complex}\leanok
+\begin{proof}\uses{Sstrip, tildeShomeo_toFun, tildeShomeo_invFun_lift, tildeShomeo_floor, tildeShomeo_invFun_complex}\leanok
 Take $(z,n)\in S\times \mathbb Z$. Since $z\in S$, we have $-\pi<\Im(z)<\pi$, so
 \[
 n\le \frac{\Im(z+2n\pi i)+\pi}{2\pi} < n+1.
@@ -729,7 +729,7 @@ lemma tildeShomeo_right_inv (w : DeftildeS) :
   simp [tildeShomeo_toFun, tildeShomeo_invFun, tildeShomeo_invFun_complex]
 
 /-%%
-\begin{proof}\uses{tildeShomeo_toFun, tildeShomeoInvFun, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
+\begin{proof}\uses{tildeShomeo_toFun, tildeShomeo_invFun, tildeShomeo_invFun_complex, tildeShomeo_floor}\leanok
 By definition,
 \[
 \tilde\varphi^{-1}(w)=\bigl(w-2N(w)\pi i,\;N(w)\bigr).
@@ -791,12 +791,12 @@ lemma tildeShomeo_continuous_invFun : Continuous tildeShomeo_invFun_lift := by
   · simpa [tildeShomeo_invFun_lift, tildeShomeo_floor] using continuous_floor_arg
 
 /-%%
-\begin{proof}\uses{continuousFloorArg, tildeShomeo_invFun_lift, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
+\begin{proof}\uses{continuous_floor_arg, tildeShomeo_invFun_lift, tildeShomeo_invFun_complex, tildeShomeo_floor}\leanok
 The second component of $\tilde\varphi^{-1}$ is the function
 \[
 w\mapsto N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor,
 \]
-which is continuous on $\tilde S$ by Lemma~\ref{continuousFloorArg}. The first component is
+which is continuous on $\tilde S$ by Lemma~\ref{continuous_floor_arg}. The first component is
 \[
 w\mapsto w-2N(w)\pi i,
 \]
@@ -872,7 +872,7 @@ product $\widetilde{PBlog}$ is a homeomorphism.
 %%-/
 
 /-%%
-\begin{lemma}\label{splitPlaneIsOpen}\lean{splitPlane_isOpen}\uses{splitPlane}\leanok
+\begin{lemma}\label{splitPlane_isOpen}\lean{splitPlane_isOpen}\uses{splitPlane}\leanok
 The set $T=\{z\in \C \mid \Re(z)>0 \text{ or } \Im(z)\neq 0\}$ is open.
 \end{lemma}
 %%-/
@@ -894,7 +894,7 @@ Hence $T$ is open.
 %%-/
 
 /-%%
-\begin{lemma}\label{memDeftildeOfMemSource}\lean{mem_Deftilde_of_mem_source}\uses{CSexp, splitPlane, DeftildeS}\leanok
+\begin{lemma}\label{mem_Deftilde_of_mem_source}\lean{mem_Deftilde_of_mem_source}\uses{CSexp, splitPlane, DeftildeS}\leanok
 If $x\in CSexp^{-1}(T)$, then $x\in \widetilde S$.
 \end{lemma}
 %%-/
@@ -935,7 +935,7 @@ Hence no odd multiple of $\pi$ occurs as $\Im(x)$, i.e. $x\in\widetilde S$.
 %%-/
 
 /-%%
-\begin{lemma}\label{CSexptildeShomeo_invFun_complex}\lean{CSexp_tildeShomeo_invFun_complex}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
+\begin{lemma}\label{CSexp_tildeShomeo_invFun_complex}\lean{CSexp_tildeShomeo_invFun_complex}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeo_floor}\leanok
 For every $x\in \C$, one has
 $CSexp(\tilde\varphi^{-1}_{\C}(x))=CSexp(x)$.
 \end{lemma}
@@ -949,17 +949,17 @@ lemma CSexp_tildeShomeo_invFun_complex (x : ℂ) :
   simp [sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
 
 /-%%
-\begin{proof}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
+\begin{proof}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeo_floor}\leanok
 By Definition~\ref{tildeShomeo_invFun_complex},
 $\tilde\varphi^{-1}_{\C}(x)=x-2N(x)\pi i$, where $N(x)$ is an integer
-(Definition~\ref{tildeShomeoFloor}).
+(Definition~\ref{tildeShomeo_floor}).
 By periodicity of $CSexp$ (Lemma~\ref{periodicity}),
 shifting by an integer multiple of $2\pi i$ does not change the value.
 \end{proof}
 %%-/
 
 /-%%
-\begin{lemma}\label{PBlogCSexpEqtildeShomeo_invFun_complex}\lean{PBlog_CSexp_eq_tildeShomeo_invFun_complex}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexptildeShomeo_invFun_complex}\leanok
+\begin{lemma}\label{PBlog_CSexp_eq_tildeShomeo_invFun_complex}\lean{PBlog_CSexp_eq_tildeShomeo_invFun_complex}\uses{mem_Deftilde_of_mem_source, tildeShomeo_invFun_mem, inverseHomeo, CSexp_tildeShomeo_invFun_complex}\leanok
 If $x\in CSexp^{-1}(T)$, then
 $PBlog(CSexp(x))=\tilde\varphi^{-1}_{\C}(x)$.
 \end{lemma}
@@ -975,19 +975,19 @@ lemma PBlog_CSexp_eq_tildeShomeo_invFun_complex {x : ℂ}
   simpa [CSexp_tildeShomeo_invFun_complex x] using hlog
 
 /-%%
-\begin{proof}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexptildeShomeo_invFun_complex}\leanok
-From Lemma~\ref{memDeftildeOfMemSource}, $x\in \widetilde S$.
-Then Lemma~\ref{tildeShomeoInvFunMem} gives
+\begin{proof}\uses{mem_Deftilde_of_mem_source, tildeShomeo_invFun_mem, inverseHomeo, CSexp_tildeShomeo_invFun_complex}\leanok
+From Lemma~\ref{mem_Deftilde_of_mem_source}, $x\in \widetilde S$.
+Then Lemma~\ref{tildeShomeo_invFun_mem} gives
 $\tilde\varphi^{-1}_{\C}(x)\in S$.
 Applying the left-inverse identity from Lemma~\ref{inverseHomeo} to
 $\tilde\varphi^{-1}_{\C}(x)$ gives
 $PBlog(CSexp(\tilde\varphi^{-1}_{\C}(x)))=\tilde\varphi^{-1}_{\C}(x)$.
-Finally use Lemma~\ref{CSexptildeShomeo_invFun_complex}.
+Finally use Lemma~\ref{CSexp_tildeShomeo_invFun_complex}.
 \end{proof}
 %%-/
 
 /-%%
-\begin{lemma}\label{floorShiftPBlog}\lean{floor_shift_PBlog}\uses{ContPBlog}\leanok
+\begin{lemma}\label{floor_shift_PBlog}\lean{floor_shift_PBlog}\uses{ContPBlog}\leanok
 For $z\in T$ and $n\in \Z$,
 \[
 \left\lfloor\frac{\Im(PBlog(z)+2n\pi i)+\pi}{2\pi}\right\rfloor=n.
@@ -1239,7 +1239,7 @@ The image of $CSexp$ is  $Cstar$.
 
 /-%%
 
-\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, DefIsCoveringOn}
+\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, IsCoveringOn}
 By Corollary~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime}
 $CSexp$ is a trivialization on $T$ and on $T'$. Hence, every point  of $Cstar$ lies
