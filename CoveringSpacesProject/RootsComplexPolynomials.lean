@@ -1254,10 +1254,15 @@ for $f$ with base $\varphi(U)$.
 
 /-%%
 
-\begin{definition}\label{TprimeDef}
-Let $T'=\{z\in \C | Re(z)<0\cup z\in \C | Im(z)\not= 0\}$.
+\begin{definition}\label{TprimeDef}\lean{TprimeDef}\leanok
+Let
+\[
+T'=\{z\in \C \mid \Re(z)<0 \text{ or } \Im(z)\neq 0\}.
+\]
 \end{definition}
 %%-/
+
+def TprimeDef : Set ℂ := {z : ℂ | re z < 0 ∨ im z ≠ 0}
 
 /-%%
 
