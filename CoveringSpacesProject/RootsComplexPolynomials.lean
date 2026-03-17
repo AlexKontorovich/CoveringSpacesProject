@@ -1345,15 +1345,37 @@ and $z\not=0$, then $Im(z)\not= 0$ and $z\in T$.
 
 /-%%
 
-\begin{corollary}\label{TcupTprimeCstar}
+\begin{corollary}\label{TcupTprimeCstar}\lean{TcupTprimeCstar}\leanok
 $T\cup T'=\{z\in \C | z∈ Cstar\}$.
 \end{corollary}
 %%-/
 
+theorem TcupTprimeCstar : splitPlane ∪ TprimeDef = Cstar := by
+  ext z
+  rw [Cstar]
+  constructor
+  · rintro (hz | hz) hz0
+    · have hz' : z.re > 0 ∨ z.im ≠ 0 := by
+        simpa [splitPlane] using hz
+      rcases hz' with hre | him
+      · simp [hz0] at hre
+      · simp [hz0] at him
+    · have hz' : z.re < 0 ∨ z.im ≠ 0 := by
+        simpa [TprimeDef] using hz
+      rcases hz' with hre | him
+      · simp [hz0] at hre
+      · simp [hz0] at him
+  · intro hz
+    exact xinTorTprime z hz
+
 /-%%
 
-\begin{proof}\uses{xinTorTprime, Cstar}
-Immediate from Lemma~\ref{xinTorTprime} and Definition~\ref{Cstar}.
+\begin{proof}\uses{xinTorTprime, splitPlane, TprimeDef, Cstar}\leanok
+If $x\in T\cup T'$, then by Definitions~\ref{splitPlane} and \ref{TprimeDef}
+either $\Re(x)>0$, or $\Re(x)<0$, or $\Im(x)\neq 0$. In each case $x\neq 0$, so
+$x\in Cstar$ by Definition~\ref{Cstar}.
+Conversely, if $x\in Cstar$, then $x\neq 0$, so Lemma~\ref{xinTorTprime} shows that
+$x\in T$ or $x\in T'$. Hence $x\in T\cup T'$.
 \end{proof}
 %%-/
 
