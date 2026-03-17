@@ -2662,3 +2662,496 @@ Since $k>0$, this is a contradiction.
 
 
 %%-/
+
+local notation "I01" => Set.Icc (0 : ℝ) 1
+local notation "I2π" => Set.Icc (0 : ℝ) (2 * π)
+
+/-%%
+\begin{definition}\label{DefS1loop}\lean{DefS1loop}\leanok
+Given a map of the circle $\psi\colon S^1\to X$ the associated loop is
+$\omega\colon [ 0, 2\pi  ]\to X$ defined by $\omega(t)=\psi(CSexp(it))$.
+\end{definition}
+%%-/
+
+noncomputable def DefS1loop {X : Type*} [TopologicalSpace X] (ψ : C(Circle, X)) : C(I2π, X) :=
+  ⟨fun t => ψ (Circle.exp t), ψ.continuous.comp (Circle.exp.continuous.comp continuous_subtype_val)⟩
+
+/-%%
+\begin{lemma}\label{DefS1loop_loop}\lean{DefS1loop_loop}\uses{DefS1loop}\leanok
+The path associated with a circle map is a loop.
+\end{lemma}
+%%-/
+
+theorem DefS1loop_loop {X : Type*} [TopologicalSpace X] (ψ : C(Circle, X)) :
+    DefS1loop ψ ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩ =
+      DefS1loop ψ ⟨2 * π, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ := by
+  simp [DefS1loop, Circle.exp_two_pi]
+
+/-%%
+\begin{lemma}\label{sameImage}\lean{sameImage}\uses{DefS1loop}\leanok
+If $\rho\colon S^1\to \Cstar$, then the image of the associated loop is contained in $\Cstar$.
+\end{lemma}
+%%-/
+
+theorem sameImage (ρ : C(Circle, Cstar)) :
+    Set.range (fun t => (DefS1loop ρ t : ℂ)) ⊆ Cstar := by
+  rintro z ⟨t, rfl⟩
+  exact (DefS1loop ρ t).property
+
+/-%%
+\begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, sameImage}\leanok
+The winding number of a map $\rho\colon S^1\to \Cstar$ is the winding number of the associated loop.
+\end{definition}
+%%-/
+
+noncomputable def DefWNS1 (ρ : C(Circle, Cstar)) : ℤ :=
+  WNloop Real.two_pi_pos (DefS1loop ρ) (DefS1loop_loop ρ)
+
+/-%%
+\begin{lemma}\label{constS1}\lean{constS1}\uses{DefS1loop, DefWNS1, constpath}\leanok
+If $f\colon S^1\to \Cstar$ is constant, then its winding number is zero.
+\end{lemma}
+%%-/
+
+theorem constS1 (c : Cstar) : DefWNS1 (ContinuousMap.const _ c : C(Circle, Cstar)) = 0 := by
+  let H : C(I2π × I01, Cstar) := ContinuousMap.const _ c
+  have hhom : homotopyloop Real.two_pi_pos.le H := by
+    intro s
+    rfl
+  have hzero :
+      ∀ t, H (t, 0) = DefS1loop (ContinuousMap.const _ c : C(Circle, Cstar)) t := by
+    intro t
+    simp [H, DefS1loop]
+  have hone : ∀ t, H (t, 1) = c := by
+    intro t
+    rfl
+  simpa [DefWNS1, H] using
+    constpath Real.two_pi_pos
+      (DefS1loop (ContinuousMap.const _ c : C(Circle, Cstar)))
+      (DefS1loop_loop (ContinuousMap.const _ c : C(Circle, Cstar)))
+      H hhom hzero c hone
+
+/-%%
+\begin{lemma}\label{S1homotopy}\lean{S1homotopy}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
+If two maps $S^1\to \Cstar$ are homotopic through maps into $\Cstar$, then they have equal
+winding numbers.
+\end{lemma}
+%%-/
+
+theorem S1homotopy (ψ ψ' : C(Circle, Cstar))
+    (H : C(Circle × I01, Cstar))
+    (hzero : ∀ z, H (z, 0) = ψ z)
+    (hone : ∀ z, H (z, 1) = ψ' z) :
+    DefWNS1 ψ = DefWNS1 ψ' := by
+  have hfst : Continuous fun x : I2π × I01 => Circle.exp x.1 :=
+    Circle.exp.continuous.comp (continuous_subtype_val.comp continuous_fst)
+  let Hhat : C(I2π × I01, Cstar) :=
+    ⟨fun x => H (Circle.exp x.1, x.2), H.continuous.comp (hfst.prodMk continuous_snd)⟩
+  have hhom : homotopyloop Real.two_pi_pos.le Hhat := by
+    intro s
+    change H (Circle.exp 0, s) = H (Circle.exp (2 * π), s)
+    rw [Circle.exp_zero, Circle.exp_two_pi]
+  have hzero' : ∀ t, Hhat (t, 0) = DefS1loop ψ t := by
+    intro t
+    simp [Hhat, DefS1loop, hzero]
+  have hone' : ∀ t, Hhat (t, 1) = DefS1loop ψ' t := by
+    intro t
+    simp [Hhat, DefS1loop, hone]
+  simpa [DefWNS1] using
+    equalwinding Real.two_pi_pos
+      (DefS1loop ψ) (DefS1loop ψ')
+      (DefS1loop_loop ψ) (DefS1loop_loop ψ')
+      Hhat hhom hzero' hone'
+
+/-%%
+\begin{definition}\label{D2}\lean{D2}\leanok
+The closed unit disk in $\C$.
+\end{definition}
+%%-/
+
+abbrev D2 := {z : ℂ // ‖z‖ ≤ 1}
+
+def circleToD2 (z : Circle) : D2 := ⟨z, by simp [Circle.norm_coe z]⟩
+
+def zeroD2 : D2 := ⟨0, by simp⟩
+
+/-%%
+\begin{theorem}\label{boundsWN0}\lean{boundsWN0}\uses{S1homotopy, constS1}\leanok
+If a map $\rho\colon S^1\to \Cstar$ extends to a map from the closed disk to $\Cstar$,
+then its winding number is zero.
+\end{theorem}
+%%-/
+
+theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
+    (hF : ∀ z : Circle, F (circleToD2 z) = ρ z) :
+    DefWNS1 ρ = 0 := by
+  let Jfun : Circle × I01 → ℂ := fun x => (((1 - (x.2 : ℝ)) : ℂ) * (x.1 : ℂ))
+  have hJfun_mem : ∀ x : Circle × I01, ‖Jfun x‖ ≤ 1 := by
+    intro x
+    have hs0 : 0 ≤ (x.2 : ℝ) := x.2.2.1
+    have hs1 : (x.2 : ℝ) ≤ 1 := x.2.2.2
+    have hnonneg : 0 ≤ 1 - (x.2 : ℝ) := by
+      linarith
+    have hreal : ‖((1 - (x.2 : ℝ)) : ℂ)‖ = |1 - (x.2 : ℝ)| := by
+      simpa using (RCLike.norm_ofReal (K := ℂ) (1 - (x.2 : ℝ)))
+    calc
+      ‖Jfun x‖ = ‖((1 - (x.2 : ℝ)) : ℂ)‖ * ‖(x.1 : ℂ)‖ := by
+        simp [Jfun, norm_mul]
+      _ = |1 - (x.2 : ℝ)| * 1 := by
+        rw [hreal]
+        simp [Circle.norm_coe]
+      _ = (1 - (x.2 : ℝ)) * 1 := by
+        rw [abs_of_nonneg hnonneg]
+      _ ≤ 1 := by
+        linarith
+  have hJfun_cont : Continuous Jfun := by
+    simpa [Jfun] using
+      (continuous_ofReal.comp
+          (continuous_const.sub (continuous_subtype_val.comp continuous_snd))).mul
+        (continuous_subtype_val.comp continuous_fst)
+  let J : C(Circle × I01, D2) :=
+    ⟨fun x => ⟨Jfun x, hJfun_mem x⟩, Continuous.subtype_mk hJfun_cont hJfun_mem⟩
+  let H : C(Circle × I01, Cstar) := F.comp J
+  have hJ0 : ∀ z : Circle, J (z, 0) = circleToD2 z := by
+    intro z
+    apply Subtype.ext
+    change Jfun (z, 0) = (z : ℂ)
+    simp [Jfun]
+  have hJ1 : ∀ z : Circle, J (z, 1) = zeroD2 := by
+    intro z
+    apply Subtype.ext
+    change Jfun (z, 1) = 0
+    simp [Jfun, zeroD2]
+  have hzero : ∀ z, H (z, 0) = ρ z := by
+    intro z
+    calc
+      H (z, 0) = F (J (z, 0)) := rfl
+      _ = F (circleToD2 z) := by rw [hJ0 z]
+      _ = ρ z := hF z
+  have hone : ∀ z, H (z, 1) = F zeroD2 := by
+    intro z
+    calc
+      H (z, 1) = F (J (z, 1)) := rfl
+      _ = F zeroD2 := by rw [hJ1 z]
+  calc
+    DefWNS1 ρ = DefWNS1 (ContinuousMap.const _ (F zeroD2) : C(Circle, Cstar)) := by
+      exact S1homotopy ρ (ContinuousMap.const _ (F zeroD2)) H hzero hone
+    _ = 0 := constS1 (F zeroD2)
+
+/-%%
+\begin{lemma}\label{walkingdog}\lean{walkingdog}\leanok
+If two maps of the circle satisfy $|\psi(z)-\psi'(z)|<|\psi(z)|$ for every $z$, then the straight
+line homotopy between them stays inside $\Cstar$.
+\end{lemma}
+%%-/
+
+theorem walkingdog (ψ ψ' : C(Circle, Cstar))
+    (hclose : ∀ z : Circle, ‖(ψ z : ℂ) - ψ' z‖ < ‖(ψ z : ℂ)‖) :
+    ∃ H : C(Circle × I01, Cstar), (∀ z, H (z, 0) = ψ z) ∧ ∀ z, H (z, 1) = ψ' z := by
+  let Hfun : Circle × I01 → ℂ := fun x =>
+    (((1 - (x.2 : ℝ)) : ℂ) * (ψ x.1 : ℂ)) + (((x.2 : ℝ) : ℂ) * (ψ' x.1 : ℂ))
+  have hHfun_cont : Continuous Hfun := by
+    have hψ : Continuous fun x : Circle × I01 => (ψ x.1 : ℂ) :=
+      continuous_subtype_val.comp (ψ.continuous.comp continuous_fst)
+    have hψ' : Continuous fun x : Circle × I01 => (ψ' x.1 : ℂ) :=
+      continuous_subtype_val.comp (ψ'.continuous.comp continuous_fst)
+    simpa [Hfun] using
+      ((continuous_ofReal.comp
+          (continuous_const.sub (continuous_subtype_val.comp continuous_snd))).mul hψ).add
+        ((continuous_ofReal.comp (continuous_subtype_val.comp continuous_snd)).mul hψ')
+  have hHfun_ne : ∀ x : Circle × I01, Hfun x ≠ 0 := by
+    intro x hx
+    have hs0 : 0 ≤ (x.2 : ℝ) := x.2.2.1
+    have hs1 : (x.2 : ℝ) ≤ 1 := x.2.2.2
+    have hsNorm : ‖((x.2 : ℝ) : ℂ)‖ ≤ 1 := by
+      simpa [RCLike.norm_ofReal, abs_of_nonneg hs0] using hs1
+    have hle :
+        ‖((x.2 : ℝ) : ℂ) * ((ψ x.1 : ℂ) - ψ' x.1)‖ ≤ ‖(ψ x.1 : ℂ) - ψ' x.1‖ := by
+      calc
+        ‖((x.2 : ℝ) : ℂ) * ((ψ x.1 : ℂ) - ψ' x.1)‖
+            = ‖((x.2 : ℝ) : ℂ)‖ * ‖(ψ x.1 : ℂ) - ψ' x.1‖ := norm_mul _ _
+        _ ≤ 1 * ‖(ψ x.1 : ℂ) - ψ' x.1‖ := by
+          gcongr
+        _ = ‖(ψ x.1 : ℂ) - ψ' x.1‖ := by ring
+    have hEq : (ψ x.1 : ℂ) = ((x.2 : ℝ) : ℂ) * ((ψ x.1 : ℂ) - ψ' x.1) := by
+      calc
+        (ψ x.1 : ℂ) = (ψ x.1 : ℂ) - Hfun x := by rw [hx]; ring
+        _ = ((x.2 : ℝ) : ℂ) * ((ψ x.1 : ℂ) - ψ' x.1) := by
+              simp [Hfun]
+              ring
+    have hlt :
+        ‖(ψ x.1 : ℂ)‖ < ‖(ψ x.1 : ℂ)‖ := by
+      calc
+        ‖(ψ x.1 : ℂ)‖
+            = ‖((x.2 : ℝ) : ℂ) * ((ψ x.1 : ℂ) - ψ' x.1)‖ := by
+                exact congrArg norm hEq
+        _ ≤ ‖(ψ x.1 : ℂ) - ψ' x.1‖ := hle
+        _ < ‖(ψ x.1 : ℂ)‖ := hclose x.1
+    have : False := (lt_irrefl ‖(ψ x.1 : ℂ)‖) hlt
+    exact this.elim
+  let H : C(Circle × I01, Cstar) :=
+    ⟨fun x => ⟨Hfun x, hHfun_ne x⟩, Continuous.subtype_mk hHfun_cont hHfun_ne⟩
+  refine ⟨H, ?_, ?_⟩
+  · intro z
+    apply Subtype.ext
+    simp [H, Hfun]
+  · intro z
+    apply Subtype.ext
+    simp [H, Hfun]
+
+/-%%
+\begin{corollary}\label{sameWN}\lean{sameWN}\uses{walkingdog, S1homotopy}\leanok
+Maps satisfying the walking-dog hypothesis have the same winding number.
+\end{corollary}
+%%-/
+
+theorem sameWN (ψ ψ' : C(Circle, Cstar))
+    (hclose : ∀ z : Circle, ‖(ψ z : ℂ) - ψ' z‖ < ‖(ψ z : ℂ)‖) :
+    DefWNS1 ψ = DefWNS1 ψ' := by
+  obtain ⟨H, hzero, hone⟩ := walkingdog ψ ψ' hclose
+  exact S1homotopy ψ ψ' H hzero hone
+
+noncomputable def monomialS1Map (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
+    C(Circle, Cstar) := by
+  refine ⟨fun z => ⟨α0 * (((R : ℂ) * z) ^ k), ?_⟩, ?_⟩
+  · refine mul_ne_zero hα0 ?_
+    exact pow_ne_zero k <| mul_ne_zero (by exact_mod_cast hR.ne') (Circle.coe_ne_zero z)
+  · exact Continuous.subtype_mk
+      (continuous_const.mul ((continuous_const.mul continuous_subtype_val).pow k))
+      (by
+        intro z
+        refine mul_ne_zero hα0 ?_
+        exact pow_ne_zero k <| mul_ne_zero (by exact_mod_cast hR.ne') (Circle.coe_ne_zero z))
+
+/-%%
+\begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{DefS1loop, multiplicativity, expCP, WNloop}\leanok
+The map $z \mapsto \alpha_0 (Rz)^k$ on the unit circle has winding number $k$.
+\end{lemma}
+%%-/
+
+theorem zkWNk (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
+    DefWNS1 (monomialS1Map α0 k R hR hα0) = (k : ℤ) := by
+  let c0 : Cstar := ⟨α0 * (R : ℂ) ^ k, by
+    refine mul_ne_zero hα0 ?_
+    exact pow_ne_zero k (by exact_mod_cast hR.ne')⟩
+  have hsurj : Set.SurjOn CSexp Set.univ Cstar := expCP.2.2
+  obtain ⟨a0, -, ha0⟩ : (c0 : ℂ) ∈ CSexp '' Set.univ := hsurj c0.property
+  let tildeω : C(I2π, ℂ) := by
+    refine ⟨fun t => a0 + (k : ℂ) * (t : ℂ) * I, ?_⟩
+    fun_prop
+  have hlift :
+      deflift CSexp (fun t => (DefS1loop (monomialS1Map α0 k R hR hα0) t : ℂ)) tildeω := by
+    refine ⟨tildeω.continuous, ?_⟩
+    ext t
+    calc
+      CSexp (tildeω t)
+          = CSexp a0 * CSexp ((k : ℂ) * (t : ℂ) * I) := by
+              simp [tildeω, multiplicativity]
+      _ = (α0 * (R : ℂ) ^ k) * CSexp ((k : ℂ) * (t : ℂ) * I) := by
+            rw [ha0]
+      _ = (α0 * (R : ℂ) ^ k) * CSexp ((k : ℂ) * ((t : ℂ) * I)) := by
+            ring_nf
+      _ = (α0 * (R : ℂ) ^ k) * (CSexp (t * I)) ^ k := by
+            unfold CSexp
+            rw [Complex.exp_nat_mul]
+      _ = (α0 * (R : ℂ) ^ k) * (Circle.exp t : ℂ) ^ k := by
+            unfold CSexp
+            rw [Circle.coe_exp]
+      _ = α0 * (((R : ℂ) * (Circle.exp t : ℂ)) ^ k) := by
+            rw [mul_pow]
+            ring
+      _ = (DefS1loop (monomialS1Map α0 k R hR hα0) t : ℂ) := by
+            rfl
+  have hwind :
+      (DefWNS1 (monomialS1Map α0 k R hR hα0) : ℂ) = k := by
+    calc
+      (DefWNS1 (monomialS1Map α0 k R hR hα0) : ℂ)
+          =
+            (tildeω ⟨2 * π, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ -
+                tildeω ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩) / (2 * π * I) := by
+              symm
+              simpa [DefWNS1] using
+                WNloop_eq_of_lift Real.two_pi_pos
+                  (DefS1loop (monomialS1Map α0 k R hR hα0))
+                  (DefS1loop_loop (monomialS1Map α0 k R hR hα0))
+                  tildeω hlift
+      _ = (k : ℂ) := by
+            have hpi : (π : ℂ) ≠ 0 := by
+              exact_mod_cast Real.pi_ne_zero
+            field_simp [tildeω, hpi, Complex.I_ne_zero]
+            ring
+  exact_mod_cast hwind
+
+noncomputable def polyCircleMap (p : Polynomial ℂ) (R : ℝ)
+    (hR : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0) : C(Circle, Cstar) := by
+  refine ⟨fun z => ⟨p.eval ((R : ℂ) * z), hR z⟩, ?_⟩
+  exact Continuous.subtype_mk
+    (p.continuous.comp (continuous_const.mul continuous_subtype_val))
+    (by
+      intro z
+      simpa using hR z)
+
+noncomputable def polyDiskMap (p : Polynomial ℂ) (R : ℝ)
+    (hR : ∀ z : D2, p.eval ((R : ℂ) * z) ≠ 0) : C(D2, Cstar) := by
+  refine ⟨fun z => ⟨p.eval ((R : ℂ) * z), hR z⟩, ?_⟩
+  exact Continuous.subtype_mk
+    (p.continuous.comp (continuous_const.mul continuous_subtype_val))
+    (by
+      intro z
+      simpa using hR z)
+
+/-%%
+\begin{lemma}\label{zkdominates}\lean{zkdominates}\leanok
+For a nonconstant complex polynomial, the leading term dominates the lower-order terms on
+sufficiently large circles.
+\end{lemma}
+%%-/
+
+theorem zkdominates (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
+    ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R → ∀ z : Circle,
+      ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
+        ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+  let S : ℝ := ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i‖
+  let R0 : ℝ := max 1 (S / ‖p.leadingCoeff‖ + 1)
+  refine ⟨R0, lt_of_lt_of_le zero_lt_one (le_max_left _ _), ?_⟩
+  intro R hR z
+  have hp : p ≠ 0 := by
+    intro hp0
+    rw [hp0] at hdeg
+    exact (lt_irrefl 0 hdeg).elim
+  have hlead : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp
+  have hleadPos : 0 < ‖p.leadingCoeff‖ := norm_pos_iff.mpr hlead
+  have hR1 : 1 ≤ R := le_trans (le_max_left _ _) hR
+  have hR0 : 0 ≤ R := le_trans (by norm_num) hR1
+  have hdivlt : S / ‖p.leadingCoeff‖ < R := by
+    have htmp : S / ‖p.leadingCoeff‖ + 1 ≤ R := le_trans (le_max_right _ _) hR
+    exact lt_of_lt_of_le (lt_add_of_pos_right (S / ‖p.leadingCoeff‖) zero_lt_one) htmp
+  have hSlt : S < ‖p.leadingCoeff‖ * R := by
+    simpa [mul_comm] using (div_lt_iff₀ hleadPos).mp hdivlt
+  let x : ℂ := (R : ℂ) * z
+  have hxnorm : ‖x‖ = R := by
+    calc
+      ‖x‖ = ‖(R : ℂ)‖ * ‖(z : ℂ)‖ := by simp [x, norm_mul]
+      _ = |R| * 1 := by simp [Circle.norm_coe]
+      _ = R := by rw [abs_of_nonneg hR0]; ring
+  have hsplit :
+      p.eval x =
+        ∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i + p.leadingCoeff * x ^ p.natDegree := by
+    rw [Polynomial.eval_eq_sum_range, Finset.sum_range_succ, Polynomial.coeff_natDegree]
+  have hsumle :
+      ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ ≤ S * R ^ (p.natDegree - 1) := by
+    calc
+      ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖
+          ≤ ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i * x ^ i‖ := by
+            exact norm_sum_le _ _
+      _ ≤ ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i‖ * R ^ (p.natDegree - 1) := by
+            refine Finset.sum_le_sum ?_
+            intro i hi
+            have hi' : i < p.natDegree := Finset.mem_range.mp hi
+            have hpow : R ^ i ≤ R ^ (p.natDegree - 1) := by
+              exact pow_le_pow_right₀ hR1 (Nat.le_pred_of_lt hi')
+            calc
+              ‖p.coeff i * x ^ i‖ = ‖p.coeff i‖ * ‖x ^ i‖ := norm_mul _ _
+              _ = ‖p.coeff i‖ * R ^ i := by rw [norm_pow, hxnorm]
+              _ ≤ ‖p.coeff i‖ * R ^ (p.natDegree - 1) := by
+                  exact mul_le_mul_of_nonneg_left hpow (norm_nonneg _)
+      _ = S * R ^ (p.natDegree - 1) := by
+            unfold S
+            rw [Finset.sum_mul]
+  have hstrict : S * R ^ (p.natDegree - 1) < ‖p.leadingCoeff‖ * R ^ p.natDegree := by
+    have hRpos : 0 < R := lt_of_lt_of_le zero_lt_one hR1
+    have hpow_pos : 0 < R ^ (p.natDegree - 1) := pow_pos hRpos _
+    have hmul : S * R ^ (p.natDegree - 1) < (‖p.leadingCoeff‖ * R) * R ^ (p.natDegree - 1) := by
+      exact mul_lt_mul_of_pos_right hSlt hpow_pos
+    have hdeg' : (p.natDegree - 1) + 1 = p.natDegree := by
+      exact Nat.sub_add_cancel (Nat.succ_le_of_lt hdeg)
+    calc
+      S * R ^ (p.natDegree - 1) < (‖p.leadingCoeff‖ * R) * R ^ (p.natDegree - 1) := hmul
+      _ = ‖p.leadingCoeff‖ * R ^ ((p.natDegree - 1) + 1) := by
+        rw [pow_add, pow_one]
+        ring
+      _ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by rw [hdeg']
+  have hleadnorm : ‖p.leadingCoeff * x ^ p.natDegree‖ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by
+    calc
+      ‖p.leadingCoeff * x ^ p.natDegree‖ = ‖p.leadingCoeff‖ * ‖x ^ p.natDegree‖ := norm_mul _ _
+      _ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by rw [norm_pow, hxnorm]
+  calc
+    ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖
+        = ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ := by
+            change ‖p.eval x - p.leadingCoeff * x ^ p.natDegree‖ = _
+            rw [hsplit]
+            ring_nf
+            simp [mul_comm]
+    _ ≤ S * R ^ (p.natDegree - 1) := hsumle
+    _ < ‖p.leadingCoeff‖ * R ^ p.natDegree := hstrict
+    _ = ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+          simpa [x] using hleadnorm.symm
+
+/-%%
+\begin{theorem}\label{WNthm}\lean{WNthm}\uses{zkWNk, zkdominates, sameWN}\leanok
+On a sufficiently large circle, a complex polynomial has winding number equal to its degree.
+\end{theorem}
+%%-/
+
+theorem WNthm (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
+    ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R →
+      ∃ f : C(Circle, Cstar), (∀ z, (f z : ℂ) = p.eval ((R : ℂ) * z)) ∧
+        DefWNS1 f = (p.natDegree : ℤ) := by
+  obtain ⟨R0, hR0pos, hdom⟩ := zkdominates p hdeg
+  refine ⟨R0, hR0pos, ?_⟩
+  intro R hR
+  have hp : p ≠ 0 := by
+    intro hp0
+    rw [hp0] at hdeg
+    exact (lt_irrefl 0 hdeg).elim
+  have hlead : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp
+  have hRpos : 0 < R := lt_of_lt_of_le hR0pos hR
+  have hpoly_nonzero : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0 := by
+    intro z hz
+    have hbad :
+        ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
+          ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+      simpa [hz, norm_sub_rev] using hdom R hR z
+    exact (lt_irrefl _ hbad).elim
+  let f : C(Circle, Cstar) := polyCircleMap p R hpoly_nonzero
+  have hclose :
+      ∀ z : Circle,
+        ‖(monomialS1Map p.leadingCoeff p.natDegree R hRpos hlead z : ℂ) - f z‖ <
+          ‖(monomialS1Map p.leadingCoeff p.natDegree R hRpos hlead z : ℂ)‖ := by
+    intro z
+    simpa [f, polyCircleMap, monomialS1Map, norm_sub_rev] using hdom R hR z
+  refine ⟨f, ?_, ?_⟩
+  · intro z
+    rfl
+  · calc
+      DefWNS1 f = DefWNS1 (monomialS1Map p.leadingCoeff p.natDegree R hRpos hlead) := by
+        symm
+        exact sameWN (monomialS1Map p.leadingCoeff p.natDegree R hRpos hlead) f hclose
+      _ = (p.natDegree : ℤ) := zkWNk p.leadingCoeff p.natDegree R hRpos hlead
+
+/-%%
+\begin{theorem}\label{ExistRoot}\lean{ExistRoot}\uses{WNthm, boundsWN0}\leanok
+Every nonconstant complex polynomial has a complex root.
+\end{theorem}
+%%-/
+
+theorem ExistRoot (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) : ∃ z : ℂ, p.IsRoot z := by
+  by_contra hroot
+  have hnoroot : ∀ z : ℂ, p.eval z ≠ 0 := by
+    intro z hz
+    exact hroot ⟨z, hz⟩
+  obtain ⟨R0, hR0pos, hWN⟩ := WNthm p hdeg
+  obtain ⟨f, hf, hwind⟩ := hWN R0 le_rfl
+  let F : C(D2, Cstar) := polyDiskMap p R0 (fun z => hnoroot ((R0 : ℂ) * z))
+  have hboundary : ∀ z : Circle, F (circleToD2 z) = f z := by
+    intro z
+    apply Subtype.ext
+    calc
+      (F (circleToD2 z) : ℂ) = p.eval ((R0 : ℂ) * z) := by
+        rfl
+      _ = (f z : ℂ) := (hf z).symm
+  have hzero : DefWNS1 f = 0 := boundsWN0 f F hboundary
+  have hdeg_ne : (p.natDegree : ℤ) ≠ 0 := by
+    exact_mod_cast (Nat.ne_of_gt hdeg)
+  exact hdeg_ne <| by
+    rw [← hwind, hzero]
