@@ -2129,13 +2129,29 @@ theorem constWNomega {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
 
 /-%%
 
- \begin{definition}\label{WNloop}\uses{constWNomega}
+ \begin{definition}\label{WNloop}\lean{WNloop}\uses{constWNomega}\leanok
  Suppose that $\omega\colon [ a, b ]\to \C$ is a loop with $\omega(t)\in Cstar$ for all
  $t\in [ a, b ]$.
  Then the constant $w(\omega)$ given in Corollary~\ref{constWNomega} is the {\em winding number
  of $\omega$}.
  \end{definition}
 %%-/
+
+noncomputable def WNloop {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ :=
+  Classical.choose (constWNomega hab ω hloop)
+
+theorem WNloop_exists_lift {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) :
+    ∃ tildeω : C(Set.Icc a b, ℂ), deflift CSexp (fun t => (ω t : ℂ)) tildeω :=
+  (Classical.choose_spec (constWNomega hab ω hloop)).1
+
+theorem WNloop_eq_of_lift {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (tildeω : C(Set.Icc a b, ℂ)) (hlift : deflift CSexp (fun t => (ω t : ℂ)) tildeω) :
+    (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) / (2 * π * I) =
+      WNloop hab ω hloop :=
+  (Classical.choose_spec (constWNomega hab ω hloop)).2 tildeω hlift
 
 /-%%
 
