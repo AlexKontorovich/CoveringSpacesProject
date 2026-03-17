@@ -2738,6 +2738,14 @@ The path associated with a circle map is a loop.
 \end{lemma}
 %%-/
 
+/-%%
+\begin{proof}\uses{DefS1loop}\leanok
+By Definition~\ref{DefS1loop}, the endpoints of the path are
+$\psi(CSexp(0))$ and $\psi(CSexp(2\pi i))$. Since both exponentials are equal to $1\in S^1$,
+these two values coincide.
+\end{proof}
+%%-/
+
 theorem DefS1loop_loop {X : Type*} [TopologicalSpace X] (ψ : C(Circle, X)) :
     DefS1loop ψ ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩ =
       DefS1loop ψ ⟨2 * π, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ := by
@@ -2747,6 +2755,14 @@ theorem DefS1loop_loop {X : Type*} [TopologicalSpace X] (ψ : C(Circle, X)) :
 \begin{lemma}\label{sameImage}\lean{sameImage}\uses{DefS1loop}\leanok
 If $\rho\colon S^1\to \Cstar$, then the image of the associated loop is contained in $\Cstar$.
 \end{lemma}
+%%-/
+
+/-%%
+\begin{proof}\uses{DefS1loop}\leanok
+Every point on the associated loop has the form $\rho(CSexp(it))$ by
+Definition~\ref{DefS1loop}. Since $\rho$ already takes values in $Cstar$, the whole image of the
+loop lies in $Cstar$ as well.
+\end{proof}
 %%-/
 
 theorem sameImage (ρ : C(Circle, Cstar)) :
@@ -2767,6 +2783,14 @@ noncomputable def DefWNS1 (ρ : C(Circle, Cstar)) : ℤ :=
 \begin{lemma}\label{constS1}\lean{constS1}\uses{DefS1loop, DefWNS1, constpath}\leanok
 If $f\colon S^1\to \Cstar$ is constant, then its winding number is zero.
 \end{lemma}
+%%-/
+
+/-%%
+\begin{proof}\uses{DefS1loop, DefWNS1, constpath}\leanok
+The loop associated to a constant map on $S^1$ is a constant loop by
+Definition~\ref{DefS1loop}. By Definition~\ref{DefWNS1}, the winding number of the map is the
+winding number of that loop, and Lemma~\ref{constpath} says the latter is zero.
+\end{proof}
 %%-/
 
 theorem constS1 (c : Cstar) : DefWNS1 (ContinuousMap.const _ c : C(Circle, Cstar)) = 0 := by
@@ -2792,6 +2816,15 @@ theorem constS1 (c : Cstar) : DefWNS1 (ContinuousMap.const _ c : C(Circle, Cstar
 If two maps $S^1\to \Cstar$ are homotopic through maps into $\Cstar$, then they have equal
 winding numbers.
 \end{lemma}
+%%-/
+
+/-%%
+\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
+Precompose the given homotopy on $S^1$ with the parametrization $t \mapsto CSexp(it)$ of the
+circle. This produces a homotopy between the associated loops in $Cstar$. By
+Lemma~\ref{equalwinding} those two loops have the same winding number, hence by
+Definition~\ref{DefWNS1} the original circle maps do as well.
+\end{proof}
 %%-/
 
 theorem S1homotopy (ψ ψ' : C(Circle, Cstar))
@@ -2848,6 +2881,15 @@ def zeroD2 : D2 := ⟨0, by simp⟩
 If a map $\rho\colon S^1\to \Cstar$ extends to a map from the closed disk to $\Cstar$,
 then its winding number is zero.
 \end{theorem}
+%%-/
+
+/-%%
+\begin{proof}\uses{S1homotopy, constS1}\leanok
+Contract the disk radially to its center. Composing the extension $F$ with this contraction gives a
+homotopy in $Cstar$ from $\rho$ to the constant boundary value $F(0)$. Lemma~\ref{S1homotopy}
+shows that $\rho$ has the same winding number as this constant map, and Lemma~\ref{constS1}
+shows that constant map has winding number zero.
+\end{proof}
 %%-/
 
 theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
@@ -2911,6 +2953,16 @@ theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
 If two maps of the circle satisfy $|\psi(z)-\psi'(z)|<|\psi(z)|$ for every $z$, then the straight
 line homotopy between them stays inside $\Cstar$.
 \end{lemma}
+%%-/
+
+/-%%
+\begin{proof}\leanok
+Use the straight-line homotopy
+$H(z,t)=(1-t)\psi(z)+t\psi'(z)$. If $H(z,t)=0$, then
+$\psi(z)=t(\psi(z)-\psi'(z))$, so
+$|\psi(z)| \le |\psi(z)-\psi'(z)|$, contradicting the hypothesis. Thus the entire homotopy avoids
+zero and stays inside $Cstar$.
+\end{proof}
 %%-/
 
 theorem walkingdog (ψ ψ' : C(Circle, Cstar))
@@ -2978,6 +3030,13 @@ theorem sameWN (ψ ψ' : C(Circle, Cstar))
     DefWNS1 ψ = DefWNS1 ψ' := by
   obtain ⟨H, hzero, hone⟩ := walkingdog ψ ψ' hclose
   exact S1homotopy ψ ψ' H hzero hone
+
+/-%%
+\begin{proof}\uses{walkingdog, S1homotopy}\leanok
+Lemma~\ref{walkingdog} supplies a homotopy through maps into $Cstar$ between the two circle maps.
+Lemma~\ref{S1homotopy} then implies that their winding numbers are equal.
+\end{proof}
+%%-/
 
 /-%%
 \begin{definition}\label{monomialS1Map}\lean{monomialS1Map}\leanok
@@ -3055,6 +3114,17 @@ theorem zkWNk (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
             field_simp [tildeω, hpi, Complex.I_ne_zero]
             ring
   exact_mod_cast hwind
+
+/-%%
+\begin{proof}\uses{DefS1loop, multiplicativity, expCP, deflift, WNloop, DefWNS1}\leanok
+The associated loop is $t \mapsto \alpha_0 R^k CSexp(kit)$. Choose a logarithm of the nonzero
+constant $\alpha_0 R^k$ using Lemma~\ref{expCP}; then
+$\tilde\omega(t)=\tilde\alpha_0+kit$ is a lift of this loop through $CSexp$ by
+Lemma~\ref{multiplicativity}. The endpoint difference of the lift is exactly $2\pi k i$, so
+Definition~\ref{WNloop} gives winding number $k$, and Definition~\ref{DefWNS1} transfers this to
+the map on $S^1$.
+\end{proof}
+%%-/
 
 /-%%
 \begin{definition}\label{polyCircleMap}\lean{polyCircleMap}\leanok
@@ -3172,6 +3242,14 @@ theorem zkdominates (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     _ < ‖p.leadingCoeff‖ * R ^ p.natDegree := hstrict
     _ = ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
           simpa [x] using hleadnorm.symm
+/-%%
+\begin{proof}\leanok
+Write the polynomial as its leading term plus the sum of lower-degree terms. On the circle
+$|z|=R$, each lower-degree monomial is bounded by a constant multiple of $R^{k-1}$, so their sum is
+at most $S R^{k-1}$ for a fixed constant $S$. For $R$ sufficiently large we have
+$S R^{k-1} < |\alpha_0| R^k$, which proves that the leading term strictly dominates the remainder.
+\end{proof}
+%%-/
 
 /-%%
 \begin{theorem}\label{WNthm}\lean{WNthm}\uses{zkWNk, zkdominates, sameWN}\leanok
@@ -3216,6 +3294,16 @@ theorem WNthm (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
       _ = (p.natDegree : ℤ) := zkWNk p.leadingCoeff p.natDegree R hRpos hlead
 
 /-%%
+\begin{proof}\uses{zkWNk, zkdominates, sameWN}\leanok
+For large $R$, Lemma~\ref{zkdominates} shows that the polynomial map
+$z \mapsto p(Rz)$ is uniformly close, in the walking-dog sense, to its leading monomial
+$z \mapsto \alpha_0 (Rz)^k$. Therefore Lemma~\ref{sameWN} says these two maps have the same winding
+number. Lemma~\ref{zkWNk} computes the winding number of the monomial to be $k$, so the polynomial
+has winding number $k$ as well.
+\end{proof}
+%%-/
+
+/-%%
 \begin{theorem}\label{ExistRoot}\lean{ExistRoot}\uses{WNthm, boundsWN0}\leanok
 Every nonconstant complex polynomial has a complex root.
 \end{theorem}
@@ -3241,3 +3329,13 @@ theorem ExistRoot (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) : ∃ z : ℂ, p
     exact_mod_cast (Nat.ne_of_gt hdeg)
   exact hdeg_ne <| by
     rw [← hwind, hzero]
+
+/-%%
+\begin{proof}\uses{WNthm, boundsWN0}\leanok
+Assume for contradiction that the polynomial has no complex root. Then for sufficiently large
+$R$, Theorem~\ref{WNthm} shows that the restriction of $p$ to the circle of radius $R$ has
+nonzero winding number, namely its degree. But under the no-root assumption, the map
+$z \mapsto p(Rz)$ extends from the boundary circle to the whole closed disk without hitting zero.
+Theorem~\ref{boundsWN0} therefore says its winding number must be zero, a contradiction.
+\end{proof}
+%%-/
