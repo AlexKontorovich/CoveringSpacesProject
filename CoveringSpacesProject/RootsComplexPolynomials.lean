@@ -1469,7 +1469,7 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
     ring_nf
 
 /-%%
-\begin{proof}\uses{deflift, loop, periodicity, DefWNlift}\leanok
+\begin{proof}\uses{deflift, loop, periodicity, DefWNlift, ContinuousOn.coe, isConnected_range_of_continuousOn, Singleton_of_isConnected_SetInt}\leanok
 By the Definition~\ref{deflift} we have
  $CSexp(\tilde\omega(b))=\omega(b)$ and $CSexp(\tilde\omega(a)=\omega(a)$.
  By Definition~\ref{loop} $\omega(b)=\omega(a)$.
