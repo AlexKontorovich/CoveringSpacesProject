@@ -1137,7 +1137,7 @@ the conditions of the  Definition~\ref{trivialization} on $T⊆ $.
 \begin{lemma}\label{homeoInv}\lean{homeoInv}\leanok
 Suppose $f\colon E\to X$ is a map between topological spaces and $U\subset X$ is an open subset
 and there is a trivialization for $f$ on $U$. Suppose also that there are homeomorphisms $\varphi\colon X\to X$ and $\tilde \varphi\colon E\to E$
-with $f\circ\tilde\varphi =\varphi\circ f$. The there is a trivialization for $f$ on $\varphi(U)$.
+with $f\circ\tilde\varphi =\varphi\circ f$. Then there is a trivialization for $f$ on $\varphi(U)$.
 \end{lemma}
 %%-/
 
@@ -1198,7 +1198,7 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
         simpa [hproj, Function.comp] using (congrFun hcomm (tildeφ.symm p)).symm }
 
 /-%%
-\begin{proof}\uses{trivialization}
+\begin{proof}\uses{trivialization}\leanok
 Since $f\circ \tilde\varphi=\varphi\circ f$,  we have  $\tilde\varphi\colon f^{-1}(U)\to f^{-1}(\varphi(U))$.
 Since $\varphi$ and $\tilde\varphi$ are homeomorphisms the induced map
  $\tilde\varphi\colon f^{-1}(U) \to f^{-1}(\varphi(U))$ is a homeomorphism.
