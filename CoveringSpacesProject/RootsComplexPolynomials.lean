@@ -1134,12 +1134,68 @@ the conditions of the  Definition~\ref{trivialization} on $T⊆ $.
 %%-/
 
 /-%%
-\begin{lemma}\label{homeoInv}
+\begin{lemma}\label{homeoInv}\lean{homeoInv}\leanok
 Suppose $f\colon E\to X$ is a map between topological spaces and $U\subset X$ is an open subset
 and there is a trivialization for $f$ on $U$. Suppose also that there are homeomorphisms $\varphi\colon X\to X$ and $\tilde \varphi\colon E\to E$
 with $f\circ\tilde\varphi =\varphi\circ f$. The there is a trivialization for $f$ on $\varphi(U)$.
 \end{lemma}
 %%-/
+
+noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpace X]
+    [TopologicalSpace I] {f : E → X} (e : Trivialization I f) (φ : X ≃ₜ X)
+    (tildeφ : E ≃ₜ E) (hcomm : f ∘ tildeφ = φ ∘ f) : Trivialization I f := by
+  let e' : Trivialization I (f ∘ tildeφ.symm) := e.compHomeomorph tildeφ.symm
+  let ψ : X × I ≃ₜ X × I := φ.prodCongr (Homeomorph.refl I)
+  have hcomm_symm : f ∘ tildeφ.symm = φ.symm ∘ f := by
+    ext x
+    have hx : f x = φ (f (tildeφ.symm x)) := by
+      simpa using congrFun hcomm (tildeφ.symm x)
+    calc
+      f (tildeφ.symm x) = φ.symm (φ (f (tildeφ.symm x))) := by rw [φ.symm_apply_apply]
+      _ = φ.symm (f x) := by rw [hx.symm]
+  refine
+    { toPartialHomeomorph := e'.toPartialHomeomorph.transHomeomorph ψ
+      baseSet := φ '' e.baseSet
+      open_baseSet := by
+        simpa using φ.isOpenMap _ e.open_baseSet
+      source_eq := by
+        ext x
+        suffices hx : tildeφ.symm x ∈ e.source ↔ x ∈ f ⁻¹' (φ '' e.baseSet) by
+          simpa [PartialHomeomorph.transHomeomorph, e', Trivialization.compHomeomorph] using hx
+        rw [e.mem_source]
+        have hsymm : f (tildeφ.symm x) = φ.symm (f x) := by
+          simpa [Function.comp] using congrFun hcomm_symm x
+        rw [hsymm]
+        constructor
+        · intro hx
+          exact ⟨φ.symm (f x), hx, by simp⟩
+        · rintro ⟨y, hy, hyx⟩
+          have hxy : φ.symm (f x) = y := by
+            simpa [hyx] using (φ.symm_apply_apply y)
+          simpa [hxy] using hy
+      target_eq := by
+        ext x
+        suffices hx : ψ.symm x ∈ e'.target ↔ x ∈ (φ '' e.baseSet) ×ˢ (Set.univ : Set I) by
+          simpa [PartialHomeomorph.transHomeomorph] using hx
+        rw [e'.target_eq]
+        change (φ.symm x.1 ∈ e.baseSet ∧ x.2 ∈ (Set.univ : Set I)) ↔
+          x ∈ (φ '' e.baseSet) ×ˢ (Set.univ : Set I)
+        constructor
+        · intro hx
+          exact ⟨⟨φ.symm x.1, hx.1, by simp⟩, hx.2⟩
+        · rintro ⟨hx1, hx2⟩
+          rcases hx1 with ⟨y, hy, hyx⟩
+          refine ⟨?_, hx2⟩
+          rw [← hyx]
+          simpa using hy
+      proj_toFun := by
+        intro p hp
+        have hp' : p ∈ e'.source := by simpa using hp
+        change (ψ (e' p)).1 = f p
+        simp [ψ, Equiv.prodCongr_apply]
+        have hproj : (e' p).1 = f (tildeφ.symm p) := by
+          simpa [Function.comp] using e'.proj_toFun p hp'
+        simpa [hproj, Function.comp] using (congrFun hcomm (tildeφ.symm p)).symm }
 
 /-%%
 \begin{proof}\uses{trivialization}
