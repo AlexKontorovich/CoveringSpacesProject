@@ -2738,6 +2738,11 @@ The path associated with a circle map is a loop.
 \end{lemma}
 %%-/
 
+theorem DefS1loop_loop {X : Type*} [TopologicalSpace X] (ψ : C(Circle, X)) :
+    DefS1loop ψ ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩ =
+      DefS1loop ψ ⟨2 * π, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ := by
+  simp [DefS1loop, Circle.exp_two_pi]
+
 /-%%
 \begin{proof}\uses{DefS1loop}\leanok
 By Definition~\ref{DefS1loop}, the endpoints of the path are
@@ -2746,16 +2751,16 @@ these two values coincide.
 \end{proof}
 %%-/
 
-theorem DefS1loop_loop {X : Type*} [TopologicalSpace X] (ψ : C(Circle, X)) :
-    DefS1loop ψ ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩ =
-      DefS1loop ψ ⟨2 * π, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ := by
-  simp [DefS1loop, Circle.exp_two_pi]
-
 /-%%
 \begin{lemma}\label{sameImage}\lean{sameImage}\uses{DefS1loop}\leanok
 If $\rho\colon S^1\to \Cstar$, then the image of the associated loop is contained in $\Cstar$.
 \end{lemma}
 %%-/
+
+theorem sameImage (ρ : C(Circle, Cstar)) :
+    Set.range (fun t => (DefS1loop ρ t : ℂ)) ⊆ Cstar := by
+  rintro z ⟨t, rfl⟩
+  exact (DefS1loop ρ t).property
 
 /-%%
 \begin{proof}\uses{DefS1loop}\leanok
@@ -2764,11 +2769,6 @@ Definition~\ref{DefS1loop}. Since $\rho$ already takes values in $Cstar$, the wh
 loop lies in $Cstar$ as well.
 \end{proof}
 %%-/
-
-theorem sameImage (ρ : C(Circle, Cstar)) :
-    Set.range (fun t => (DefS1loop ρ t : ℂ)) ⊆ Cstar := by
-  rintro z ⟨t, rfl⟩
-  exact (DefS1loop ρ t).property
 
 /-%%
 \begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, sameImage}\leanok
@@ -2783,14 +2783,6 @@ noncomputable def DefWNS1 (ρ : C(Circle, Cstar)) : ℤ :=
 \begin{lemma}\label{constS1}\lean{constS1}\uses{DefS1loop, DefWNS1, constpath}\leanok
 If $f\colon S^1\to \Cstar$ is constant, then its winding number is zero.
 \end{lemma}
-%%-/
-
-/-%%
-\begin{proof}\uses{DefS1loop, DefWNS1, constpath}\leanok
-The loop associated to a constant map on $S^1$ is a constant loop by
-Definition~\ref{DefS1loop}. By Definition~\ref{DefWNS1}, the winding number of the map is the
-winding number of that loop, and Lemma~\ref{constpath} says the latter is zero.
-\end{proof}
 %%-/
 
 theorem constS1 (c : Cstar) : DefWNS1 (ContinuousMap.const _ c : C(Circle, Cstar)) = 0 := by
@@ -2812,19 +2804,18 @@ theorem constS1 (c : Cstar) : DefWNS1 (ContinuousMap.const _ c : C(Circle, Cstar
       H hhom hzero c hone
 
 /-%%
+\begin{proof}\uses{DefS1loop, DefWNS1, constpath}\leanok
+The loop associated to a constant map on $S^1$ is a constant loop by
+Definition~\ref{DefS1loop}. By Definition~\ref{DefWNS1}, the winding number of the map is the
+winding number of that loop, and Lemma~\ref{constpath} says the latter is zero.
+\end{proof}
+%%-/
+
+/-%%
 \begin{lemma}\label{S1homotopy}\lean{S1homotopy}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
 If two maps $S^1\to \Cstar$ are homotopic through maps into $\Cstar$, then they have equal
 winding numbers.
 \end{lemma}
-%%-/
-
-/-%%
-\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
-Precompose the given homotopy on $S^1$ with the parametrization $t \mapsto CSexp(it)$ of the
-circle. This produces a homotopy between the associated loops in $Cstar$. By
-Lemma~\ref{equalwinding} those two loops have the same winding number, hence by
-Definition~\ref{DefWNS1} the original circle maps do as well.
-\end{proof}
 %%-/
 
 theorem S1homotopy (ψ ψ' : C(Circle, Cstar))
@@ -2851,6 +2842,15 @@ theorem S1homotopy (ψ ψ' : C(Circle, Cstar))
       (DefS1loop ψ) (DefS1loop ψ')
       (DefS1loop_loop ψ) (DefS1loop_loop ψ')
       Hhat hhom hzero' hone'
+
+/-%%
+\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
+Precompose the given homotopy on $S^1$ with the parametrization $t \mapsto CSexp(it)$ of the
+circle. This produces a homotopy between the associated loops in $Cstar$. By
+Lemma~\ref{equalwinding} those two loops have the same winding number, hence by
+Definition~\ref{DefWNS1} the original circle maps do as well.
+\end{proof}
+%%-/
 
 /-%%
 \begin{definition}\label{D2}\lean{D2}\leanok
@@ -2881,15 +2881,6 @@ def zeroD2 : D2 := ⟨0, by simp⟩
 If a map $\rho\colon S^1\to \Cstar$ extends to a map from the closed disk to $\Cstar$,
 then its winding number is zero.
 \end{theorem}
-%%-/
-
-/-%%
-\begin{proof}\uses{S1homotopy, constS1}\leanok
-Contract the disk radially to its center. Composing the extension $F$ with this contraction gives a
-homotopy in $Cstar$ from $\rho$ to the constant boundary value $F(0)$. Lemma~\ref{S1homotopy}
-shows that $\rho$ has the same winding number as this constant map, and Lemma~\ref{constS1}
-shows that constant map has winding number zero.
-\end{proof}
 %%-/
 
 theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
@@ -2949,20 +2940,19 @@ theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
     _ = 0 := constS1 (F zeroD2)
 
 /-%%
+\begin{proof}\uses{S1homotopy, constS1}\leanok
+Contract the disk radially to its center. Composing the extension $F$ with this contraction gives a
+homotopy in $Cstar$ from $\rho$ to the constant boundary value $F(0)$. Lemma~\ref{S1homotopy}
+shows that $\rho$ has the same winding number as this constant map, and Lemma~\ref{constS1}
+shows that constant map has winding number zero.
+\end{proof}
+%%-/
+
+/-%%
 \begin{lemma}\label{walkingdog}\lean{walkingdog}\leanok
 If two maps of the circle satisfy $|\psi(z)-\psi'(z)|<|\psi(z)|$ for every $z$, then the straight
 line homotopy between them stays inside $\Cstar$.
 \end{lemma}
-%%-/
-
-/-%%
-\begin{proof}\leanok
-Use the straight-line homotopy
-$H(z,t)=(1-t)\psi(z)+t\psi'(z)$. If $H(z,t)=0$, then
-$\psi(z)=t(\psi(z)-\psi'(z))$, so
-$|\psi(z)| \le |\psi(z)-\psi'(z)|$, contradicting the hypothesis. Thus the entire homotopy avoids
-zero and stays inside $Cstar$.
-\end{proof}
 %%-/
 
 theorem walkingdog (ψ ψ' : C(Circle, Cstar))
@@ -3018,6 +3008,16 @@ theorem walkingdog (ψ ψ' : C(Circle, Cstar))
   · intro z
     apply Subtype.ext
     simp [H, Hfun]
+
+/-%%
+\begin{proof}\leanok
+Use the straight-line homotopy
+$H(z,t)=(1-t)\psi(z)+t\psi'(z)$. If $H(z,t)=0$, then
+$\psi(z)=t(\psi(z)-\psi'(z))$, so
+$|\psi(z)| \le |\psi(z)-\psi'(z)|$, contradicting the hypothesis. Thus the entire homotopy avoids
+zero and stays inside $Cstar$.
+\end{proof}
+%%-/
 
 /-%%
 \begin{corollary}\label{sameWN}\lean{sameWN}\uses{walkingdog, S1homotopy}\leanok
