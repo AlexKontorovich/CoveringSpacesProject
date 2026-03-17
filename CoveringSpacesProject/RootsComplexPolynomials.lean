@@ -1314,14 +1314,30 @@ $\mu(T)=T'$. The result now follows from Lemma~\ref{homeoInv} and Proposition~\r
 
 /-%%
 
-\begin{lemma}\label{xinTorTprime}
+\begin{lemma}\label{xinTorTprime}\lean{xinTorTprime}\leanok
 For $x\in \C$ with $x\not= 0$, either $x\in T$ or $x\in T'$.
 \end{lemma}
 %%-/
 
+lemma xinTorTprime (x : ℂ) (hx : x ≠ 0) : x ∈ splitPlane ∨ x ∈ TprimeDef := by
+  by_cases hre : x.re > 0
+  · left
+    simp [splitPlane, hre]
+  · have hre_le : x.re ≤ 0 := le_of_not_gt hre
+    by_cases hlt : x.re < 0
+    · right
+      simp [TprimeDef, hlt]
+    · left
+      have hre0 : x.re = 0 := le_antisymm hre_le (le_of_not_gt hlt)
+      have him : x.im ≠ 0 := by
+        intro him0
+        apply hx
+        apply Complex.ext <;> simp [hre0, him0]
+      simp [splitPlane, hre0, him]
+
 /-%%
 
-\begin{proof}\uses{splitPlane, TprimeDef}
+\begin{proof}\uses{splitPlane, TprimeDef}\leanok
 Suppose that $x\in \C$ and $x\not= 0$. Then either $Re(x)> 0$ or $Re(x)\le 0$. If $Re(x)>0$, then by Definition~\ref{splitPlane} $x\in T$. if $Re(x)< 0$ then by Definition~\ref{TprimeDef} $x\in T'$. Finally, if $Re(z)=0$
 and $z\not=0$, then $Im(z)\not= 0$ and $z\in T$.
 \end{proof}
