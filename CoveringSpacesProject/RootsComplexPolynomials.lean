@@ -2338,24 +2338,58 @@ $w(\omega)$ and $w(\omega')$, so these winding numbers are equal.
 
 /-%%
 
-\begin{corollary}\label{constpath}
+\begin{corollary}\label{constpath}\lean{constpath}\leanok
 Suppose that $\omega\colon [ a, b ]\to \C$ is a loop and $\omega(t)\in Cstar$
 for all $t\in [ a, b ]$.
 Suppose that $H\colon [ a, b ]\times [ 0, 1 ]\to \C$ is a  homotopy of loops
 from $\omega$  to a constant loop
 and $H(t,s)\in Cstar$ for all $(t,s)\in [ a, b ]\times [ 0, 1 ]$. Then
-the winding number of $\omega$ is zero
+the winding number of $\omega$ is zero.
 \end{corollary}
 %%-/
 
+theorem constpath {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, Cstar))
+    (hhom : homotopyloop hab.le H)
+    (hzero : ∀ t, H (t, 0) = ω t)
+    (c : Cstar)
+    (hone : ∀ t, H (t, 1) = c) :
+    WNloop hab ω hloop = 0 := by
+  let ωconst : C(Set.Icc a b, Cstar) := ContinuousMap.const _ c
+  have hloopconst :
+      ωconst ⟨a, ⟨le_rfl, hab.le⟩⟩ = ωconst ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
+    rfl
+  have hequal : WNloop hab ω hloop = WNloop hab ωconst hloopconst := by
+    apply equalwinding hab ω ωconst hloop hloopconst H hhom hzero
+    intro t
+    simpa [ωconst] using hone t
+  have hsurj : Set.SurjOn CSexp Set.univ Cstar := expCP.2.2
+  obtain ⟨z0, -, hz0⟩ : (c : ℂ) ∈ CSexp '' Set.univ := hsurj c.property
+  have hconstlift :
+      deflift CSexp (fun t => (ωconst t : ℂ)) (ContinuousMap.const _ z0) := by
+    refine ⟨(ContinuousMap.const _ z0).continuous, ?_⟩
+    ext t
+    simpa [ωconst] using hz0
+  have hconstcomplex : (WNloop hab ωconst hloopconst : ℂ) = 0 := by
+    have hq :
+        (0 : ℂ) = WNloop hab ωconst hloopconst := by
+      simpa [ωconst] using
+        (WNloop_eq_of_lift hab ωconst hloopconst (ContinuousMap.const _ z0) hconstlift)
+    simpa using hq.symm
+  have hconst : WNloop hab ωconst hloopconst = 0 := by
+    exact_mod_cast hconstcomplex
+  exact hequal.trans hconst
+
 /-%%
 
-\begin{proof}\uses{equalwinding, expUPL, WNloop}
-By Lemma~\ref{equalwinding} the winding number of the loop $\omega$
-is equal to the winding number of a constant loop. By Lemma~\ref{expUPL}
-the lift of a constant loop through $CSexp$ is a constant path. Thus, the endpoints of the lift of
-the constant loop
-are equal and hence by Definition~\ref{WNloop} the winding number of a constant loop is zero.
+\begin{proof}\uses{equalwinding, expCP, WNloop_eq_of_lift}\leanok
+By Lemma~\ref{equalwinding}, the winding number of $\omega$ is equal to the winding number of a
+constant loop.
+Choose a point $z_0\in \C$ with $CSexp(z_0)=c$; this is possible by Corollary~\ref{expCP}.
+Then the constant map $t\mapsto z_0$ is a lift of the constant loop at $c$ through $CSexp$.
+Its endpoint difference is zero, so Lemma~\ref{WNloop_eq_of_lift} shows that the winding number of
+the constant loop is zero.
 \end{proof}
 %%-/
 
