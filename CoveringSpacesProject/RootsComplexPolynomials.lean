@@ -1819,13 +1819,17 @@ def loop {X : Type*} [TopologicalSpace X] (a b : ℝ) (ω : ℝ → X) : Prop :=
 
 /-%%
 
-\begin{definition}\label{homotopyloop}
+\begin{definition}\label{homotopyloop}\lean{homotopyloop}\uses{loop}\leanok
 A homotopy of loops is a one parameter family $\Omega\colon [a, b]\times [0, 1]\to X$ with
 $\Omega|_{[a, b]\times\{s\}}$
 a loop for all $s\in [0, 1]$. A homotopy of loops based at $x_0$ is a one parameter family
 indexed by $[0, 1]$ of loops based at $x_0$.
 \end{definition}
 %%-/
+
+def homotopyloop {X : Type*} [TopologicalSpace X] {a b : ℝ} (hab : a ≤ b)
+    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, X)) : Prop :=
+  ∀ s, H (⟨a, ⟨le_rfl, hab⟩⟩, s) = H (⟨b, ⟨hab, le_rfl⟩⟩, s)
 
 /-%%
 
