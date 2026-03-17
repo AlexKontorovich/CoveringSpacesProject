@@ -1117,7 +1117,7 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
 
 /-%%
 
-\begin{proof}\uses{tildeShomeo, widetildePBlogHomeo, periodicity, trivialization}\leanok
+\begin{proof}\uses{splitPlane_isOpen, PBlog_CSexp_eq_tildeShomeo_invFun_complex, floor_shift_PBlog, tildeShomeo, widetildePBlogHomeo, periodicity, trivialization}\leanok
 $\varphi$ is a homeomorphism by Lemma~\ref{tildeShomeo}.
 By Lemma~\ref{widetildePBlogHomeo}
 $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is
@@ -2443,7 +2443,7 @@ $ω(t)=ρ(CSexp(it))\in Cstar$.
 
 /-%%
 
-\begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, sameImage}\leanok
+\begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, DefS1loop_loop, sameImage}\leanok
 The winding number of a map $\rho\colon S^1\to \C$ with $\rho(z)\in Cstar$
 for all $z\in S^1$  is the winding number of the associated loop.
 \end{definition}
@@ -2455,7 +2455,7 @@ for all $z\in S^1$  is the winding number of the associated loop.
 If $f\colon S^1\to \C$ is a constant map to a point $z\in Cstar$, then $w(f)=0$.
 \end{lemma}
 
-\begin{proof}\uses{DefS1loop, DefWNS1, constpath}\leanok
+\begin{proof}\uses{DefS1loop, DefS1loop_loop, DefWNS1, constpath}\leanok
 By Definition~\ref{DefS1loop} the loop associated with the constant map $f\colon S^1\to Cstar$
 is a constant loop at a point of $Cstar$.
 By Lemma~\ref{DefWNS1} the winding number of $f$ is equal to the winding number
@@ -2475,7 +2475,7 @@ whose image lies in  $Cstar$. Then the winding numbers of $\psi$ and $\psi'$ are
 
 /-%%
 
-\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
+\begin{proof}\uses{DefS1loop, DefS1loop_loop, equalwinding, DefWNS1}\leanok
 Let $H\colon S^1\times I\to \C$ be a homotopy from $\psi$ to $\psi'$ whose image lies in $Cstar$.
 Let $ω$ and $ω'$ be the loops associated to $ψ$ and $ψ'$ respectively.
 Define $\hat H\colon [ 0, 2\pi  ]\times [ 0, 1 ]\to \C$ by
@@ -2515,7 +2515,7 @@ Let $0_{D^2}$ denote the center of the closed unit disk.
 
 /-%%
 
-\begin{theorem}\label{boundsWN0}\lean{boundsWN0}\leanok
+\begin{theorem}\label{boundsWN0}\lean{boundsWN0}\uses{circleToD2, zeroD2, S1homotopy, constS1}\leanok
 Let $\rho\colon S^1\to \C$ be a map with $\rho(z)\in Cstar$ for all $z\in S^1$.
 Suppose there is a map $\hat f\colon D^2\to \C$ with $\hat f|_{S^1}=\rho$ and with
 the image of $\hat f$ contained in $Cstar$. Then the winding $w(\rho)=0$.
@@ -2525,7 +2525,7 @@ the image of $\hat f$ contained in $Cstar$. Then the winding $w(\rho)=0$.
 /-%%
 
 
-\begin{proof}\uses{S1homotopy, constS1}\leanok
+\begin{proof}\uses{circleToD2, zeroD2, S1homotopy, constS1}\leanok
 Define a continuous map $J\colon S^1\times [ 0,1 ]\to D^2$ by
 $(z,t)\mapsto (1-t)z$. Then $\hat f\circ J(z,0)= \rho(z)$ and
 $\hat f\circ J(z,1)=\hat f(0)$ for all $z\in S^1$.
@@ -2554,7 +2554,7 @@ $\psi_{\alpha_0,k,R}(z)=\alpha_0(Rz)^k$.
 %%-/
 
 /-%%
-\begin{lemma}\label{zkWNk}\lean{zkWNk}\leanok
+\begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{monomialS1Map, DefS1loop, DefS1loop_loop, multiplicativity, expCP, deflift, WNloop_eq_of_lift, WNloop, DefWNS1}\leanok
 For any $\alpha_0\in \C$ and any $k\in \mathbb N$, define $\psi_{\alpha_0,k}\colon \C\to \C$ by
 $\psi_{\alpha_0,k}(z)=\alpha_0 z^k$.
 Then for any $R>0$, if $\alpha_0\not=0$, the winding number of the restriction of
@@ -2564,7 +2564,7 @@ $\psi_{\alpha_0,k}$ to the circle of radius $R$ is $k$.
 
 /-%%
 
-\begin{proof}\uses{DefS1loop, multiplicativity, expCP, deflift, WNloop, DefWNS1}\leanok
+\begin{proof}\uses{monomialS1Map, DefS1loop, DefS1loop_loop, multiplicativity, expCP, deflift, WNloop_eq_of_lift, WNloop, DefWNS1}\leanok
 By Definition`\ref{DefS1loop} and by Lemma~\ref{multiplicativity} the loop
  $\omega\colon [ 0, 2\pi  ]\to \C$ associated to $\psi_{\alpha_0,t}$ restricted to the circle of
  radius $R$ is given by
@@ -2666,7 +2666,7 @@ $$
 
 /-%%
 
-\begin{theorem}\label{WNthm}\lean{WNthm}\leanok
+\begin{theorem}\label{WNthm}\lean{WNthm}\uses{monomialS1Map, polyCircleMap, zkWNk, zkdominates, sameWN}\leanok
 Let $p(z)$ be a complex polynomial of degree $k>0$ given by $p(z)=\sum_{i=0}^k\alpha_iz^{k-i}$ with
 $α_i∈ℂ$ for all $i$ and $α_0\not= 0$. Then for $R$ sufficiently large,
  the map $f : S^1\to \C$ given by
@@ -2674,7 +2674,7 @@ $f(z)= p(R* z)$ for $z\in S^1$ has winding number $k$.
 \end{theorem}
 
 
-\begin{proof}\uses{zkWNk, zkdominates, sameWN}\leanok
+\begin{proof}\uses{monomialS1Map, polyCircleMap, zkWNk, zkdominates, sameWN}\leanok
 By Lemma~\ref{zkdominates} for $R>{\rm max}(1,\sum_{i=1}^k|\beta_j|)$,
 and for any $z\in \C$ with $|z|=1$
 $|\alpha_0(R*z)^k-f(z)| <|\alpha_0 R^k|$. By Lemma~\ref{sameWN} the maps defined on $S^1$ by
@@ -2690,14 +2690,14 @@ Thus, the winding number of $f$ is also $k$.
 /-%%
 
 
-\begin{theorem}\label{ExistRoot}\lean{ExistRoot}\leanok
+\begin{theorem}\label{ExistRoot}\lean{ExistRoot}\uses{circleToD2, polyDiskMap, WNthm, boundsWN0}\leanok
 Every complex polynomial of degree $k>0$ has a complex root.
 \end{theorem}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{WNthm, boundsWN0}\leanok
+\begin{proof}\uses{circleToD2, polyDiskMap, WNthm, boundsWN0}\leanok
 The proof is by contradiction. Suppose that $p(z)=\sum_{i=0}^k\alpha_iz^{k-i} $ with
 $\alpha_0\not= 0$. Suppose that
 $p(z)\not= 0$ for all $z\in \C$.
@@ -2771,7 +2771,7 @@ loop lies in $Cstar$ as well.
 %%-/
 
 /-%%
-\begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, sameImage}\leanok
+\begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, DefS1loop_loop, sameImage}\leanok
 The winding number of a map $\rho\colon S^1\to \Cstar$ is the winding number of the associated loop.
 \end{definition}
 %%-/
@@ -2780,7 +2780,7 @@ noncomputable def DefWNS1 (ρ : C(Circle, Cstar)) : ℤ :=
   WNloop Real.two_pi_pos (DefS1loop ρ) (DefS1loop_loop ρ)
 
 /-%%
-\begin{lemma}\label{constS1}\lean{constS1}\uses{DefS1loop, DefWNS1, constpath}\leanok
+\begin{lemma}\label{constS1}\lean{constS1}\uses{DefS1loop, DefS1loop_loop, DefWNS1, constpath}\leanok
 If $f\colon S^1\to \Cstar$ is constant, then its winding number is zero.
 \end{lemma}
 %%-/
@@ -2804,7 +2804,7 @@ theorem constS1 (c : Cstar) : DefWNS1 (ContinuousMap.const _ c : C(Circle, Cstar
       H hhom hzero c hone
 
 /-%%
-\begin{proof}\uses{DefS1loop, DefWNS1, constpath}\leanok
+\begin{proof}\uses{DefS1loop, DefS1loop_loop, DefWNS1, constpath}\leanok
 The loop associated to a constant map on $S^1$ is a constant loop by
 Definition~\ref{DefS1loop}. By Definition~\ref{DefWNS1}, the winding number of the map is the
 winding number of that loop, and Lemma~\ref{constpath} says the latter is zero.
@@ -2812,7 +2812,7 @@ winding number of that loop, and Lemma~\ref{constpath} says the latter is zero.
 %%-/
 
 /-%%
-\begin{lemma}\label{S1homotopy}\lean{S1homotopy}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
+\begin{lemma}\label{S1homotopy}\lean{S1homotopy}\uses{DefS1loop, DefS1loop_loop, equalwinding, DefWNS1}\leanok
 If two maps $S^1\to \Cstar$ are homotopic through maps into $\Cstar$, then they have equal
 winding numbers.
 \end{lemma}
@@ -2844,7 +2844,7 @@ theorem S1homotopy (ψ ψ' : C(Circle, Cstar))
       Hhat hhom hzero' hone'
 
 /-%%
-\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
+\begin{proof}\uses{DefS1loop, DefS1loop_loop, equalwinding, DefWNS1}\leanok
 Precompose the given homotopy on $S^1$ with the parametrization $t \mapsto CSexp(it)$ of the
 circle. This produces a homotopy between the associated loops in $Cstar$. By
 Lemma~\ref{equalwinding} those two loops have the same winding number, hence by
@@ -2877,7 +2877,7 @@ The center of the closed unit disk.
 def zeroD2 : D2 := ⟨0, by simp⟩
 
 /-%%
-\begin{theorem}\label{boundsWN0}\lean{boundsWN0}\uses{S1homotopy, constS1}\leanok
+\begin{theorem}\label{boundsWN0}\lean{boundsWN0}\uses{circleToD2, zeroD2, S1homotopy, constS1}\leanok
 If a map $\rho\colon S^1\to \Cstar$ extends to a map from the closed disk to $\Cstar$,
 then its winding number is zero.
 \end{theorem}
@@ -2940,7 +2940,7 @@ theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
     _ = 0 := constS1 (F zeroD2)
 
 /-%%
-\begin{proof}\uses{S1homotopy, constS1}\leanok
+\begin{proof}\uses{circleToD2, zeroD2, S1homotopy, constS1}\leanok
 Contract the disk radially to its center. Composing the extension $F$ with this contraction gives a
 homotopy in $Cstar$ from $\rho$ to the constant boundary value $F(0)$. Lemma~\ref{S1homotopy}
 shows that $\rho$ has the same winding number as this constant map, and Lemma~\ref{constS1}
@@ -3057,7 +3057,7 @@ noncomputable def monomialS1Map (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (h�
         exact pow_ne_zero k <| mul_ne_zero (by exact_mod_cast hR.ne') (Circle.coe_ne_zero z))
 
 /-%%
-\begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{DefS1loop, multiplicativity, expCP, deflift, WNloop, DefWNS1}\leanok
+\begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{monomialS1Map, DefS1loop, DefS1loop_loop, multiplicativity, expCP, deflift, WNloop_eq_of_lift, WNloop, DefWNS1}\leanok
 The map $z \mapsto \alpha_0 (Rz)^k$ on the unit circle has winding number $k$.
 \end{lemma}
 %%-/
@@ -3116,7 +3116,7 @@ theorem zkWNk (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
   exact_mod_cast hwind
 
 /-%%
-\begin{proof}\uses{DefS1loop, multiplicativity, expCP, deflift, WNloop, DefWNS1}\leanok
+\begin{proof}\uses{monomialS1Map, DefS1loop, DefS1loop_loop, multiplicativity, expCP, deflift, WNloop_eq_of_lift, WNloop, DefWNS1}\leanok
 The associated loop is $t \mapsto \alpha_0 R^k CSexp(kit)$. Choose a logarithm of the nonzero
 constant $\alpha_0 R^k$ using Lemma~\ref{expCP}; then
 $\tilde\omega(t)=\tilde\alpha_0+kit$ is a lift of this loop through $CSexp$ by
@@ -3252,7 +3252,7 @@ $S R^{k-1} < |\alpha_0| R^k$, which proves that the leading term strictly domina
 %%-/
 
 /-%%
-\begin{theorem}\label{WNthm}\lean{WNthm}\uses{zkWNk, zkdominates, sameWN}\leanok
+\begin{theorem}\label{WNthm}\lean{WNthm}\uses{monomialS1Map, polyCircleMap, zkWNk, zkdominates, sameWN}\leanok
 On a sufficiently large circle, a complex polynomial has winding number equal to its degree.
 \end{theorem}
 %%-/
@@ -3294,7 +3294,7 @@ theorem WNthm (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
       _ = (p.natDegree : ℤ) := zkWNk p.leadingCoeff p.natDegree R hRpos hlead
 
 /-%%
-\begin{proof}\uses{zkWNk, zkdominates, sameWN}\leanok
+\begin{proof}\uses{monomialS1Map, polyCircleMap, zkWNk, zkdominates, sameWN}\leanok
 For large $R$, Lemma~\ref{zkdominates} shows that the polynomial map
 $z \mapsto p(Rz)$ is uniformly close, in the walking-dog sense, to its leading monomial
 $z \mapsto \alpha_0 (Rz)^k$. Therefore Lemma~\ref{sameWN} says these two maps have the same winding
@@ -3304,7 +3304,7 @@ has winding number $k$ as well.
 %%-/
 
 /-%%
-\begin{theorem}\label{ExistRoot}\lean{ExistRoot}\uses{WNthm, boundsWN0}\leanok
+\begin{theorem}\label{ExistRoot}\lean{ExistRoot}\uses{circleToD2, polyDiskMap, WNthm, boundsWN0}\leanok
 Every nonconstant complex polynomial has a complex root.
 \end{theorem}
 %%-/
@@ -3331,7 +3331,7 @@ theorem ExistRoot (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) : ∃ z : ℂ, p
     rw [← hwind, hzero]
 
 /-%%
-\begin{proof}\uses{WNthm, boundsWN0}\leanok
+\begin{proof}\uses{circleToD2, polyDiskMap, WNthm, boundsWN0}\leanok
 Assume for contradiction that the polynomial has no complex root. Then for sufficiently large
 $R$, Theorem~\ref{WNthm} shows that the restriction of $p$ to the circle of radius $R$ has
 nonzero winding number, namely its degree. But under the no-root assumption, the map
