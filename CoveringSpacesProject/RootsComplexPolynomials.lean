@@ -1416,18 +1416,187 @@ This proves that $CSexp$ is onto $\{z\in \C | z\not=0\}$, which by Lemma~\ref{Cs
 is equal to $Cstar$.\end{proof}
 %%-/
 
+noncomputable def CSexpCstar : ℂ → Cstar :=
+  Cstar.codRestrict CSexp fun z => by
+    simp [Cstar, CSexp, Complex.exp_ne_zero]
+
+@[simp] theorem CSexpCstar_coe (z : ℂ) : ((CSexpCstar z : Cstar) : ℂ) = CSexp z :=
+  rfl
+
+lemma splitPlane_subset_Cstar : splitPlane ⊆ Cstar := by
+  intro z hz
+  exact splitPlane_ne_zero hz
+
+lemma TprimeDef_subset_Cstar : TprimeDef ⊆ Cstar := by
+  intro z hz
+  have hz' : z.re < 0 ∨ z.im ≠ 0 := by
+    simpa [TprimeDef] using hz
+  rcases hz' with hre | him
+  · intro hz0
+    simp [hz0] at hre
+  · intro hz0
+    simp [hz0] at him
+
+noncomputable def trivializationCstar (e : Trivialization ℤ CSexp) :
+    Trivialization ℤ CSexpCstar where
+  toFun := fun x => (⟨CSexp x, by simp [Cstar, CSexp, Complex.exp_ne_zero]⟩, (e x).2)
+  invFun := fun x => e.invFun ((x.1 : ℂ), x.2)
+  source := e.source
+  target := ((((↑) : Cstar → ℂ) ⁻¹' e.baseSet) : Set Cstar) ×ˢ (Set.univ : Set ℤ)
+  baseSet := (((↑) : Cstar → ℂ) ⁻¹' e.baseSet : Set Cstar)
+  open_baseSet := e.open_baseSet.preimage continuous_subtype_val
+  source_eq := by
+    ext x
+    simp [e.source_eq, CSexpCstar]
+  target_eq := by
+    rfl
+  proj_toFun := by
+    intro p hp
+    rfl
+  map_source' := by
+    intro x hx
+    have hx_target : e x ∈ e.target := e.map_source hx
+    have hx_base : (e x).1 ∈ e.baseSet := by
+      simpa [e.target_eq] using hx_target
+    have hproj : (e x).1 = CSexp x := e.proj_toFun x hx
+    refine ⟨?_, trivial⟩
+    simpa [hproj] using hx_base
+  map_target' := by
+    intro x hx
+    have hx' : ((x.1 : ℂ), x.2) ∈ e.target := by
+      simpa [e.target_eq] using hx
+    simpa using e.map_target hx'
+  continuousOn_toFun := by
+    rw [continuousOn_iff_continuous_restrict]
+    have hfst : Continuous fun x : e.source => (⟨CSexp x, by
+        simp [Cstar, CSexp, Complex.exp_ne_zero]⟩ : Cstar) :=
+      Continuous.subtype_mk (Contexp.comp continuous_subtype_val) fun x => by
+        simp [Cstar, CSexp, Complex.exp_ne_zero]
+    have hecont : Continuous fun x : e.source => e x :=
+      continuousOn_iff_continuous_restrict.mp e.continuousOn_toFun
+    have hsnd : Continuous fun x : e.source => (e x).2 :=
+      continuous_snd.comp hecont
+    exact hfst.prodMk hsnd
+  continuousOn_invFun := by
+    rw [continuousOn_iff_continuous_restrict]
+    have hecont : Continuous fun x : e.target => e.invFun x :=
+      continuousOn_iff_continuous_restrict.mp e.continuousOn_invFun
+    have hmap : Continuous fun x : ((((↑) : Cstar → ℂ) ⁻¹' e.baseSet : Set Cstar) ×ˢ (Set.univ : Set ℤ)) =>
+        (⟨((x.1.1 : ℂ), x.1.2), by
+          rw [e.target_eq]
+          exact ⟨x.2.1, trivial⟩⟩ : e.target) := by
+      apply Continuous.subtype_mk
+      · have hfst : Continuous fun x : ((((↑) : Cstar → ℂ) ⁻¹' e.baseSet : Set Cstar) ×ˢ (Set.univ : Set ℤ)) =>
+            (x.1.1 : ℂ) :=
+          continuous_subtype_val.comp (continuous_fst.comp continuous_subtype_val)
+        have hsnd : Continuous fun x : ((((↑) : Cstar → ℂ) ⁻¹' e.baseSet : Set Cstar) ×ˢ (Set.univ : Set ℤ)) =>
+            x.1.2 :=
+          continuous_snd.comp continuous_subtype_val
+        exact hfst.prodMk hsnd
+    simpa [Set.restrict] using hecont.comp hmap
+  left_inv' := by
+    intro x hx
+    change e.invFun (CSexp x, (e x).2) = x
+    rw [← e.proj_toFun x hx]
+    exact e.left_inv hx
+  right_inv' := by
+    intro x hx
+    have hx' : ((x.1 : ℂ), x.2) ∈ e.target := by
+      simpa [e.target_eq] using hx
+    have hsrc : e.invFun ((x.1 : ℂ), x.2) ∈ e.source := e.map_target hx'
+    have hright : e (e.invFun ((x.1 : ℂ), x.2)) = ((x.1 : ℂ), x.2) := e.right_inv hx'
+    apply Prod.ext
+    · apply Subtype.ext
+      have hproj :
+          (e (e.invFun ((x.1 : ℂ), x.2))).1 = CSexp (e.invFun ((x.1 : ℂ), x.2)) :=
+        e.proj_toFun _ hsrc
+      have hfst : (e (e.invFun ((x.1 : ℂ), x.2))).1 = (x.1 : ℂ) :=
+        congrArg Prod.fst hright
+      exact hproj.symm.trans hfst
+    · simpa using congrArg Prod.snd hright
+  open_source := e.open_source
+  open_target := by
+    simpa [Set.top_eq_univ] using (e.open_baseSet.preimage continuous_subtype_val).prod isOpen_univ
+
+noncomputable def trivOverTCstar : Trivialization ℤ CSexpCstar :=
+  trivializationCstar trivOverT
+
+noncomputable def trivOverTprimeCstar : Trivialization ℤ CSexpCstar :=
+  trivializationCstar trivOverTprime.1
+
+@[simp] theorem trivOverTCstar_baseSet :
+    trivOverTCstar.baseSet = (((↑) : Cstar → ℂ) ⁻¹' splitPlane : Set Cstar) :=
+  rfl
+
+@[simp] theorem trivOverTprimeCstar_baseSet :
+    trivOverTprimeCstar.baseSet = (((↑) : Cstar → ℂ) ⁻¹' TprimeDef : Set Cstar) := by
+  simp [trivOverTprimeCstar, trivializationCstar, trivOverTprime_baseSet]
+
+theorem CSexpCstar_isCoveringMap : IsCoveringMap CSexpCstar := by
+  intro x
+  have hx : (x : ℂ) ∈ splitPlane ∪ TprimeDef := by
+    have hxC : (x : ℂ) ∈ Cstar := x.property
+    simp [TcupTprimeCstar, x.property]
+  rcases hx with hs | ht
+  · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
+      ⟨inferInstance, trivOverTCstar, by simpa [trivOverTCstar_baseSet] using hs⟩
+  · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
+      ⟨inferInstance, trivOverTprimeCstar, by simpa [trivOverTprimeCstar_baseSet] using ht⟩
+
 /-%%
 
-\begin{corollary}\label{expUPL}
-Given a path $\omega\colon [ a , b]\to \C $ with $\omega(t)\not=0$ for all $t\in [ a, b]$, and
+\begin{corollary}\label{expUPL}\lean{expUPL}\leanok
+Given $a,b\in \R$ with $a < b$, a path $\omega\colon [ a , b]\to \C $ with $\omega(t)\not=0$ for all $t\in [ a, b]$, and
 $\tilde a_0\in CSexp^{-1}(\omega(a))$, there is a unique map
 $\tilde\omega\colon [ a, b ]\to \C$ with $\tilde\omega(a)=\tilde a_0$ and $exp(\tilde\omega)=\omega$.
 \end{corollary}
 %%-/
 
+theorem expUPL {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar)) (z0 : ℂ)
+    (hz0 : CSexp z0 = (ω ⟨a, ⟨le_rfl, hab.le⟩⟩ : ℂ)) :
+    ∃! tildeω : C(Set.Icc a b, ℂ),
+      (∀ t, CSexp (tildeω t) = (ω t : ℂ)) ∧ tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩ = z0 := by
+  let e := iccHomeoI a b hab
+  let γ : C(↥(Set.Icc (0 : ℝ) 1), Cstar) :=
+    ⟨fun t => ω (e.symm t), ω.continuous.comp e.symm.continuous⟩
+  have hleft : e.symm 0 = ⟨a, ⟨le_rfl, hab.le⟩⟩ := by
+    apply Subtype.ext
+    simp [e]
+  have hright : e ⟨a, ⟨le_rfl, hab.le⟩⟩ = 0 := by
+    apply Subtype.ext
+    simp [e]
+  have hγ0 : γ 0 = CSexpCstar z0 := by
+    apply Subtype.ext
+    simpa [γ, hleft, CSexpCstar] using hz0.symm
+  let Γ := CSexpCstar_isCoveringMap.liftPath γ z0 hγ0
+  refine ⟨⟨fun t => Γ (e t), Γ.continuous.comp e.continuous⟩, ?_, ?_⟩
+  · constructor
+    · intro t
+      have hΓ :=
+        congrFun (CSexpCstar_isCoveringMap.liftPath_lifts (γ := γ) (e := z0) (γ_0 := hγ0)) (e t)
+      simpa [γ, e, CSexpCstar] using congrArg Subtype.val hΓ
+    · simpa [hright] using
+        (CSexpCstar_isCoveringMap.liftPath_zero (γ := γ) (e := z0) (γ_0 := hγ0))
+  · intro tildeω htilde
+    rcases htilde with ⟨hlift, h0⟩
+    let Γ' : C(↥(Set.Icc (0 : ℝ) 1), ℂ) :=
+      ⟨fun t => tildeω (e.symm t), tildeω.continuous.comp e.symm.continuous⟩
+    have hΓ' : Γ' = CSexpCstar_isCoveringMap.liftPath γ z0 hγ0 := by
+      apply (CSexpCstar_isCoveringMap.eq_liftPath_iff'
+        (γ := γ) (e := z0) (γ_0 := hγ0) (Γ := Γ')).2
+      constructor
+      · ext t
+        change CSexp (tildeω (e.symm t)) = (ω (e.symm t) : ℂ)
+        exact hlift (e.symm t)
+      · change tildeω (e.symm 0) = z0
+        simpa [hleft] using h0
+    ext t
+    have hval := congrFun (congrArg DFunLike.coe hΓ') (e t)
+    simpa [Γ', e] using hval
+
 /-%%
 
-\begin{proof}\uses{expCP}
+\begin{proof}\uses{expCP}\leanok
 By Corollary~\ref{expCP} and the basic result about covering projections.
 \end{proof}
 %%-/
