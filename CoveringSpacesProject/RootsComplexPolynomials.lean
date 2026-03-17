@@ -1829,19 +1829,30 @@ indexed by $[0, 1]$ of loops based at $x_0$.
 
 /-%%
 
-\begin{lemma}\label{existlift}
+\begin{lemma}\label{existlift}\lean{existlift}\leanok
 Let $\omega\colon [a, b]\to \C$ be a loop. Assume that $\omega(t)\in Cstar$ for all $t\in [a, b]$.
 There is a lift of $\omega$ through $exp$.
 \end{lemma}
 %%-/
 
+theorem existlift {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar)) :
+    ∃ tildeω : C(Set.Icc a b, ℂ), deflift CSexp (fun t => (ω t : ℂ)) tildeω := by
+  let t0 : Set.Icc a b := ⟨a, ⟨le_rfl, hab.le⟩⟩
+  have hsurj : Set.SurjOn CSexp Set.univ Cstar := expCP.2.2
+  obtain ⟨z0, -, hz0⟩ : (ω t0 : ℂ) ∈ CSexp '' Set.univ := hsurj (ω t0).property
+  rcases ExistsUnique.exists (expUPL hab ω z0 hz0) with ⟨tildeω, htilde⟩
+  refine ⟨tildeω, ?_⟩
+  refine ⟨tildeω.continuous, ?_⟩
+  ext t
+  exact htilde.1 t
+
 /-%%
 
-\begin{proof}\uses{expCP, expUPL}
+\begin{proof}\uses{deflift, expCP, expUPL}\leanok
 By Corollary~\ref{expCP}  $CSexp^{-1}(\omega(a))\not=\emptyset$.
 Fix a point $x\in CSexp^{-1}(\omega(a))$ and
  let $\tilde\omega_x\colon [a, b]\to \C$ be  lift of $\omega$ through the $CSexp$ with initial
- point $x$
+point $x$
 as guaranteed by Corollary~\ref{expUPL}.
 \end{proof}
 %%-/
