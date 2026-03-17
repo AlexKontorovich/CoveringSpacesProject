@@ -2141,10 +2141,30 @@ noncomputable def WNloop {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
     (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ :=
   Classical.choose (constWNomega hab ω hloop)
 
+/-%%
+
+\begin{lemma}\label{WNloop_exists_lift}\lean{WNloop_exists_lift}\uses{constWNomega}\leanok
+If $\omega$ is a loop in $Cstar$, then it admits a lift through $CSexp$.
+\end{lemma}
+%%-/
+
 theorem WNloop_exists_lift {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
     (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) :
     ∃ tildeω : C(Set.Icc a b, ℂ), deflift CSexp (fun t => (ω t : ℂ)) tildeω :=
   (Classical.choose_spec (constWNomega hab ω hloop)).1
+
+/-%%
+\begin{proof}\uses{constWNomega}\leanok
+This is one of the conclusions of Corollary~\ref{constWNomega}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{WNloop_eq_of_lift}\lean{WNloop_eq_of_lift}\uses{WNloop, constWNomega}\leanok
+If $\tilde\omega$ is any lift of the loop $\omega$ through $CSexp$, then its winding number is
+$w(\omega)$.
+\end{lemma}
+%%-/
 
 theorem WNloop_eq_of_lift {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
     (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
@@ -2152,6 +2172,13 @@ theorem WNloop_eq_of_lift {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
     (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) / (2 * π * I) =
       WNloop hab ω hloop :=
   (Classical.choose_spec (constWNomega hab ω hloop)).2 tildeω hlift
+
+/-%%
+\begin{proof}\uses{WNloop, constWNomega}\leanok
+By definition, $w(\omega)$ is the integer supplied by Corollary~\ref{constWNomega}.
+That corollary also says that every lift of $\omega$ has winding number equal to this integer.
+\end{proof}
+%%-/
 
 /-%%
 
