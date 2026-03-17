@@ -7,3 +7,4 @@
 --import «CoveringSpacesProject».ExpCovering
 --import «CoveringSpacesProject».HomotopyClassesOfLoops
 import «CoveringSpacesProject».RootsComplexPolynomials
+import «CoveringSpacesProject».RootsMathlib
