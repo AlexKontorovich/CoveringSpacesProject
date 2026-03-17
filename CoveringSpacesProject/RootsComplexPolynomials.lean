@@ -1133,6 +1133,17 @@ the conditions of the  Definition~\ref{trivialization} on $T⊆ $.
 \end{proof}
 %%-/
 
+lemma commute_symm_of_commute {E X : Type*} [TopologicalSpace E] [TopologicalSpace X]
+    {f : E → X} (φ : X ≃ₜ X) (tildeφ : E ≃ₜ E) (hcomm : f ∘ tildeφ = φ ∘ f) :
+    f ∘ tildeφ.symm = φ.symm ∘ f := by
+  ext x
+  have hx : f x = φ (f (tildeφ.symm x)) := by
+    simpa using congrFun hcomm (tildeφ.symm x)
+  calc
+    f (tildeφ.symm x) = φ.symm (φ (f (tildeφ.symm x))) := by rw [φ.symm_apply_apply]
+    _ = φ.symm (f x) := by rw [hx.symm]
+
+
 /-%%
 \begin{lemma}\label{homeoInv}\lean{homeoInv}\leanok
 Suppose $f\colon E\to X$ is a map between topological spaces and $U\subset X$ is an open subset
@@ -1147,13 +1158,7 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
     {e' : Trivialization I f // e'.baseSet = φ '' e.baseSet} := by
   let e' : Trivialization I (f ∘ tildeφ.symm) := e.compHomeomorph tildeφ.symm
   let ψ : X × I ≃ₜ X × I := φ.prodCongr (Homeomorph.refl I)
-  have hcomm_symm : f ∘ tildeφ.symm = φ.symm ∘ f := by
-    ext x
-    have hx : f x = φ (f (tildeφ.symm x)) := by
-      simpa using congrFun hcomm (tildeφ.symm x)
-    calc
-      f (tildeφ.symm x) = φ.symm (φ (f (tildeφ.symm x))) := by rw [φ.symm_apply_apply]
-      _ = φ.symm (f x) := by rw [hx.symm]
+  have hcomm_symm : f ∘ tildeφ.symm = φ.symm ∘ f := commute_symm_of_commute φ tildeφ hcomm
   let t : Trivialization I f :=
     { toPartialHomeomorph := e'.toPartialHomeomorph.transHomeomorph ψ
       baseSet := φ '' e.baseSet
@@ -1198,6 +1203,12 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
           simpa [Function.comp] using e'.proj_toFun p hp'
         simpa [hproj, Function.comp] using (congrFun hcomm (tildeφ.symm p)).symm }
   exact ⟨t, rfl⟩
+
+@[simp] theorem homeoInv_baseSet {E X I : Type*} [TopologicalSpace E] [TopologicalSpace X]
+    [TopologicalSpace I] {f : E → X} (e : Trivialization I f) (φ : X ≃ₜ X)
+    (tildeφ : E ≃ₜ E) (hcomm : f ∘ tildeφ = φ ∘ f) :
+    (homeoInv e φ tildeφ hcomm).1.baseSet = φ '' e.baseSet :=
+  (homeoInv e φ tildeφ hcomm).2
 
 /-%%
 \begin{proof}\uses{trivialization}\leanok
