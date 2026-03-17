@@ -1381,15 +1381,30 @@ $x\in T$ or $x\in T'$. Hence $x\in T\cup T'$.
 
 /-%%
 
-\begin{corollary}\label{expCP}
+\begin{corollary}\label{expCP}\lean{expCP}\leanok
 $CSexp\colon \C\to \C $ is a covering projection over $Cstar$ with source $\C$.
 The image of $CSexp$ is  $Cstar$.
 \end{corollary}
 %%-/
 
+theorem expCP : IsCoveringOn CSexp Cstar ∧ CSexp ⁻¹' Cstar = Set.univ ∧ Set.SurjOn CSexp Set.univ Cstar := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro x hx
+    have hx' : x ∈ splitPlane ∪ TprimeDef := by
+      simpa [TcupTprimeCstar] using hx
+    rcases hx' with hxT | hxT'
+    · exact IsEvenlyCovered.to_isEvenlyCovered_preimage ⟨inferInstance, trivOverT, by simpa using hxT⟩
+    · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
+        ⟨inferInstance, trivOverTprime.1, by simpa using hxT'⟩
+  · ext z
+    simp [Cstar, CSexp, Complex.exp_ne_zero]
+  · intro z hz
+    refine ⟨PBlog z, by simp, ?_⟩
+    exact (ImPBlog z (by simpa [Cstar] using hz)).1
+
 /-%%
 
-\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, IsCoveringOn}
+\begin{proof}\uses{Cstar, trivOverT, trivOverTprime, ImPBlog, TcupTprimeCstar, IsCoveringOn}\leanok
 By Corollary~\ref{TcupTprimeCstar}
 $T\cup T'= Cstar$. By Proposition~\ref{trivOverT} and Corollary~\ref{trivOverTprime}
 $CSexp$ is a trivialization on $T$ and on $T'$. Hence, every point  of $Cstar$ lies
