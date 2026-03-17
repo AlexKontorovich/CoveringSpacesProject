@@ -7,7 +7,7 @@ open TopologicalSpace Function
 open Complex Set
 
 /-%%
-\begin{lemma}\label{isConnectedRangeContinuousOn}\lean{isConnected_range_of_continuousOn}\leanok
+\begin{lemma}\label{isConnected_range_of_continuousOn}\lean{isConnected_range_of_continuousOn}\leanok
 The image of a connected set under a continuous map is connected.
 \end{lemma}
 %%-/
@@ -17,7 +17,7 @@ IsConnected (f '' s) := by
 exact IsConnected.image hs f h
 
 /-%%
-\begin{lemma}\label{SingletonConnectedInt}\lean{Singleton_of_isConnected_SetInt}
+\begin{lemma}\label{Singleton_of_isConnected_SetInt}\lean{Singleton_of_isConnected_SetInt}
 Any nonempty connected subset of $\mathbb Z$ is a singleton.
 \end{lemma}
 %%-/
@@ -33,7 +33,7 @@ theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) (hs' 
   exact ⟨k, hsSub.eq_singleton_of_mem hk⟩
 
 /-%%
-\begin{lemma}\label{ContinuousOnCoeInt}\lean{ContinuousOn.coe}
+\begin{lemma}\label{ContinuousOn.coe}\lean{ContinuousOn.coe}
 If a map into $\mathbb Z$ is continuous after coercion to $\C$, then it is continuous.
 \end{lemma}
 %%-/
@@ -94,7 +94,7 @@ def IsCoveringOn := IsCoveringMapOn proj
 end trivializations
 
 /-%%
-\begin{definition}\label{Defexp}\lean{CSexp}\leanok
+\begin{definition}\label{CSexp}\lean{CSexp}\leanok
 $CSexp\colon \C\to \C$ defined by
 the usual power series.
 \end{definition}
@@ -113,7 +113,7 @@ lemma Contexp : Continuous exp := by
   apply Complex.continuous_exp
 
 /-%%
-\begin{proof}\uses{Defexp}\leanok
+\begin{proof}\uses{CSexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -133,7 +133,7 @@ lemma Eulersformula (r θ : ℝ) :
   rw [Complex.exp_add, Complex.exp_mul_I]
 
 /-%%
-\begin{proof}\uses{Defexp}\leanok
+\begin{proof}\uses{CSexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -150,7 +150,7 @@ lemma multiplicativity (z w : ℂ) :
   rw [Complex.exp_add]
 
 /-%%
-\begin{proof}\uses{Defexp}\leanok
+\begin{proof}\uses{CSexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -166,7 +166,7 @@ lemma periodicity (x y : ℂ) : CSexp x = CSexp y ↔ ∃ (n : ℤ), x = y + n *
   exact Complex.exp_eq_exp_iff_exists_int
 
 /-%%
-\begin{proof}\uses{Defexp}\leanok
+\begin{proof}\uses{CSexp}\leanok
   In Mathlib.
 \end{proof}
 %%-/
@@ -196,7 +196,7 @@ lemma ImPBlog (z : ℂ) (hz : z ≠ 0) :
   · exact log_im_le_pi z
 
 /-%%
-\begin{proof}\uses{DefPBlog, Defexp, Eulersformula}\leanok
+\begin{proof}\uses{DefPBlog, CSexp, Eulersformula}\leanok
 This is immediate from Definition~\ref{DefPBlog} and Lemma~\ref{Eulersformula}.
 \end{proof}
 %%-/
@@ -222,7 +222,7 @@ $PBlog(z)\in \{z\in \C |-\pi  < Im(z) < \pi \}$.
 %%-/
 
 lemma ContPBlog :
-    ContinuousOn PBlog splitPlane ∧ ∀ (z : ℂ) (hz : z ∈ splitPlane),
+    ContinuousOn PBlog splitPlane ∧ ∀ (z : ℂ) (_ : z ∈ splitPlane),
     -π < im (PBlog z) ∧ im (PBlog z) < π := by
   unfold splitPlane
   unfold PBlog
@@ -434,14 +434,7 @@ def DeftildeS : Set ℂ :=
   {z : ℂ | ∀ (k : ℤ), im z ≠ (2 * k + 1) * π}
 
 /-%%
-\begin{lemma}\label{tildeShomeo}\lean{tildeShomeo}\uses{DeftildeS, Sstrip}\leanok
-Define $\varphi\colon S\times \Z \to \C$  by $\varphi(z,k)=z+2k\pi  *I$. Then
-$\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
-\end{lemma}
-%%-/
-
-/-%%
-\begin{lemma}\label{floorArgNotInt}\lean{floor_arg_not_int}\leanok
+\begin{lemma}\label{floor_arg_not_int}\lean{floor_arg_not_int}\leanok
 For each $w\in \tilde S$, the number $\frac{\Im(w)+\pi}{2\pi}$ is not an integer.
 \end{lemma}
 %%-/
@@ -511,7 +504,7 @@ lemma continuous_floor_arg :
   · exact isOpen_lt continuous_im continuous_const
 
 /-%%
-\begin{definition}\label{tildeShomeoToFun}\lean{tildeShomeo_toFun}\leanok
+\begin{definition}\label{tildeShomeo_toFun}\lean{tildeShomeo_toFun}\leanok
 Define $\varphi\colon \C\times \Z\to \C$ by $\varphi(z,n)=z+2n\pi i$.
 \end{definition}
 %%-/
@@ -520,7 +513,7 @@ noncomputable def tildeShomeo_toFun (zn : ℂ × ℤ) : ℂ :=
   zn.1 + (2 * zn.2 : ℂ) * π * I
 
 /-%%
-\begin{lemma}\label{tildeShomeoToFunMem}\lean{tildeShomeo_toFun_mem}\leanok
+\begin{lemma}\label{tildeShomeo_toFun_mem}\lean{tildeShomeo_toFun_mem}\leanok
 If $z\in S$, then $\varphi(z,n)\in \tilde S$.
 \end{lemma}
 %%-/
@@ -599,7 +592,7 @@ noncomputable def tildeShomeo_invFun (w : ℂ) : ℂ × ℤ :=
   (tildeShomeo_invFun_complex w, tildeShomeo_floor w)
 
 /-%%
-\begin{definition}\label{tildeShomeoInvFunLift}\lean{tildeShomeo_invFun_lift}\leanok
+\begin{definition}\label{tildeShomeo_invFun_lift}\lean{tildeShomeo_invFun_lift}\leanok
 Restrict $\tilde\varphi^{-1}$ to a map $\tilde S\to S\times \Z$.
 \end{definition}
 %%-/
@@ -608,7 +601,7 @@ noncomputable def tildeShomeo_invFun_lift (w : DeftildeS) : Sstrip × ℤ :=
   (⟨tildeShomeo_invFun_complex w.1, tildeShomeo_invFun_mem w.2⟩, tildeShomeo_floor w)
 
 /-%%
-\begin{lemma}\label{tildeShomeoLeftInv}\lean{tildeShomeo_left_inv}\leanok
+\begin{lemma}\label{tildeShomeo_left_inv}\lean{tildeShomeo_left_inv}\leanok
 The maps $\tilde\varphi$ and $\tilde\varphi^{-1}$ are left inverses on $S\times \Z$.
 \end{lemma}
 %%-/
@@ -632,7 +625,7 @@ lemma tildeShomeo_left_inv (zn : Sstrip × ℤ) :
   · simp [tildeShomeo_invFun_lift, tildeShomeo_floor, tildeShomeo_toFun, hfloor]
 
 /-%%
-\begin{lemma}\label{tildeShomeoRightInv}\lean{tildeShomeo_right_inv}\leanok
+\begin{lemma}\label{tildeShomeo_right_inv}\lean{tildeShomeo_right_inv}\leanok
 The maps $\tilde\varphi$ and $\tilde\varphi^{-1}$ are right inverses on $\tilde S$.
 \end{lemma}
 %%-/
@@ -644,7 +637,7 @@ lemma tildeShomeo_right_inv (w : DeftildeS) :
   simp [tildeShomeo_toFun, tildeShomeo_invFun, tildeShomeo_invFun_complex]
 
 /-%%
-\begin{lemma}\label{tildeShomeoContinuousToFun}\lean{tildeShomeo_continuous_toFun}\leanok
+\begin{lemma}\label{tildeShomeo_continuous_toFun}\lean{tildeShomeo_continuous_toFun}\leanok
 The forward map $S\times \Z\to \tilde S$ is continuous.
 \end{lemma}
 %%-/
@@ -661,7 +654,7 @@ lemma tildeShomeo_continuous_toFun : Continuous (fun zn : Sstrip × ℤ =>
   simpa [tildeShomeo_toFun] using hz.add hterm
 
 /-%%
-\begin{lemma}\label{tildeShomeoContinuousInvFun}\lean{tildeShomeo_continuous_invFun}\leanok
+\begin{lemma}\label{tildeShomeo_continuous_invFun}\lean{tildeShomeo_continuous_invFun}\leanok
 The inverse map $\tilde S\to S\times \Z$ is continuous.
 \end{lemma}
 %%-/
@@ -681,6 +674,14 @@ lemma tildeShomeo_continuous_invFun : Continuous tildeShomeo_invFun_lift := by
       continuous_subtype_val.sub hterm'
   · simpa [tildeShomeo_invFun_lift, tildeShomeo_floor] using continuous_floor_arg
 
+
+/-%%
+\begin{lemma}\label{tildeShomeo}\lean{tildeShomeo}\uses{DeftildeS, Sstrip}\leanok
+Define $\varphi\colon S\times \Z \to \C$  by $\varphi(z,k)=z+2k\pi  *I$. Then
+$\varphi\colon S\times \Z\to \tilde S$  is a homeomorphism.
+\end{lemma}
+%%-/
+
 noncomputable def tildeShomeo : Homeomorph (Sstrip × ℤ) DeftildeS where
   toFun zn := ⟨tildeShomeo_toFun (zn.1.1, zn.2), tildeShomeo_toFun_mem zn.1.2⟩
   invFun := tildeShomeo_invFun_lift
@@ -690,7 +691,7 @@ noncomputable def tildeShomeo : Homeomorph (Sstrip × ℤ) DeftildeS where
   continuous_invFun := tildeShomeo_continuous_invFun
 
 /-%%
-\begin{proof}\uses{DeftildeS, Sstrip}\leanok
+\begin{proof}\uses{DeftildeS, Sstrip, tildeShomeo_toFun, tildeShomeo_toFun_mem, tildeShomeo_invFun_lift, tildeShomeo_left_inv, tildeShomeo_right_inv, tildeShomeo_continuous_toFun, tildeShomeo_continuous_invFun}\leanok
 According to Definition~\ref{Defstrip}  image of $S$ under the translation action of $(2\pi )\Z$ on $\C$
 is the union
 of all strips $S(2n-1)\pi ,(2n+1)\pi )$. By Definition~\ref{DeftildeS} this union is $\tilde S$.
@@ -762,7 +763,7 @@ Hence $T$ is open.
 %%-/
 
 /-%%
-\begin{lemma}\label{memDeftildeOfMemSource}\lean{mem_Deftilde_of_mem_source}\uses{Defexp, splitPlane, DeftildeS}\leanok
+\begin{lemma}\label{memDeftildeOfMemSource}\lean{mem_Deftilde_of_mem_source}\uses{CSexp, splitPlane, DeftildeS}\leanok
 If $x\in CSexp^{-1}(T)$, then $x\in \widetilde S$.
 \end{lemma}
 %%-/
@@ -794,7 +795,7 @@ lemma mem_Deftilde_of_mem_source {x : ℂ} (hx : x ∈ CSexp ⁻¹' splitPlane) 
   exact (hx'.elim hre_not_pos (fun him => him him0))
 
 /-%%
-\begin{proof}\uses{Defexp, splitPlane, DeftildeS}\leanok
+\begin{proof}\uses{CSexp, splitPlane, DeftildeS}\leanok
 By contradiction, suppose $\Im(x)=(2k+1)\pi$ for some $k\in \Z$.
 Then $\Im(CSexp(x))=0$ and $\Re(CSexp(x))<0$, so $CSexp(x)\notin T$.
 This contradicts $x\in CSexp^{-1}(T)$.
