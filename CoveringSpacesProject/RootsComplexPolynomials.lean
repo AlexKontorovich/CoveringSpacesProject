@@ -1416,16 +1416,59 @@ This proves that $CSexp$ is onto $\{z\in \C | z\not=0\}$, which by Lemma~\ref{Cs
 is equal to $Cstar$.\end{proof}
 %%-/
 
+/-%%
+
+\begin{definition}\label{CSexpCstar}\lean{CSexpCstar}\uses{CSexp, Cstar}\leanok
+Let
+\[
+CSexpCstar\colon \C \to Cstar
+\]
+be the map obtained from $CSexp$ by regarding $CSexp(z)$ as an element of $Cstar$.
+\end{definition}
+%%-/
+
 noncomputable def CSexpCstar : ℂ → Cstar :=
   Cstar.codRestrict CSexp fun z => by
     simp [Cstar, CSexp, Complex.exp_ne_zero]
 
+/-%%
+
+\begin{lemma}\label{CSexpCstar_coe}\lean{CSexpCstar_coe}\leanok
+For every $z\in \C$, forgetting that $CSexpCstar(z)$ lies in $Cstar$ gives back $CSexp(z)$.
+\end{lemma}
+%%-/
+
 @[simp] theorem CSexpCstar_coe (z : ℂ) : ((CSexpCstar z : Cstar) : ℂ) = CSexp z :=
   rfl
+
+/-%%
+\begin{proof}\uses{CSexpCstar}\leanok
+This is immediate from Definition~\ref{CSexpCstar}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{splitPlane_subset_Cstar}\lean{splitPlane_subset_Cstar}\leanok
+We have $T\subset Cstar$.
+\end{lemma}
+%%-/
 
 lemma splitPlane_subset_Cstar : splitPlane ⊆ Cstar := by
   intro z hz
   exact splitPlane_ne_zero hz
+
+/-%%
+\begin{proof}\uses{splitPlane, Cstar}\leanok
+If $z\in T$, then by Definition~\ref{splitPlane} either $\Re(z)>0$ or $\Im(z)\neq 0$.
+In either case $z\neq 0$, so $z\in Cstar$ by Definition~\ref{Cstar}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{TprimeDef_subset_Cstar}\lean{TprimeDef_subset_Cstar}\leanok
+We have $T'\subset Cstar$.
+\end{lemma}
+%%-/
 
 lemma TprimeDef_subset_Cstar : TprimeDef ⊆ Cstar := by
   intro z hz
@@ -1436,6 +1479,20 @@ lemma TprimeDef_subset_Cstar : TprimeDef ⊆ Cstar := by
     simp [hz0] at hre
   · intro hz0
     simp [hz0] at him
+
+/-%%
+\begin{proof}\uses{TprimeDef, Cstar}\leanok
+If $z\in T'$, then by Definition~\ref{TprimeDef} either $\Re(z)<0$ or $\Im(z)\neq 0$.
+Again either alternative implies $z\neq 0$, hence $z\in Cstar$ by Definition~\ref{Cstar}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{trivializationCstar}\lean{trivializationCstar}\leanok
+If $e$ is a trivialization of $CSexp\colon \C\to \C$ over a set $U$, then the same formulas
+define a trivialization of $CSexpCstar\colon \C\to Cstar$ over $U\cap Cstar$.
+\end{lemma}
+%%-/
 
 noncomputable def trivializationCstar (e : Trivialization ℤ CSexp) :
     Trivialization ℤ CSexpCstar where
@@ -1518,19 +1575,90 @@ noncomputable def trivializationCstar (e : Trivialization ℤ CSexp) :
   open_target := by
     simpa [Set.top_eq_univ] using (e.open_baseSet.preimage continuous_subtype_val).prod isOpen_univ
 
+/-%%
+\begin{proof}\uses{trivialization, CSexpCstar}\leanok
+Because $CSexp(z)\neq 0$ for every $z\in \C$, the first coordinate of the old
+trivialization already lands in $Cstar$. Thus we may keep the same source and inverse map,
+replace the base by $U\cap Cstar$, and regard the target as $(U\cap Cstar)\times \Z$.
+All the axioms of a trivialization are inherited from those of $e$.
+\end{proof}
+%%-/
+
+/-%%
+\begin{corollary}\label{trivOverTCstar}\lean{trivOverTCstar}\leanok
+There is a trivialization of $CSexpCstar$ over $T$, viewed as a subset of $Cstar$.
+\end{corollary}
+%%-/
+
 noncomputable def trivOverTCstar : Trivialization ℤ CSexpCstar :=
   trivializationCstar trivOverT
 
+/-%%
+\begin{proof}\uses{splitPlane_subset_Cstar, trivializationCstar, trivOverT}\leanok
+By Proposition~\ref{trivOverT}, $CSexp$ is trivial over $T$.
+Since $T\subset Cstar$ by Lemma~\ref{splitPlane_subset_Cstar},
+Lemma~\ref{trivializationCstar} turns this into a trivialization of $CSexpCstar$
+over $T$ viewed inside $Cstar$.
+\end{proof}
+%%-/
+
+/-%%
+\begin{corollary}\label{trivOverTprimeCstar}\lean{trivOverTprimeCstar}\leanok
+There is a trivialization of $CSexpCstar$ over $T'$, viewed as a subset of $Cstar$.
+\end{corollary}
+%%-/
+
 noncomputable def trivOverTprimeCstar : Trivialization ℤ CSexpCstar :=
   trivializationCstar trivOverTprime.1
+
+/-%%
+\begin{proof}\uses{TprimeDef_subset_Cstar, trivializationCstar, trivOverTprime}\leanok
+By Corollary~\ref{trivOverTprime}, $CSexp$ is trivial over $T'$.
+Since $T'\subset Cstar$ by Lemma~\ref{TprimeDef_subset_Cstar},
+Lemma~\ref{trivializationCstar} turns this into a trivialization of $CSexpCstar$
+over $T'$ viewed inside $Cstar$.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{trivOverTCstar_baseSet}\lean{trivOverTCstar_baseSet}\leanok
+The base of the trivialization of Corollary~\ref{trivOverTCstar} is exactly $T$,
+viewed as a subset of $Cstar$.
+\end{lemma}
+%%-/
 
 @[simp] theorem trivOverTCstar_baseSet :
     trivOverTCstar.baseSet = (((↑) : Cstar → ℂ) ⁻¹' splitPlane : Set Cstar) :=
   rfl
 
+/-%%
+\begin{proof}\uses{trivOverTCstar}\leanok
+This is immediate from the construction of Corollary~\ref{trivOverTCstar}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{trivOverTprimeCstar_baseSet}\lean{trivOverTprimeCstar_baseSet}\leanok
+The base of the trivialization of Corollary~\ref{trivOverTprimeCstar} is exactly $T'$,
+viewed as a subset of $Cstar$.
+\end{lemma}
+%%-/
+
 @[simp] theorem trivOverTprimeCstar_baseSet :
     trivOverTprimeCstar.baseSet = (((↑) : Cstar → ℂ) ⁻¹' TprimeDef : Set Cstar) := by
   simp [trivOverTprimeCstar, trivializationCstar, trivOverTprime_baseSet]
+
+/-%%
+\begin{proof}\uses{trivOverTprimeCstar}\leanok
+This is immediate from the construction of Corollary~\ref{trivOverTprimeCstar}.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{CSexpCstar_isCoveringMap}\lean{CSexpCstar_isCoveringMap}\leanok
+The map $CSexpCstar\colon \C\to Cstar$ is a covering map.
+\end{lemma}
+%%-/
 
 theorem CSexpCstar_isCoveringMap : IsCoveringMap CSexpCstar := by
   intro x
@@ -1542,6 +1670,17 @@ theorem CSexpCstar_isCoveringMap : IsCoveringMap CSexpCstar := by
       ⟨inferInstance, trivOverTCstar, by simpa [trivOverTCstar_baseSet] using hs⟩
   · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
       ⟨inferInstance, trivOverTprimeCstar, by simpa [trivOverTprimeCstar_baseSet] using ht⟩
+
+/-%%
+\begin{proof}\uses{CSexpCstar, TcupTprimeCstar, trivOverTCstar, trivOverTprimeCstar, trivOverTCstar_baseSet, trivOverTprimeCstar_baseSet}\leanok
+By Corollary~\ref{TcupTprimeCstar}, every point of $Cstar$ lies in $T$ or in $T'$.
+By Corollaries~\ref{trivOverTCstar} and \ref{trivOverTprimeCstar}, together with
+Lemmas~\ref{trivOverTCstar_baseSet} and \ref{trivOverTprimeCstar_baseSet},
+these two sets are bases of trivializations for $CSexpCstar$.
+Hence every point of $Cstar$ has an evenly covered neighborhood, so
+$CSexpCstar$ is a covering map.
+\end{proof}
+%%-/
 
 /-%%
 
@@ -1596,8 +1735,14 @@ theorem expUPL {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar)) (z0 : ℂ)
 
 /-%%
 
-\begin{proof}\uses{expCP}\leanok
-By Corollary~\ref{expCP} and the basic result about covering projections.
+\begin{proof}\uses{CSexpCstar, CSexpCstar_coe, CSexpCstar_isCoveringMap}\leanok
+By Lemma~\ref{CSexpCstar_isCoveringMap}, the codomain-restricted exponential
+$CSexpCstar\colon \C\to Cstar$ is a covering map.
+Therefore the standard path-lifting theorem for covering maps yields a unique lift of $\omega$
+starting at $\tilde a_0$.
+Finally, Lemma~\ref{CSexpCstar_coe} says that forgetting the codomain restriction turns the
+identity $CSexpCstar\circ\tilde\omega=\omega$ into $CSexp\circ\tilde\omega=\omega$,
+which is exactly the desired conclusion.
 \end{proof}
 %%-/
 
