@@ -1041,14 +1041,9 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
   open_baseSet := splitPlane_isOpen
   source_eq := by rfl
   target_eq := by rfl
-  proj_toFun := by
-    intro p hp
-    simp
-  map_source' := by
-    intro x hx
-    exact ⟨hx, trivial⟩
-  map_target' := by
-    intro x hx
+  proj_toFun p hp := by simp
+  map_source' x hx := ⟨hx, trivial⟩
+  map_target' x hx := by
     rcases x with ⟨z, n⟩
     have hz : z ∈ splitPlane := hx.1
     change CSexp (PBlog z + (2 * n : ℂ) * π * I) ∈ splitPlane
@@ -1088,8 +1083,7 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
     have hshift : ContinuousOn (fun x : ℂ × ℤ => (2 * x.2 : ℂ) * π * I) (splitPlane ×ˢ (⊤ : Set ℤ)) :=
       ((((continuous_const.mul hsnd).mul continuous_const).mul continuous_const)).continuousOn
     exact hlog.add hshift
-  left_inv' := by
-    intro x hx
+  left_inv' x hx := by
     have hPB : PBlog (CSexp x) = tildeShomeo_invFun_complex x :=
       PBlog_CSexp_eq_tildeShomeo_invFun_complex hx
     have hPB' : PBlog (CSexp x) = x - (2 * (⌊(x.im + π) / (2 * π)⌋ : ℝ)) * π * I := by
@@ -1102,8 +1096,7 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
       _ = x := by
         norm_cast
         ring_nf
-  right_inv' := by
-    intro x hx
+  right_inv' x hx := by
     rcases x with ⟨z, n⟩
     have hz : z ∈ splitPlane := hx.1
     have hz0 : z ≠ 0 := by
