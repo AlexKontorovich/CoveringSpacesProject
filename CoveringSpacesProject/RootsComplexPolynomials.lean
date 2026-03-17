@@ -17,7 +17,7 @@ IsConnected (f '' s) := by
 exact IsConnected.image hs f h
 
 /-%%
-\begin{lemma}\label{Singleton_of_isConnected_SetInt}\lean{Singleton_of_isConnected_SetInt}
+\begin{lemma}\label{Singleton_of_isConnected_SetInt}\lean{Singleton_of_isConnected_SetInt}\leanok
 Any nonempty connected subset of $\mathbb Z$ is a singleton.
 \end{lemma}
 %%-/
@@ -33,7 +33,16 @@ theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) (hs' 
   exact ⟨k, hsSub.eq_singleton_of_mem hk⟩
 
 /-%%
-\begin{lemma}\label{ContinuousOn.coe}\lean{ContinuousOn.coe}
+\begin{proof}\leanok
+The subspace topology on $s\subset \mathbb Z$ is discrete, because $\mathbb Z$ itself is discrete.
+A connected discrete space cannot contain two distinct points: otherwise one of those points would
+be a nontrivial clopen subset, contradicting connectedness. Hence $s$ has at most one point.
+Since $s$ is assumed nonempty, it must be of the form $\{k\}$ for some $k\in \mathbb Z$.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{ContinuousOn.coe}\lean{ContinuousOn.coe}\leanok
 If a map into $\mathbb Z$ is continuous after coercion to $\C$, then it is continuous.
 \end{lemma}
 %%-/
@@ -46,6 +55,15 @@ theorem ContinuousOn.coe {f : ℝ → ℤ} {s : Set ℝ} (h : ContinuousOn (fun 
   have hCast : ContinuousOn (((↑) : ℤ → ℝ) ∘ f) s := by
     simpa [Function.comp] using hReal
   exact (Int.isClosedEmbedding_coe_real.isEmbedding.continuousOn_iff).2 hCast
+
+/-%%
+\begin{proof}\leanok
+Compose the map $x\mapsto f(x)\in \mathbb C$ with the real-part map $\Re\colon \mathbb C\to \mathbb R$.
+This shows that the same function, viewed as an $\mathbb R$-valued map, is continuous on $s$.
+Now the inclusion $\mathbb Z\hookrightarrow \mathbb R$ is an embedding, so continuity after
+composing with this inclusion is equivalent to continuity of the original $\mathbb Z$-valued map.
+\end{proof}
+%%-/
 
 
 local notation "π" => Real.pi
@@ -728,8 +746,8 @@ noncomputable def widetildePBlogHomeo :
 
 /-%%
 
-\begin{proof}\uses{DefwidetildePBlog, inverseHomeo}
-By Definition~\ref{DefwidetildePBlog}\leanok
+\begin{proof}\uses{DefwidetildePBlog, inverseHomeo}\leanok
+By Definition~\ref{DefwidetildePBlog}
 $\widetilde PBlog$
 is the product of $PBlog\colon T\to S$
 and ${\rm Id}_\Z\colon \Z\to\Z$.
