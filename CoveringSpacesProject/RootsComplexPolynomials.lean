@@ -1133,6 +1133,16 @@ the conditions of the  Definition~\ref{trivialization} on $T⊆ $.
 \end{proof}
 %%-/
 
+/-%%
+\begin{lemma}\label{commute_symm_of_commute}\lean{commute_symm_of_commute}\leanok
+Suppose $f\colon E\to X$ is a map between topological spaces and
+$\varphi\colon X\to X$, $\tilde\varphi\colon E\to E$ are homeomorphisms such that
+$f\circ\tilde\varphi=\varphi\circ f$.
+Then also
+$f\circ\tilde\varphi^{-1}=\varphi^{-1}\circ f$.
+\end{lemma}
+%%-/
+
 lemma commute_symm_of_commute {E X : Type*} [TopologicalSpace E] [TopologicalSpace X]
     {f : E → X} (φ : X ≃ₜ X) (tildeφ : E ≃ₜ E) (hcomm : f ∘ tildeφ = φ ∘ f) :
     f ∘ tildeφ.symm = φ.symm ∘ f := by
@@ -1142,6 +1152,21 @@ lemma commute_symm_of_commute {E X : Type*} [TopologicalSpace E] [TopologicalSpa
   calc
     f (tildeφ.symm x) = φ.symm (φ (f (tildeφ.symm x))) := by rw [φ.symm_apply_apply]
     _ = φ.symm (f x) := by rw [hx.symm]
+
+/-%%
+\begin{proof}\leanok
+Apply the identity $f\circ\tilde\varphi=\varphi\circ f$ to a point of the form
+$\tilde\varphi^{-1}(x)$. This gives
+\[
+f(x)=\varphi(f(\tilde\varphi^{-1}(x))).
+\]
+Now compose both sides with $\varphi^{-1}$ to obtain
+\[
+f(\tilde\varphi^{-1}(x))=\varphi^{-1}(f(x)).
+\]
+Since this holds for every $x$, the desired identity follows.
+\end{proof}
+%%-/
 
 
 /-%%
@@ -1211,7 +1236,9 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
   (homeoInv e φ tildeφ hcomm).2
 
 /-%%
-\begin{proof}\uses{trivialization}\leanok
+\begin{proof}\uses{trivialization, commute_symm_of_commute}\leanok
+By Lemma~\ref{commute_symm_of_commute}, we also have
+$f\circ\tilde\varphi^{-1}=\varphi^{-1}\circ f$.
 Since $f\circ \tilde\varphi=\varphi\circ f$,  we have  $\tilde\varphi\colon f^{-1}(U)\to f^{-1}(\varphi(U))$.
 Since $\varphi$ and $\tilde\varphi$ are homeomorphisms the induced map
  $\tilde\varphi\colon f^{-1}(U) \to f^{-1}(\varphi(U))$ is a homeomorphism.
