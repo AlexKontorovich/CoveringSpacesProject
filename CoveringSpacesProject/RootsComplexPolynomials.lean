@@ -17,6 +17,13 @@ IsConnected (f '' s) := by
 exact IsConnected.image hs f h
 
 /-%%
+\begin{proof}\leanok
+This is the standard fact that the image of a connected space under a continuous map is connected.
+Apply this to the restriction of $f$ to the connected set $s$.
+\end{proof}
+%%-/
+
+/-%%
 \begin{lemma}\label{Singleton_of_isConnected_SetInt}\lean{Singleton_of_isConnected_SetInt}\leanok
 Any nonempty connected subset of $\mathbb Z$ is a singleton.
 \end{lemma}
@@ -472,6 +479,17 @@ lemma floor_arg_not_int {w : ℂ} (hw : w ∈ DeftildeS) :
   linarith
 
 /-%%
+\begin{proof}\uses{DeftildeS}\leanok
+If $\frac{\Im(w)+\pi}{2\pi}$ were an integer, say equal to $k$, then
+\[
+\Im(w)=(2k-1)\pi=(2(k-1)+1)\pi.
+\]
+But this says that $\Im(w)$ is an odd multiple of $\pi$, contradicting the definition of
+$\tilde S$.
+\end{proof}
+%%-/
+
+/-%%
 \begin{lemma}\label{continuousFloorArg}\lean{continuous_floor_arg}\leanok
 The map $w\mapsto\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$ is continuous on $\tilde S$.
 \end{lemma}
@@ -522,6 +540,22 @@ lemma continuous_floor_arg :
   · exact isOpen_lt continuous_im continuous_const
 
 /-%%
+\begin{proof}\uses{DeftildeS, floor_arg_not_int}\leanok
+Fix $n\in \mathbb Z$. The fiber where
+\[
+\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor=n
+\]
+is exactly the strip
+\[
+(2n-1)\pi<\Im(w)<(2n+1)\pi
+\]
+inside $\tilde S$. The point is that equality at one of the endpoints would make
+$\frac{\Im(w)+\pi}{2\pi}$ an integer, which is excluded by Lemma~\ref{floor_arg_not_int}.
+Hence each fiber is open in $\tilde S$, so the map is locally constant, and therefore continuous.
+\end{proof}
+%%-/
+
+/-%%
 \begin{definition}\label{tildeShomeo_toFun}\lean{tildeShomeo_toFun}\leanok
 Define $\varphi\colon \C\times \Z\to \C$ by $\varphi(z,n)=z+2n\pi i$.
 \end{definition}
@@ -553,6 +587,21 @@ lemma tildeShomeo_toFun_mem {zn : ℂ × ℤ} (hzn : zn.1 ∈ Sstrip) : tildeSho
   have h1 : -1 < 2 * m + 1 := by exact_mod_cast h1
   have h2 : 2 * m + 1 < 1 := by exact_mod_cast h2
   omega
+
+/-%%
+\begin{proof}\uses{Sstrip, DeftildeS, tildeShomeo_toFun}\leanok
+Let $z\in S$, so $-\pi<\Im(z)<\pi$. For $\varphi(z,n)=z+2n\pi i$, the imaginary part is
+\[
+\Im(\varphi(z,n))=\Im(z)+2n\pi.
+\]
+If this were equal to an odd multiple $(2k+1)\pi$, then
+\[
+\Im(z)=(2(k-n)+1)\pi,
+\]
+which is impossible because $\Im(z)$ lies strictly between $-\pi$ and $\pi$.
+Therefore $\varphi(z,n)\in\tilde S$.
+\end{proof}
+%%-/
 
 /-%%
 \begin{definition}\label{tildeShomeoFloor}\lean{tildeShomeo_floor}\leanok
@@ -601,6 +650,23 @@ lemma tildeShomeo_invFun_mem {w : ℂ} (hw : w ∈ DeftildeS) : tildeShomeo_invF
   · rw [div_lt_iff₀ h2pi] at hn_lt; linarith
 
 /-%%
+\begin{proof}\uses{DeftildeS, Sstrip, tildeShomeoFloor, tildeShomeoInvFunComplex, floor_arg_not_int}\leanok
+Set $N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$. By the defining inequalities for the floor
+function,
+\[
+N(w)\le \frac{\Im(w)+\pi}{2\pi}<N(w)+1.
+\]
+Because $w\in\tilde S$, Lemma~\ref{floor_arg_not_int} shows that the left inequality is in fact strict.
+Multiplying through by $2\pi$ gives
+\[
+(2N(w)-1)\pi<\Im(w)<(2N(w)+1)\pi.
+\]
+After subtracting $2N(w)\pi i$, the imaginary part lands in the interval $(-\pi,\pi)$, which is exactly
+the condition defining $S$.
+\end{proof}
+%%-/
+
+/-%%
 \begin{definition}\label{tildeShomeoInvFun}\lean{tildeShomeo_invFun}\leanok
 Define $\tilde\varphi^{-1}(w)=(\tilde\varphi^{-1}_{\C}(w),N(w))\in \C\times \Z$.
 \end{definition}
@@ -643,6 +709,18 @@ lemma tildeShomeo_left_inv (zn : Sstrip × ℤ) :
   · simp [tildeShomeo_invFun_lift, tildeShomeo_floor, tildeShomeo_toFun, hfloor]
 
 /-%%
+\begin{proof}\uses{Sstrip, tildeShomeo_toFun, tildeShomeo_invFun_lift, tildeShomeoFloor, tildeShomeoInvFunComplex}\leanok
+Take $(z,n)\in S\times \mathbb Z$. Since $z\in S$, we have $-\pi<\Im(z)<\pi$, so
+\[
+n\le \frac{\Im(z+2n\pi i)+\pi}{2\pi}<n+1.
+\]
+Hence the floor function recovers exactly the integer $n$. Therefore
+$\tilde\varphi^{-1}$ subtracts precisely the same shift $2n\pi i$ that $\varphi$ added, and it also
+returns the second coordinate $n$. Thus $\tilde\varphi^{-1}(\varphi(z,n))=(z,n)$.
+\end{proof}
+%%-/
+
+/-%%
 \begin{lemma}\label{tildeShomeo_right_inv}\lean{tildeShomeo_right_inv}\leanok
 The maps $\tilde\varphi$ and $\tilde\varphi^{-1}$ are right inverses on $\tilde S$.
 \end{lemma}
@@ -653,6 +731,17 @@ lemma tildeShomeo_right_inv (w : DeftildeS) :
   rcases w with ⟨w, hw⟩
   ext
   simp [tildeShomeo_toFun, tildeShomeo_invFun, tildeShomeo_invFun_complex]
+
+/-%%
+\begin{proof}\uses{tildeShomeo_toFun, tildeShomeoInvFun, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+By definition,
+\[
+\tilde\varphi^{-1}(w)=\bigl(w-2N(w)\pi i,\;N(w)\bigr).
+\]
+Applying $\tilde\varphi$ to this pair adds back the same quantity $2N(w)\pi i$, so the first coordinate
+returns to $w$. Therefore $\tilde\varphi(\tilde\varphi^{-1}(w))=w$.
+\end{proof}
+%%-/
 
 /-%%
 \begin{lemma}\label{tildeShomeo_continuous_toFun}\lean{tildeShomeo_continuous_toFun}\leanok
@@ -670,6 +759,19 @@ lemma tildeShomeo_continuous_toFun : Continuous (fun zn : Sstrip × ℤ =>
   have hterm : Continuous (fun zn : Sstrip × ℤ => (2 : ℂ) * (zn.2 : ℂ) * π * I) := by
     exact (((continuous_const.mul hn).mul continuous_const).mul continuous_const)
   simpa [tildeShomeo_toFun] using hz.add hterm
+
+/-%%
+\begin{proof}\uses{tildeShomeo_toFun, tildeShomeo_toFun_mem}\leanok
+The formula for the forward map is
+\[
+(z,n)\longmapsto z+2n\pi i.
+\]
+The first term is continuous in $(z,n)$, and the second term depends only on $n$; since $\mathbb Z$ is
+discrete, every map out of it is continuous. Therefore the sum is continuous as a map into $\mathbb C$.
+Lemma~\ref{tildeShomeo_toFun_mem} shows that its image lies in $\tilde S$, so it is continuous as a map
+into $\tilde S$.
+\end{proof}
+%%-/
 
 /-%%
 \begin{lemma}\label{tildeShomeo_continuous_invFun}\lean{tildeShomeo_continuous_invFun}\leanok
@@ -691,6 +793,22 @@ lemma tildeShomeo_continuous_invFun : Continuous tildeShomeo_invFun_lift := by
     simpa [tildeShomeo_invFun_complex, mul_assoc, mul_left_comm, mul_comm] using
       continuous_subtype_val.sub hterm'
   · simpa [tildeShomeo_invFun_lift, tildeShomeo_floor] using continuous_floor_arg
+
+/-%%
+\begin{proof}\uses{continuousFloorArg, tildeShomeo_invFun_lift, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+The second component of $\tilde\varphi^{-1}$ is the function
+\[
+w\mapsto N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor,
+\]
+which is continuous on $\tilde S$ by Lemma~\ref{continuousFloorArg}. The first component is
+\[
+w\mapsto w-2N(w)\pi i,
+\]
+so it is obtained from the identity map and the continuous function $N(w)$ by continuous algebraic
+operations. Hence both components are continuous, and therefore the product map
+$\tilde\varphi^{-1}\colon \tilde S\to S\times\mathbb Z$ is continuous.
+\end{proof}
+%%-/
 
 
 /-%%
@@ -736,7 +854,7 @@ noncomputable def DefwidetildePBlog :
   | (z, n) => (inverseHomeo.invFun z, n)
 
 /-%%
-\begin{lemma}\label{widetildePBlogHomeo}\leanok
+\begin{lemma}\label{widetildePBlogHomeo}\lean{widetildePBlogHomeo}\leanok
 $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is a homeomorphism.
 \end{lemma}
 %%-/
@@ -912,7 +1030,7 @@ which is exactly the interval characterization of
 
 /-%%
 
-\begin{proposition}\label{trivOverT}
+\begin{proposition}\label{trivOverT}\lean{trivOverT}\leanok
 The composition $\psi=\varphi\circ\widetilde{PBlog}\colon T\times \Z\to \tilde S$ defines
 a trivialization of $CSexp$
 on $T$
@@ -1021,7 +1139,7 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
 
 /-%%
 
-\begin{proof}\uses{tildeShomeo, widetildePBlogHomeo, periodicity, trivialization}
+\begin{proof}\uses{tildeShomeo, widetildePBlogHomeo, periodicity, trivialization}\leanok
 $\varphi$ is a homeomorphism by Lemma~\ref{tildeShomeo}.
 By Lemma~\ref{widetildePBlogHomeo}
 $\widetilde{PBlog}\colon T\times \Z\to S\times \Z$ is
