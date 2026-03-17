@@ -1266,11 +1266,39 @@ def TprimeDef : Set ℂ := {z : ℂ | re z < 0 ∨ im z ≠ 0}
 
 /-%%
 
-\begin{corollary}\label{trivOverTprime}
+\begin{corollary}\label{trivOverTprime}\lean{trivOverTprime}\leanok
 $T'$ is the base of a trivialization for $CSexp\colon \C\to \C$
 with non-empty fiber.
 \end{corollary}
 %%-/
+
+noncomputable def trivOverTprime : {e : Trivialization ℤ CSexp // e.baseSet = TprimeDef} := by
+  let φ : ℂ ≃ₜ ℂ := Homeomorph.neg ℂ
+  let tildeφ : ℂ ≃ₜ ℂ := Homeomorph.addRight (π * I)
+  have hcomm : CSexp ∘ tildeφ = φ ∘ CSexp := by
+    ext z
+    calc
+      CSexp (tildeφ z) = CSexp (z + π * I) := by rfl
+      _ = CSexp z * CSexp (π * I) := multiplicativity z (π * I)
+      _ = CSexp z * (-1) := by
+        unfold CSexp
+        rw [Complex.exp_pi_mul_I]
+      _ = φ (CSexp z) := by simp [φ]
+  rcases homeoInv trivOverT φ tildeφ hcomm with ⟨e, he⟩
+  refine ⟨e, ?_⟩
+  rw [he]
+  ext z
+  constructor
+  · rintro ⟨w, hw, rfl⟩
+    change w ∈ splitPlane at hw
+    simpa [φ, splitPlane, TprimeDef]
+  · intro hz
+    refine ⟨-z, ?_, by simp [φ]⟩
+    change -z ∈ splitPlane
+    simpa [splitPlane, TprimeDef] using hz
+
+@[simp] theorem trivOverTprime_baseSet : trivOverTprime.1.baseSet = TprimeDef :=
+  trivOverTprime.2
 
 /-%%
 
