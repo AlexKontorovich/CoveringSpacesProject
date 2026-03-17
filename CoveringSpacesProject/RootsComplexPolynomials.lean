@@ -883,6 +883,12 @@ lemma splitPlane_isOpen : IsOpen splitPlane := by
   · exact isOpen_lt continuous_const continuous_re
   · exact isOpen_ne_fun continuous_im continuous_const
 
+lemma splitPlane_ne_zero {z : ℂ} (hz : z ∈ splitPlane) : z ≠ 0 := by
+  intro hz0
+  have hz' : z.re > 0 ∨ z.im ≠ 0 := by simpa [splitPlane] using hz
+  rw [hz0] at hz'
+  simp at hz'
+
 /-%%
 \begin{proof}\uses{splitPlane}\leanok
 By Definition~\ref{splitPlane}, $T$ is the union of
@@ -1023,6 +1029,20 @@ which is exactly the interval characterization of
 \end{proof}
 %%-/
 
+lemma CSexp_PBlog_add_period (z : ℂ) (hz : z ∈ splitPlane) (n : ℤ) :
+    CSexp (PBlog z + (2 * n : ℂ) * π * I) = z := by
+  have hz0 : z ≠ 0 := splitPlane_ne_zero hz
+  have hperiod : CSexp ((2 * n : ℂ) * π * I) = 1 := by
+    unfold CSexp
+    have hmul : ((2 * n : ℂ) * π * I) = (n : ℂ) * (2 * π * I) := by ring
+    rw [hmul, Complex.exp_int_mul_two_pi_mul_I]
+  calc
+    CSexp (PBlog z + (2 * n : ℂ) * π * I)
+        = CSexp (PBlog z) * CSexp ((2 * n : ℂ) * π * I) := multiplicativity _ _
+    _ = z * CSexp ((2 * n : ℂ) * π * I) := by rw [(ImPBlog z hz0).1]
+    _ = z * 1 := by rw [hperiod]
+    _ = z := by simp
+
 /-%%
 
 \begin{proposition}\label{trivOverT}\lean{trivOverT}\leanok
@@ -1047,23 +1067,7 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
     rcases x with ⟨z, n⟩
     have hz : z ∈ splitPlane := hx.1
     change CSexp (PBlog z + (2 * n : ℂ) * π * I) ∈ splitPlane
-    have hz0 : z ≠ 0 := by
-      intro hz0
-      have hz' : z.re > 0 ∨ z.im ≠ 0 := by simpa [splitPlane] using hz
-      rw [hz0] at hz'
-      simp at hz'
-    have hperiod : CSexp ((2 * n : ℂ) * π * I) = 1 := by
-      unfold CSexp
-      have hmul : ((2 * n : ℂ) * π * I) = (n : ℂ) * (2 * π * I) := by ring
-      rw [hmul, Complex.exp_int_mul_two_pi_mul_I]
-    have hexp : CSexp (PBlog z + (2 * n : ℂ) * π * I) = z := by
-      calc
-        CSexp (PBlog z + (2 * n : ℂ) * π * I)
-            = CSexp (PBlog z) * CSexp ((2 * n : ℂ) * π * I) := multiplicativity _ _
-        _ = z * CSexp ((2 * n : ℂ) * π * I) := by rw [(ImPBlog z hz0).1]
-        _ = z * 1 := by rw [hperiod]
-        _ = z := by simp
-    simpa [hexp] using hz
+    simpa [CSexp_PBlog_add_period z hz n] using hz
   continuousOn_toFun := by
     refine (Contexp.continuousOn).prodMk ?_
     rw [continuousOn_iff_continuous_restrict]
@@ -1099,22 +1103,8 @@ noncomputable def trivOverT : Trivialization ℤ CSexp where
   right_inv' x hx := by
     rcases x with ⟨z, n⟩
     have hz : z ∈ splitPlane := hx.1
-    have hz0 : z ≠ 0 := by
-      intro hz0
-      have hz' : z.re > 0 ∨ z.im ≠ 0 := by simpa [splitPlane] using hz
-      rw [hz0] at hz'
-      simp at hz'
-    have hperiod : CSexp ((2 * n : ℂ) * π * I) = 1 := by
-      unfold CSexp
-      have hmul : ((2 * n : ℂ) * π * I) = (n : ℂ) * (2 * π * I) := by ring
-      rw [hmul, Complex.exp_int_mul_two_pi_mul_I]
-    have hexp : CSexp (PBlog z + (2 * n : ℂ) * π * I) = z := by
-      calc
-        CSexp (PBlog z + (2 * n : ℂ) * π * I)
-            = CSexp (PBlog z) * CSexp ((2 * n : ℂ) * π * I) := multiplicativity _ _
-        _ = z * CSexp ((2 * n : ℂ) * π * I) := by rw [(ImPBlog z hz0).1]
-        _ = z * 1 := by rw [hperiod]
-        _ = z := by simp
+    have hexp : CSexp (PBlog z + (2 * n : ℂ) * π * I) = z :=
+      CSexp_PBlog_add_period z hz n
     have hfloor : ⌊((PBlog z + (2 * n : ℂ) * π * I).im + π) / (2 * π)⌋ = n :=
       floor_shift_PBlog z hz n
     refine Prod.ext ?_ ?_
