@@ -2395,15 +2395,34 @@ the constant loop is zero.
 
 /-%%
 
-\begin{definition}\label{DefS1loop}
+\begin{definition}\label{DefS1loop}\lean{DefS1loop}\leanok
 Given a map of the circle $\psi\colon S^1\to X$ the associated loop is
-$\omega\colon [ 0, 2\pi  ]\to X$ is defined by $\omega(t)=\psi(CSexp(it))$.
+$\omega\colon [ 0, 2\pi  ]\to X$ defined by $\omega(t)=\psi(CSexp(it))$.
 \end{definition}
 %%-/
 
 /-%%
 
-\begin{lemma}\label{sameImage}
+\begin{lemma}\label{DefS1loop_loop}\lean{DefS1loop_loop}\uses{DefS1loop}\leanok
+For every circle map $\psi$, the associated path begins and ends at the same point, so it is a
+loop.
+\end{lemma}
+
+%%-/
+
+/-%%
+
+\begin{proof}\uses{DefS1loop}\leanok
+By Definition~\ref{DefS1loop}, the endpoints of the associated path are
+$\psi(CSexp(0))$ and $\psi(CSexp(2\pi i))$. Since $CSexp(0)=CSexp(2\pi i)=1$, these endpoints
+agree.
+\end{proof}
+
+%%-/
+
+/-%%
+
+\begin{lemma}\label{sameImage}\lean{sameImage}\leanok
  Let $ρ : S^1→ \C$ be a map with $ρ(z)∈ Cstar$ for all $z∈ S^1$.
  Let $ω$ be the loop associated with $ρ$.
  Then the image of $ω$ is contained in $Cstar$.
@@ -2413,9 +2432,10 @@ $\omega\colon [ 0, 2\pi  ]\to X$ is defined by $\omega(t)=\psi(CSexp(it))$.
 
 /-%%
 
-\begin{proof}\uses{DefS1loop}
+\begin{proof}\uses{DefS1loop}\leanok
 Let $ω \colon [ 0, 2\pi  ] \to \C$ be the loop associated to $ρ$.
-Then by Definition~\ref{DefS1loop} for all $t∈ [ 0 ,1 ]$ $ω(t)=ρ(2\pi * t *I)∈ Cstar$.
+Then by Definition~\ref{DefS1loop}, for every $t\in [0,2\pi]$ we have
+$ω(t)=ρ(CSexp(it))\in Cstar$.
 \end{proof}
 
 %%-/
@@ -2423,7 +2443,7 @@ Then by Definition~\ref{DefS1loop} for all $t∈ [ 0 ,1 ]$ $ω(t)=ρ(2\pi * t *I
 
 /-%%
 
-\begin{definition}\label{DefWNS1}\uses{DefS1loop, sameImage}
+\begin{definition}\label{DefWNS1}\lean{DefWNS1}\uses{DefS1loop, sameImage}\leanok
 The winding number of a map $\rho\colon S^1\to \C$ with $\rho(z)\in Cstar$
 for all $z\in S^1$  is the winding number of the associated loop.
 \end{definition}
@@ -2431,11 +2451,11 @@ for all $z\in S^1$  is the winding number of the associated loop.
 
 /-%%
 
-\begin{lemma}\label{constS1}
+\begin{lemma}\label{constS1}\lean{constS1}\leanok
 If $f\colon S^1\to \C$ is a constant map to a point $z\in Cstar$, then $w(f)=0$.
 \end{lemma}
 
-\begin{proof}\uses{DefS1loop, DefWNS1, constpath}
+\begin{proof}\uses{DefS1loop, DefWNS1, constpath}\leanok
 By Definition~\ref{DefS1loop} the loop associated with the constant map $f\colon S^1\to Cstar$
 is a constant loop at a point of $Cstar$.
 By Lemma~\ref{DefWNS1} the winding number of $f$ is equal to the winding number
@@ -2447,24 +2467,23 @@ of the constant loop at $f(S^1)\in Cstar$. By Lemma~\ref{constpath} this winding
 
 /-%%
 
-\begin{lemma}\label{S1homotopy}
-Let $\psi, \psi'\colon S^1\to \C$ be maps and $H : S^1→ \C$ a homotopy between them
+\begin{lemma}\label{S1homotopy}\lean{S1homotopy}\leanok
+Let $\psi, \psi'\colon S^1\to \C$ be maps and let $H : S^1\times I\to \C$ be a homotopy between them
 whose image lies in  $Cstar$. Then the winding numbers of $\psi$ and $\psi'$ are equal.
 \end{lemma}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1 }
+\begin{proof}\uses{DefS1loop, equalwinding, DefWNS1}\leanok
 Let $H\colon S^1\times I\to \C$ be a homotopy from $\psi$ to $\psi'$ whose image lies in $Cstar$.
-Let $ω$ and $ω'$ be the loops associated to $ψ$ and $ψ'$ respectively
-Define $\hat H\colon [ 0, 2\pi  ]\times [ 0, 1 ]\to X$ by
+Let $ω$ and $ω'$ be the loops associated to $ψ$ and $ψ'$ respectively.
+Define $\hat H\colon [ 0, 2\pi  ]\times [ 0, 1 ]\to \C$ by
 $\hat H(t,s)=H(CSexp(it),s)$. Then by Definition~\ref{DefS1loop} $\hat H$ is a homotopy from
- the loop $\omega$ to the loop $\omega'$. The images of $H$ and $\hat H$ are the same
- so that the image of $\hat H$ lies in $Cstar$. By Lemma~\ref{equalwinding}
- the winding numbers of $\omega$ and $\omega'$ are equal. By Definition~\ref{DefWNS1} this means
- that the winding numbers of $\psi$
- that the winding numbers of $ψ$ and $ψ'$ are equal.
+the loop $\omega$ to the loop $\omega'$. The images of $H$ and $\hat H$ are the same, so the
+image of $\hat H$ also lies in $Cstar$. By Lemma~\ref{equalwinding}, the winding numbers of
+$\omega$ and $\omega'$ are equal. By Definition~\ref{DefWNS1}, this means that the winding
+numbers of $ψ$ and $ψ'$ are equal.
 \end{proof}
 %%-/
 
@@ -2474,9 +2493,31 @@ $\hat H(t,s)=H(CSexp(it),s)$. Then by Definition~\ref{DefS1loop} $\hat H$ is a h
 
 /-%%
 
-\begin{theorem}\label{boundsWN0}
+\begin{definition}\label{D2}\lean{D2}\leanok
+Let $D^2=\{z\in \C : |z|\le 1\}$ be the closed unit disk.
+\end{definition}
+%%-/
+
+/-%%
+
+\begin{definition}\label{circleToD2}\lean{circleToD2}\uses{D2}\leanok
+The canonical inclusion $S^1\hookrightarrow D^2$ sends a point of the unit circle to the same
+complex number, now viewed as a point of the closed disk.
+\end{definition}
+%%-/
+
+/-%%
+
+\begin{definition}\label{zeroD2}\lean{zeroD2}\uses{D2}\leanok
+Let $0_{D^2}$ denote the center of the closed unit disk.
+\end{definition}
+%%-/
+
+/-%%
+
+\begin{theorem}\label{boundsWN0}\lean{boundsWN0}\leanok
 Let $\rho\colon S^1\to \C$ be a map with $\rho(z)\in Cstar$ for all $z\in S^1$.
-Suppose there is a map $\hat f\colon D^2\to \C$ with $\hat f|_{S^1}=f$ and with
+Suppose there is a map $\hat f\colon D^2\to \C$ with $\hat f|_{S^1}=\rho$ and with
 the image of $\hat f$ contained in $Cstar$. Then the winding $w(\rho)=0$.
 \end{theorem}
 %%-/
@@ -2484,7 +2525,7 @@ the image of $\hat f$ contained in $Cstar$. Then the winding $w(\rho)=0$.
 /-%%
 
 
-\begin{proof}\uses{S1homotopy, constS1}
+\begin{proof}\uses{S1homotopy, constS1}\leanok
 Define a continuous map $J\colon S^1\times [ 0,1 ]\to D^2$ by
 $(z,t)\mapsto (1-t)z$. Then $\hat f\circ J(z,0)= \rho(z)$ and
 $\hat f\circ J(z,1)=\hat f(0)$ for all $z\in S^1$.
@@ -2493,13 +2534,6 @@ By Lemma~\ref{S1homotopy} the winding number of $\rho$ is equal to the winding n
 of a constant map $S^1\to C\star$.
 By Lemma~\ref{constS1}, the winding number of a constant
 map $S^1\to \hat f(0)\in Cstar$ is zero.
-
-
-
-
-Since there is a homotopy $H$ from $\rho$
-to a constant map with image in $Cstar$, it follows from Lemma~\ref{S1homotopy}
-that the winding number of $\rho$ is zero.
 \end{proof}
 
 %%-/
@@ -2512,18 +2546,25 @@ that the winding number of $\rho$ is zero.
 %%-/
 
 /-%%
-\begin{lemma}\label{zkWNk}
-For any $\alpha_0\in \C$  and any $k\in \Z$ $k≥ 0$, define $\psi_{\alpha_0,k}\colon \C\to \C$ by
+\begin{definition}\label{monomialS1Map}\lean{monomialS1Map}\leanok
+Given $\alpha_0\in \C^\times$, a natural number $k$, and $R>0$, let
+$\psi_{\alpha_0,k,R}\colon S^1\to Cstar$ be the map
+$\psi_{\alpha_0,k,R}(z)=\alpha_0(Rz)^k$.
+\end{definition}
+%%-/
+
+/-%%
+\begin{lemma}\label{zkWNk}\lean{zkWNk}\leanok
+For any $\alpha_0\in \C$ and any $k\in \mathbb N$, define $\psi_{\alpha_0,k}\colon \C\to \C$ by
 $\psi_{\alpha_0,k}(z)=\alpha_0 z^k$.
- Then for any $R>0$ if $\alpha_0\not=0$ and $k>0$  the winding number of the map of
- the restriction of $\psi_{\alpha_0,k}$ to the circle of radius $R$
-is $k$
+Then for any $R>0$, if $\alpha_0\not=0$, the winding number of the restriction of
+$\psi_{\alpha_0,k}$ to the circle of radius $R$ is $k$.
 \end{lemma}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{DefS1loop, multiplicativity, expCP, WNloop}
+\begin{proof}\uses{DefS1loop, multiplicativity, expCP, deflift, WNloop, DefWNS1}\leanok
 By Definition`\ref{DefS1loop} and by Lemma~\ref{multiplicativity} the loop
  $\omega\colon [ 0, 2\pi  ]\to \C$ associated to $\psi_{\alpha_0,t}$ restricted to the circle of
  radius $R$ is given by
@@ -2541,7 +2582,7 @@ By Definition~\ref{DefWNS1}, this means that the winding number of $\psi_{\alpha
 %%-/
 
 /-%%
-\begin{lemma}\label{walkingdog}
+\begin{lemma}\label{walkingdog}\lean{walkingdog}\leanok
 Suppose that $\psi\colon S^1\to \C$ and $\psi'\colon S^1\to \C$ are maps
 and for each $z\in S^1$, we have $|\psi(z)-\psi'(z)|<|\psi(z)|$. Then there is a homotopy
 $H$ from $\psi$ to $\psi'$ whose image lies in $Cstar$.
@@ -2550,16 +2591,15 @@ $H$ from $\psi$ to $\psi'$ whose image lies in $Cstar$.
 
 /-%%
 
-\begin{proof}
-Since for all $z\in S^1$, $|\psi(z)-|\psi'(z)|<|\psi(z)|$, it follows that $|\psi(z)|>0$ and
+\begin{proof}\leanok
+Since for all $z\in S^1$, $|\psi(z)-\psi'(z)|<|\psi(z)|$, it follows that $|\psi(z)|>0$ and
 $|\psi'(z)|>0$ for all $z\in S^1$.
-Define a homotopy $H\colon S^1× [ 0, 2\pi ]\to \C$ by
+Define a homotopy $H\colon S^1\times [ 0, 1 ]\to \C$ by
 $H(z,t)=t\psi'(z)+(1-t)\psi(z)$.
 $H(z,0)=\psi(z)$ and $H(z,1)=\psi'(z)$, so $H$ is a homotopy from $\psi$ to $\psi'$.
 
-We establish that $H(z,t)\not= 0$. For all $z\in S^1$ and $t\in [ 0, 1 ]$
- $|\psi(z)-(t\psi(z)-(1-t)\psi'(z)|=|(1-t)(\psi-\psi')|$. Since $0\le t\le 1$, $0\le (1-t)\le 1$.
-Then, $|\psi(z)-H(z,t)|=|\psi(z)-(t\psi(z)-(1-t)\psi'(z)|=(1-t)|\psi(z)-\psi'(z)|<|\psi(z)|$.
+We establish that $H(z,t)\not= 0$. For all $z\in S^1$ and $t\in [ 0, 1 ]$ we have
+$|\psi(z)-H(z,t)|=|(1-t)(\psi(z)-\psi'(z))|\le |\psi(z)-\psi'(z)|<|\psi(z)|$.
 So $H(z,t)\not=0$ for all $z\in S^1$ and all $t\in[ 0, 1 ]$.
 
 Consequently, $H$ is a homotopy $S^1\times [ 0 , 1 ]\to \C$ from $\psi$ to $\psi'$ whose image lies
@@ -2569,12 +2609,12 @@ in $Cstar$.
 
 /-%%
 
-\begin{corollary}\label{sameWN}
-Suppose that $\psi,\psi'\colon S^1\to \C$ with $|\psi(z)-\psi'(z)|<|\psi(z)|$
-for all $s\in [ 0, 2\pi  ]$. Then $\psi$ and $\psi'$ have the same winding number.
+\begin{corollary}\label{sameWN}\lean{sameWN}\leanok
+Suppose that $\psi,\psi'\colon S^1\to \C$ satisfy $|\psi(z)-\psi'(z)|<|\psi(z)|$
+for all $z\in S^1$. Then $\psi$ and $\psi'$ have the same winding number.
 \end{corollary}
 
-\begin{proof}\uses{walkingdog, S1homotopy}
+\begin{proof}\uses{walkingdog, S1homotopy}\leanok
 By Lemma~\ref{walkingdog}, there is a homotopy $H$ from $\psi$ to $\psi'$ whose image lies in
 $Cstar$.
 Thus, by Lemma~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding number.
@@ -2585,10 +2625,26 @@ Thus, by Lemma~\ref{S1homotopy}, $\psi$ and $\psi'$ have the same winding number
 
 /-%%
 
+\begin{definition}\label{polyCircleMap}\lean{polyCircleMap}\leanok
+If a polynomial $p$ has no zeros on the circle of radius $R$, let $f_{p,R}\colon S^1\to Cstar$
+be the map $f_{p,R}(z)=p(Rz)$.
+\end{definition}
+%%-/
+
+/-%%
+
+\begin{definition}\label{polyDiskMap}\lean{polyDiskMap}\uses{D2}\leanok
+If a polynomial $p$ has no zeros on the closed disk of radius $R$, let $F_{p,R}\colon D^2\to Cstar$
+be the map $F_{p,R}(z)=p(Rz)$.
+\end{definition}
+%%-/
+
+/-%%
 
 
 
-\begin{lemma}\label{zkdominates}
+
+\begin{lemma}\label{zkdominates}\lean{zkdominates}\leanok
 Let $p(z)$ be a complex polynomial of degree $k$;  $p(z)=\sum_{i=0}^k\alpha_iz^{k-i}$ with
 $\alpha_i\in \C$ and $\alpha_0\not= 0$.
 For all $R$ sufficiently large $|\alpha_0|R^k>|\alpha_0z^k - p(z)|$ for any $z$ with $|z|=R$.
@@ -2597,7 +2653,7 @@ For all $R$ sufficiently large $|\alpha_0|R^k>|\alpha_0z^k - p(z)|$ for any $z$ 
 
 /-%%
 
-\begin{proof}
+\begin{proof}\leanok
 For each $1\le i\le k$ set $\beta_i=\alpha_i/\alpha_0$
 Choose $R>\sum_{i=1}^k|\beta_j|$ and $R>1$.
 For any $z\in \C$ with $|z|=R$, we have
@@ -2610,15 +2666,15 @@ $$
 
 /-%%
 
-\begin{theorem}\label{WNthm}
-Let $p(z)$ be a complex polynomial of degree $k>1$ given by $p(z)=\sum_{i=0}^k\alpha_iz^{k-i}$ with
+\begin{theorem}\label{WNthm}\lean{WNthm}\leanok
+Let $p(z)$ be a complex polynomial of degree $k>0$ given by $p(z)=\sum_{i=0}^k\alpha_iz^{k-i}$ with
 $α_i∈ℂ$ for all $i$ and $α_0\not= 0$. Then for $R$ sufficiently large,
  the map $f : S^1\to \C$ given by
 $f(z)= p(R* z)$ for $z\in S^1$ has winding number $k$.
 \end{theorem}
 
 
-\begin{proof}\uses{zkWNk, zkdominates,sameWN}
+\begin{proof}\uses{zkWNk, zkdominates, sameWN}\leanok
 By Lemma~\ref{zkdominates} for $R>{\rm max}(1,\sum_{i=1}^k|\beta_j|)$,
 and for any $z\in \C$ with $|z|=1$
 $|\alpha_0(R*z)^k-f(z)| <|\alpha_0 R^k|$. By Lemma~\ref{sameWN} the maps defined on $S^1$ by
@@ -2634,14 +2690,14 @@ Thus, the winding number of $f$ is also $k$.
 /-%%
 
 
-\begin{theorem}\label{ExistRoot}
+\begin{theorem}\label{ExistRoot}\lean{ExistRoot}\leanok
 Every complex polynomial of degree $k>0$ has a complex root.
 \end{theorem}
 %%-/
 
 /-%%
 
-\begin{proof}\uses{WNthm, boundsWN0}
+\begin{proof}\uses{WNthm, boundsWN0}\leanok
 The proof is by contradiction. Suppose that $p(z)=\sum_{i=0}^k\alpha_iz^{k-i} $ with
 $\alpha_0\not= 0$. Suppose that
 $p(z)\not= 0$ for all $z\in \C$.
@@ -2771,7 +2827,19 @@ The closed unit disk in $\C$.
 
 abbrev D2 := {z : ℂ // ‖z‖ ≤ 1}
 
+/-%%
+\begin{definition}\label{circleToD2}\lean{circleToD2}\uses{D2}\leanok
+The canonical inclusion of the unit circle into the closed unit disk.
+\end{definition}
+%%-/
+
 def circleToD2 (z : Circle) : D2 := ⟨z, by simp [Circle.norm_coe z]⟩
+
+/-%%
+\begin{definition}\label{zeroD2}\lean{zeroD2}\uses{D2}\leanok
+The center of the closed unit disk.
+\end{definition}
+%%-/
 
 def zeroD2 : D2 := ⟨0, by simp⟩
 
@@ -2911,6 +2979,12 @@ theorem sameWN (ψ ψ' : C(Circle, Cstar))
   obtain ⟨H, hzero, hone⟩ := walkingdog ψ ψ' hclose
   exact S1homotopy ψ ψ' H hzero hone
 
+/-%%
+\begin{definition}\label{monomialS1Map}\lean{monomialS1Map}\leanok
+The map $z \mapsto \alpha_0 (Rz)^k$ from the unit circle to $\Cstar$.
+\end{definition}
+%%-/
+
 noncomputable def monomialS1Map (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
     C(Circle, Cstar) := by
   refine ⟨fun z => ⟨α0 * (((R : ℂ) * z) ^ k), ?_⟩, ?_⟩
@@ -2924,7 +2998,7 @@ noncomputable def monomialS1Map (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (h�
         exact pow_ne_zero k <| mul_ne_zero (by exact_mod_cast hR.ne') (Circle.coe_ne_zero z))
 
 /-%%
-\begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{DefS1loop, multiplicativity, expCP, WNloop}\leanok
+\begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{DefS1loop, multiplicativity, expCP, deflift, WNloop, DefWNS1}\leanok
 The map $z \mapsto \alpha_0 (Rz)^k$ on the unit circle has winding number $k$.
 \end{lemma}
 %%-/
@@ -2982,6 +3056,12 @@ theorem zkWNk (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
             ring
   exact_mod_cast hwind
 
+/-%%
+\begin{definition}\label{polyCircleMap}\lean{polyCircleMap}\leanok
+The polynomial map $z \mapsto p(Rz)$ from the unit circle to $\Cstar$ when it avoids zero.
+\end{definition}
+%%-/
+
 noncomputable def polyCircleMap (p : Polynomial ℂ) (R : ℝ)
     (hR : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0) : C(Circle, Cstar) := by
   refine ⟨fun z => ⟨p.eval ((R : ℂ) * z), hR z⟩, ?_⟩
@@ -2990,6 +3070,12 @@ noncomputable def polyCircleMap (p : Polynomial ℂ) (R : ℝ)
     (by
       intro z
       simpa using hR z)
+
+/-%%
+\begin{definition}\label{polyDiskMap}\lean{polyDiskMap}\uses{D2}\leanok
+The polynomial map $z \mapsto p(Rz)$ from the closed unit disk to $\Cstar$ when it avoids zero.
+\end{definition}
+%%-/
 
 noncomputable def polyDiskMap (p : Polynomial ℂ) (R : ℝ)
     (hR : ∀ z : D2, p.eval ((R : ℂ) * z) ≠ 0) : C(D2, Cstar) := by
