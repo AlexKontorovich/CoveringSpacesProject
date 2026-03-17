@@ -29,7 +29,6 @@ Any nonempty connected subset of $\mathbb Z$ is a singleton.
 \end{lemma}
 %%-/
 
-
 theorem Singleton_of_isConnected_SetInt {s : Set ℤ} (hs : IsConnected s) (hs' : s.Nonempty) : ∃ k : ℤ, s = {k} := by
   rcases hs' with ⟨k, hk⟩
   have hsSub : s.Subsingleton := by
@@ -71,7 +70,6 @@ Now the inclusion $\mathbb Z\hookrightarrow \mathbb R$ is an embedding, so conti
 composing with this inclusion is equivalent to continuity of the original $\mathbb Z$-valued map.
 \end{proof}
 %%-/
-
 
 local notation "π" => Real.pi
 
@@ -128,7 +126,6 @@ the usual power series.
 noncomputable def CSexp : ℂ → ℂ := Complex.exp
 
 /-%%
-
 \begin{lemma}\label{Contexp}\lean{Contexp}\leanok
 $CSexp\colon \C\to \C$ is continuous.
 \end{lemma}
@@ -142,7 +139,6 @@ lemma Contexp : Continuous exp := by
   In Mathlib.
 \end{proof}
 %%-/
-
 
 /-%%
 \begin{lemma}\label{Eulersformula}\lean{Eulersformula}\leanok
@@ -612,7 +608,7 @@ Define $N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$.
 noncomputable def tildeShomeo_floor (w : ℂ) : ℤ := ⌊(w.im + π) / (2 * π)⌋
 
 /-%%
-\begin{definition}\label{tildeShomeoInvFunComplex}\lean{tildeShomeo_invFun_complex}\leanok
+\begin{definition}\label{tildeShomeo_invFun_complex}\lean{tildeShomeo_invFun_complex}\leanok
 Define $\tilde\varphi^{-1}_{\C}(w)=w-2N(w)\pi i$.
 \end{definition}
 %%-/
@@ -650,12 +646,12 @@ lemma tildeShomeo_invFun_mem {w : ℂ} (hw : w ∈ DeftildeS) : tildeShomeo_invF
   · rw [div_lt_iff₀ h2pi] at hn_lt; linarith
 
 /-%%
-\begin{proof}\uses{DeftildeS, Sstrip, tildeShomeoFloor, tildeShomeoInvFunComplex, floor_arg_not_int}\leanok
+\begin{proof}\uses{DeftildeS, Sstrip, tildeShomeoFloor, tildeShomeo_invFun_complex, floor_arg_not_int}\leanok
 Set $N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor$. By the defining inequalities for the floor
 function,
-\[
-N(w)\le \frac{\Im(w)+\pi}{2\pi}<N(w)+1.
-\]
+$$
+N(w)\le \frac{\Im(w)+\pi}{2\pi} < N(w)+1.
+$$
 Because $w\in\tilde S$, Lemma~\ref{floor_arg_not_int} shows that the left inequality is in fact strict.
 Multiplying through by $2\pi$ gives
 \[
@@ -709,10 +705,10 @@ lemma tildeShomeo_left_inv (zn : Sstrip × ℤ) :
   · simp [tildeShomeo_invFun_lift, tildeShomeo_floor, tildeShomeo_toFun, hfloor]
 
 /-%%
-\begin{proof}\uses{Sstrip, tildeShomeo_toFun, tildeShomeo_invFun_lift, tildeShomeoFloor, tildeShomeoInvFunComplex}\leanok
+\begin{proof}\uses{Sstrip, tildeShomeo_toFun, tildeShomeo_invFun_lift, tildeShomeoFloor, tildeShomeo_invFun_complex}\leanok
 Take $(z,n)\in S\times \mathbb Z$. Since $z\in S$, we have $-\pi<\Im(z)<\pi$, so
 \[
-n\le \frac{\Im(z+2n\pi i)+\pi}{2\pi}<n+1.
+n\le \frac{\Im(z+2n\pi i)+\pi}{2\pi} < n+1.
 \]
 Hence the floor function recovers exactly the integer $n$. Therefore
 $\tilde\varphi^{-1}$ subtracts precisely the same shift $2n\pi i$ that $\varphi$ added, and it also
@@ -733,7 +729,7 @@ lemma tildeShomeo_right_inv (w : DeftildeS) :
   simp [tildeShomeo_toFun, tildeShomeo_invFun, tildeShomeo_invFun_complex]
 
 /-%%
-\begin{proof}\uses{tildeShomeo_toFun, tildeShomeoInvFun, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+\begin{proof}\uses{tildeShomeo_toFun, tildeShomeoInvFun, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
 By definition,
 \[
 \tilde\varphi^{-1}(w)=\bigl(w-2N(w)\pi i,\;N(w)\bigr).
@@ -795,7 +791,7 @@ lemma tildeShomeo_continuous_invFun : Continuous tildeShomeo_invFun_lift := by
   · simpa [tildeShomeo_invFun_lift, tildeShomeo_floor] using continuous_floor_arg
 
 /-%%
-\begin{proof}\uses{continuousFloorArg, tildeShomeo_invFun_lift, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+\begin{proof}\uses{continuousFloorArg, tildeShomeo_invFun_lift, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
 The second component of $\tilde\varphi^{-1}$ is the function
 \[
 w\mapsto N(w)=\left\lfloor\frac{\Im(w)+\pi}{2\pi}\right\rfloor,
@@ -809,7 +805,6 @@ operations. Hence both components are continuous, and therefore the product map
 $\tilde\varphi^{-1}\colon \tilde S\to S\times\mathbb Z$ is continuous.
 \end{proof}
 %%-/
-
 
 /-%%
 \begin{lemma}\label{tildeShomeo}\lean{tildeShomeo}\uses{DeftildeS, Sstrip}\leanok
@@ -940,7 +935,7 @@ Hence no odd multiple of $\pi$ occurs as $\Im(x)$, i.e. $x\in\widetilde S$.
 %%-/
 
 /-%%
-\begin{lemma}\label{CSexpTildeShomeoInvFunComplex}\lean{CSexp_tildeShomeo_invFun_complex}\uses{periodicity, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
+\begin{lemma}\label{CSexptildeShomeo_invFun_complex}\lean{CSexp_tildeShomeo_invFun_complex}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
 For every $x\in \C$, one has
 $CSexp(\tilde\varphi^{-1}_{\C}(x))=CSexp(x)$.
 \end{lemma}
@@ -954,8 +949,8 @@ lemma CSexp_tildeShomeo_invFun_complex (x : ℂ) :
   simp [sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
 
 /-%%
-\begin{proof}\uses{periodicity, tildeShomeoInvFunComplex, tildeShomeoFloor}\leanok
-By Definition~\ref{tildeShomeoInvFunComplex},
+\begin{proof}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeoFloor}\leanok
+By Definition~\ref{tildeShomeo_invFun_complex},
 $\tilde\varphi^{-1}_{\C}(x)=x-2N(x)\pi i$, where $N(x)$ is an integer
 (Definition~\ref{tildeShomeoFloor}).
 By periodicity of $CSexp$ (Lemma~\ref{periodicity}),
@@ -964,7 +959,7 @@ shifting by an integer multiple of $2\pi i$ does not change the value.
 %%-/
 
 /-%%
-\begin{lemma}\label{PBlogCSexpEqTildeShomeoInvFunComplex}\lean{PBlog_CSexp_eq_tildeShomeo_invFun_complex}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexpTildeShomeoInvFunComplex}\leanok
+\begin{lemma}\label{PBlogCSexpEqtildeShomeo_invFun_complex}\lean{PBlog_CSexp_eq_tildeShomeo_invFun_complex}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexptildeShomeo_invFun_complex}\leanok
 If $x\in CSexp^{-1}(T)$, then
 $PBlog(CSexp(x))=\tilde\varphi^{-1}_{\C}(x)$.
 \end{lemma}
@@ -980,14 +975,14 @@ lemma PBlog_CSexp_eq_tildeShomeo_invFun_complex {x : ℂ}
   simpa [CSexp_tildeShomeo_invFun_complex x] using hlog
 
 /-%%
-\begin{proof}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexpTildeShomeoInvFunComplex}\leanok
+\begin{proof}\uses{memDeftildeOfMemSource, tildeShomeoInvFunMem, inverseHomeo, CSexptildeShomeo_invFun_complex}\leanok
 From Lemma~\ref{memDeftildeOfMemSource}, $x\in \widetilde S$.
 Then Lemma~\ref{tildeShomeoInvFunMem} gives
 $\tilde\varphi^{-1}_{\C}(x)\in S$.
 Applying the left-inverse identity from Lemma~\ref{inverseHomeo} to
 $\tilde\varphi^{-1}_{\C}(x)$ gives
 $PBlog(CSexp(\tilde\varphi^{-1}_{\C}(x)))=\tilde\varphi^{-1}_{\C}(x)$.
-Finally use Lemma~\ref{CSexpTildeShomeoInvFunComplex}.
+Finally use Lemma~\ref{CSexptildeShomeo_invFun_complex}.
 \end{proof}
 %%-/
 
