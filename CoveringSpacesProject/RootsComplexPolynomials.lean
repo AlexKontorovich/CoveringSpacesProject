@@ -1748,15 +1748,57 @@ which is exactly the desired conclusion.
 
 /-%%
 
-\begin{corollary}\label{expHLP}
-$CSexp$ satisfies the homotopy lifting property on $Cstar$.
+\begin{corollary}\label{expHLP}\lean{expHLP}\leanok
+Let $A$ be a topological space, let $H\colon [0,1]\times A\to Cstar$ be continuous, and let
+$f\colon A\to \C$ be continuous. Assume that
+\[
+CSexp(f(a))=H(0,a)
+\]
+for all $a\in A$. Then there is a unique continuous map
+\[
+\tilde H\colon [0,1]\times A\to \C
+\]
+such that $\tilde H(0,a)=f(a)$ for all $a\in A$ and
+$CSexp(\tilde H(t,a))=H(t,a)$ for all $(t,a)\in [0,1]\times A$.
 \end{corollary}
 %%-/
 
+theorem expHLP {A : Type*} [TopologicalSpace A]
+    (H : C(↥(Set.Icc (0 : ℝ) 1) × A, Cstar)) (f : C(A, ℂ))
+    (h0 : ∀ a, CSexp (f a) = (H (0, a) : ℂ)) :
+    ∃! H' : C(↥(Set.Icc (0 : ℝ) 1) × A, ℂ),
+      (∀ x, CSexp (H' x) = (H x : ℂ)) ∧ ∀ a, H' (0, a) = f a := by
+  have h0' : ∀ a, H (0, a) = CSexpCstar (f a) := by
+    intro a
+    apply Subtype.ext
+    simpa [CSexpCstar] using (h0 a).symm
+  refine ⟨CSexpCstar_isCoveringMap.liftHomotopy H f h0', ?_, ?_⟩
+  · constructor
+    · intro x
+      have hx :=
+        congrFun (CSexpCstar_isCoveringMap.liftHomotopy_lifts (H := H) (f := f) (H_0 := h0')) x
+      simpa [CSexpCstar] using congrArg Subtype.val hx
+    · intro a
+      simpa using
+        (CSexpCstar_isCoveringMap.liftHomotopy_zero (H := H) (f := f) (H_0 := h0') a)
+  · intro H' hH'
+    rcases hH' with ⟨hH'lifts, hH'zero⟩
+    exact (CSexpCstar_isCoveringMap.eq_liftHomotopy_iff'
+      (H := H) (f := f) (H_0 := h0') (H' := H')).2
+      ⟨by
+          ext x
+          simpa [Function.comp, CSexpCstar] using hH'lifts x,
+        hH'zero⟩
+
 /-%%
-\begin{proof}\uses{expCP}
-This is immediate from Corollary~\ref{expCP} and the theorem that covering projections
-have the homotopy lifting property.
+\begin{proof}\uses{CSexpCstar, CSexpCstar_coe, CSexpCstar_isCoveringMap}\leanok
+By Lemma~\ref{CSexpCstar_isCoveringMap}, the map
+$CSexpCstar\colon \C\to Cstar$ is a covering map.
+Hence the general homotopy lifting theorem for covering maps gives a unique lift
+$\tilde H$ of the homotopy $H$ starting from the prescribed map $f$ at time $0$.
+Finally, Lemma~\ref{CSexpCstar_coe} identifies the equality
+$CSexpCstar\circ \tilde H=H$ with the desired equality
+$CSexp\circ \tilde H=H$ after forgetting that the codomain is $Cstar$.
 \end{proof}
 %%-/
 
