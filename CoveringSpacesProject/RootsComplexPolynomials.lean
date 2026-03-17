@@ -1874,15 +1874,8 @@ is $(\tilde\omega_x(b)-\tilde\omega_x(a))/2\pi  *I$.
 %%-/
 
 noncomputable def DefWNlift (a b : ℝ)
--- (ω : ℝ → ℂ)
--- (hω : loop a b ω)
---  (hCstar : ∀ t ∈ Icc a b, ω t ∈ Cstar)
-  (tildeω : ℝ → ℂ)
---  (hlift : deflift CSexp ω tildeω)
-  :
-  ℂ :=
+  (tildeω : ℝ → ℂ) : ℂ :=
   (tildeω b - tildeω a) / (2 * Real.pi * I)
-
 
 /-%%
 
@@ -1895,9 +1888,7 @@ Then DefWNlift$(\tilde\omega)\in \Z$ and DefWNlift$(\tilde\omega')=$DefWNlift$(\
 %%-/
 
 lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
-    --(ωCont : ContinuousOn ω (Icc a b))
     (hω : loop a b ω)
-    --(hCstar : ∀ t ∈ Icc a b, ω t ∈ Cstar)
     (tildeω tildeω' : ℝ → ℂ)
     (hlift : deflift CSexp ω tildeω)
     (hlift' : deflift CSexp ω tildeω') :
@@ -2033,7 +2024,7 @@ It follows from Definition~\ref{DefWNlift} $w(\tilde ω')=w(\tilde ω).$
 
 /-%%
 
- \begin{corollary}\label{constWNomega}
+ \begin{corollary}\label{constWNomega}\lean{constWNomega}\leanok
  Let $\omega\colon [ a, b]\to \C$ be a loop with $\omega(t)\in Cstar$ for all $t\in [ a, b]$.
  There is a lift $\tilde\omega\colon [ a, b]\to \C$ of $\omega$ through $CSexp$.
  There is a constant $w(\omega)\in \Z$ such that for every lift $\tilde\omega \colon [ a, b]\to \C$
@@ -2041,10 +2032,98 @@ It follows from Definition~\ref{DefWNlift} $w(\tilde ω')=w(\tilde ω).$
  \end{corollary}
 %%-/
 
+theorem constWNomega {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) :
+    ∃ k : ℤ, (∃ tildeω : C(Set.Icc a b, ℂ), deflift CSexp (fun t => (ω t : ℂ)) tildeω) ∧
+      ∀ tildeω : C(Set.Icc a b, ℂ), deflift CSexp (fun t => (ω t : ℂ)) tildeω →
+        (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) / (2 * π * I) = k := by
+  let a0 : Set.Icc a b := ⟨a, ⟨le_rfl, hab.le⟩⟩
+  let b0 : Set.Icc a b := ⟨b, ⟨hab.le, le_rfl⟩⟩
+  obtain ⟨tildeω, hlift⟩ := existlift hab ω
+  have htilde : (∀ t, CSexp (tildeω t) = (ω t : ℂ)) ∧ tildeω a0 = tildeω a0 := by
+    constructor
+    · intro t
+      simpa [Function.comp] using congrFun hlift.2 t
+    · rfl
+  have hz0 : CSexp (tildeω a0) = (ω a0 : ℂ) := by
+    simpa [Function.comp] using congrFun hlift.2 a0
+  have hloop' : (ω b0 : ℂ) = (ω a0 : ℂ) := by
+    simpa [a0, b0] using congrArg Subtype.val hloop.symm
+  have hper : CSexp (tildeω b0) = CSexp (tildeω a0) := by
+    calc
+      CSexp (tildeω b0) = (ω b0 : ℂ) := by simpa [Function.comp] using congrFun hlift.2 b0
+      _ = (ω a0 : ℂ) := hloop'
+      _ = CSexp (tildeω a0) := by simpa [Function.comp] using (congrFun hlift.2 a0).symm
+  obtain ⟨k, hk⟩ := (periodicity (tildeω b0) (tildeω a0)).1 hper
+  refine ⟨k, ⟨tildeω, hlift⟩, ?_⟩
+  intro tildeω' hlift'
+  have hbase : (tildeω b0 - tildeω a0) / (2 * π * I) = k := by
+    rw [hk]
+    ring_nf
+    have : I ≠ 0 := by norm_num
+    have : (π : ℂ) ≠ 0 := by
+      norm_cast
+      exact Real.pi_ne_zero
+    field_simp
+    rw [show k * π * I * I = - (k * π) by ring_nf; norm_cast; simp]
+    norm_cast
+    ring_nf
+  have haeq : CSexp (tildeω' a0) = CSexp (tildeω a0) := by
+    calc
+      CSexp (tildeω' a0) = (ω a0 : ℂ) := by simpa [Function.comp] using congrFun hlift'.2 a0
+      _ = CSexp (tildeω a0) := by simpa [Function.comp] using (congrFun hlift.2 a0).symm
+  obtain ⟨n, hn⟩ := (periodicity (tildeω' a0) (tildeω a0)).1 haeq
+  let shifted : C(Set.Icc a b, ℂ) :=
+    ⟨fun t => tildeω' t - n * (2 * π * I), tildeω'.continuous.sub continuous_const⟩
+  have hshifted : (∀ t, CSexp (shifted t) = (ω t : ℂ)) ∧ shifted a0 = tildeω a0 := by
+    constructor
+    · intro t
+      have hperiod :
+          CSexp (shifted t) = CSexp (tildeω' t) := by
+        apply (periodicity _ _).2
+        refine ⟨-n, by
+          simp [shifted]
+          ring⟩
+      exact hperiod.trans (by simpa [Function.comp] using congrFun hlift'.2 t)
+    · calc
+        shifted a0 = tildeω' a0 - n * (2 * π * I) := by rfl
+        _ = tildeω a0 := by rw [hn]; ring
+  have huniq : shifted = tildeω := by
+    exact ExistsUnique.unique (expUPL hab ω (tildeω a0) hz0) hshifted htilde
+  have hshift_eq : ∀ t, tildeω' t = tildeω t + n * (2 * π * I) := by
+    intro t
+    have ht : shifted t = tildeω t := by
+      have hfun := congrArg DFunLike.coe huniq
+      simpa using congrFun hfun t
+    calc
+      tildeω' t = (tildeω' t - n * (2 * π * I)) + n * (2 * π * I) := by ring
+      _ = shifted t + n * (2 * π * I) := by rfl
+      _ = tildeω t + n * (2 * π * I) := by rw [ht]
+  calc
+    (tildeω' b0 - tildeω' a0) / (2 * π * I)
+        = ((tildeω b0 + n * (2 * π * I)) - (tildeω a0 + n * (2 * π * I))) / (2 * π * I) := by
+            rw [hshift_eq b0, hshift_eq a0]
+    _ = (tildeω b0 - tildeω a0) / (2 * π * I) := by ring
+    _ = k := hbase
+
 /-%%
 
- \begin{proof}\uses{diffinitpoint, existlift}
- This is immediate from Lemmas~\ref{diffinitpoint} and Lemma~\ref{existlift}.
+ \begin{proof}\uses{existlift, periodicity, expUPL}\leanok
+ By Lemma~\ref{existlift}, there is at least one lift $\tilde\omega$ of $\omega$ through $CSexp$.
+ Since $\omega(a)=\omega(b)$ and $CSexp(\tilde\omega(a))=\omega(a)$,
+ $CSexp(\tilde\omega(b))=\omega(b)$, Lemma~\ref{periodicity} implies that
+ $\tilde\omega(b)-\tilde\omega(a)=2\pi k I$ for some $k\in \Z$.
+ Hence the winding number of this lift is $k$.
+
+ If $\tilde\omega'$ is any other lift, then again by Lemma~\ref{periodicity} the values
+ $\tilde\omega'(a)$ and $\tilde\omega(a)$ differ by an integral multiple of $2\pi I$.
+ After subtracting this multiple from $\tilde\omega'$, we obtain another lift of $\omega$
+ with the same initial value as $\tilde\omega$.
+ By Corollary~\ref{expUPL}, lifts with the same initial value are equal.
+ Therefore $\tilde\omega'$ differs from $\tilde\omega$ by the same constant period
+ at every point of $[a,b]$, so the endpoint difference
+ $\tilde\omega'(b)-\tilde\omega'(a)$ equals $\tilde\omega(b)-\tilde\omega(a)$.
+ Thus every lift has the same winding number $k$.
  \end{proof}
 %%-/
 
