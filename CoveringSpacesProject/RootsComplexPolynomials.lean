@@ -1302,7 +1302,7 @@ noncomputable def trivOverTprime : {e : Trivialization ℤ CSexp // e.baseSet = 
 
 /-%%
 
-\begin{proof}\uses{multiplicativity, Eulersformula, homeoInv, trivOverT, splitPlane, TprimeDef}
+\begin{proof}\uses{multiplicativity, Eulersformula, homeoInv, trivOverT, splitPlane, TprimeDef}\leanok
 We have homeomorphism $\mu \colon \C\to \C$ that sends $z \to CSexp(\pi  *I)z)$
 and the homeomorphism $\tilde \mu\colon \C\to \C$ defined by $\tilde \mu(z)=z+\pi  *I$
 Clearly  by Lemma~\ref{multiplicativity} and Lemma~\ref{Eulersformula}
