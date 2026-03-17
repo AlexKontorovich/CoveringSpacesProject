@@ -1143,7 +1143,8 @@ with $f\circ\tilde\varphi =\varphi\circ f$. Then there is a trivialization for $
 
 noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpace X]
     [TopologicalSpace I] {f : E → X} (e : Trivialization I f) (φ : X ≃ₜ X)
-    (tildeφ : E ≃ₜ E) (hcomm : f ∘ tildeφ = φ ∘ f) : Trivialization I f := by
+    (tildeφ : E ≃ₜ E) (hcomm : f ∘ tildeφ = φ ∘ f) :
+    {e' : Trivialization I f // e'.baseSet = φ '' e.baseSet} := by
   let e' : Trivialization I (f ∘ tildeφ.symm) := e.compHomeomorph tildeφ.symm
   let ψ : X × I ≃ₜ X × I := φ.prodCongr (Homeomorph.refl I)
   have hcomm_symm : f ∘ tildeφ.symm = φ.symm ∘ f := by
@@ -1153,7 +1154,7 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
     calc
       f (tildeφ.symm x) = φ.symm (φ (f (tildeφ.symm x))) := by rw [φ.symm_apply_apply]
       _ = φ.symm (f x) := by rw [hx.symm]
-  refine
+  let t : Trivialization I f :=
     { toPartialHomeomorph := e'.toPartialHomeomorph.transHomeomorph ψ
       baseSet := φ '' e.baseSet
       open_baseSet := by
@@ -1196,6 +1197,7 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
         have hproj : (e' p).1 = f (tildeφ.symm p) := by
           simpa [Function.comp] using e'.proj_toFun p hp'
         simpa [hproj, Function.comp] using (congrFun hcomm (tildeφ.symm p)).symm }
+  exact ⟨t, rfl⟩
 
 /-%%
 \begin{proof}\uses{trivialization}\leanok
