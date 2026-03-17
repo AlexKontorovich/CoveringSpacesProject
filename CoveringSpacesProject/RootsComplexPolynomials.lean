@@ -2183,7 +2183,7 @@ That corollary also says that every lift of $\omega$ has winding number equal to
 /-%%
 
 
-\begin{lemma}\label{equalwinding}
+\begin{lemma}\label{equalwinding}\lean{equalwinding}\leanok
 If $\omega\colon [ a, b ]\to \C$ and $\omega'\colon [ a, b ]\to \C$
 are loops with $\omega(t) , \omega'(t) \in Cstar$ for all $t\in [ a, b ]$
 and if $H\colon [ a, b ]\times[ 0, 1 ]\to \C$ is a homotopy of loops from $\omega$ to $\omega'$
@@ -2191,22 +2191,148 @@ with $H(t,s)\in Cstar$ for all $t\in [ a, b ]$ and $s\in[ 0, 1 ]$, then $w(\omeg
 \end{lemma}
 %%-/
 
+theorem equalwinding {a b : ℝ} (hab : a < b)
+    (ω ω' : C(Set.Icc a b, Cstar))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (hloop' : ω' ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω' ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, Cstar))
+    (hhom : homotopyloop hab.le H)
+    (hzero : ∀ t, H (t, 0) = ω t)
+    (hone : ∀ t, H (t, 1) = ω' t) :
+    WNloop hab ω hloop = WNloop hab ω' hloop' := by
+  let a0 : Set.Icc a b := ⟨a, ⟨le_rfl, hab.le⟩⟩
+  let b0 : Set.Icc a b := ⟨b, ⟨hab.le, le_rfl⟩⟩
+  let Hswap : C(Set.Icc (0 : ℝ) 1 × Set.Icc a b, Cstar) :=
+    ⟨fun x => H (x.2, x.1), H.continuous.comp (continuous_snd.prodMk continuous_fst)⟩
+  obtain ⟨tildeω, hlift⟩ := WNloop_exists_lift hab ω hloop
+  have hHswap0 : ∀ t, CSexp (tildeω t) = (Hswap (0, t) : ℂ) := by
+    intro t
+    calc
+      CSexp (tildeω t) = (ω t : ℂ) := by
+        simpa [Function.comp] using congrFun hlift.2 t
+      _ = (H (t, 0) : ℂ) := by
+        simpa using congrArg Subtype.val (hzero t).symm
+      _ = (Hswap (0, t) : ℂ) := by
+        rfl
+  obtain ⟨tildeH, htildeH⟩ := ExistsUnique.exists (expHLP Hswap tildeω hHswap0)
+  have htildeH_lifts : ∀ x, CSexp (tildeH x) = (Hswap x : ℂ) := htildeH.1
+  have htildeH_zero : ∀ t, tildeH (0, t) = tildeω t := htildeH.2
+  let μ : C(Set.Icc (0 : ℝ) 1, Cstar) :=
+    ⟨fun s => H (a0, s), H.continuous.comp (continuous_const.prodMk continuous_id)⟩
+  let μa : C(Set.Icc (0 : ℝ) 1, ℂ) :=
+    ⟨fun s => tildeH (s, a0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
+  let μb : C(Set.Icc (0 : ℝ) 1, ℂ) :=
+    ⟨fun s => tildeH (s, b0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
+  have hμa : (∀ s, CSexp (μa s) = (μ s : ℂ)) ∧ μa 0 = tildeω a0 := by
+    constructor
+    · intro s
+      simpa [μa, μ, Hswap] using htildeH_lifts (s, a0)
+    · simpa [μa] using htildeH_zero a0
+  have hμb : (∀ s, CSexp (μb s) = (μ s : ℂ)) ∧ μb 0 = tildeω b0 := by
+    constructor
+    · intro s
+      calc
+        CSexp (μb s) = (H (b0, s) : ℂ) := by
+          simpa [μb, Hswap] using htildeH_lifts (s, b0)
+        _ = (H (a0, s) : ℂ) := by
+          simpa [a0, b0] using congrArg Subtype.val (hhom s).symm
+        _ = (μ s : ℂ) := by
+          rfl
+    · simpa [μb] using htildeH_zero b0
+  have hstart : CSexp (tildeω b0) = CSexp (tildeω a0) := by
+    calc
+      CSexp (tildeω b0) = (ω b0 : ℂ) := by
+        simpa [Function.comp] using congrFun hlift.2 b0
+      _ = (ω a0 : ℂ) := by
+        simpa [a0, b0] using congrArg Subtype.val hloop.symm
+      _ = CSexp (tildeω a0) := by
+        simpa [Function.comp] using (congrFun hlift.2 a0).symm
+  obtain ⟨n, hn⟩ := (periodicity (tildeω b0) (tildeω a0)).1 hstart
+  let shiftedμa : C(Set.Icc (0 : ℝ) 1, ℂ) :=
+    ⟨fun s => μa s + n * (2 * π * I), μa.continuous.add continuous_const⟩
+  have hshiftedμa : (∀ s, CSexp (shiftedμa s) = (μ s : ℂ)) ∧ shiftedμa 0 = μb 0 := by
+    constructor
+    · intro s
+      have hperiod : CSexp (shiftedμa s) = CSexp (μa s) := by
+        exact (periodicity (shiftedμa s) (μa s)).2 ⟨n, by rfl⟩
+      exact hperiod.trans (hμa.1 s)
+    · calc
+        shiftedμa 0 = μa 0 + n * (2 * π * I) := by rfl
+        _ = tildeω a0 + n * (2 * π * I) := by rw [hμa.2]
+        _ = tildeω b0 := by rw [hn]
+        _ = μb 0 := by rw [hμb.2]
+  have hμb_self : (∀ s, CSexp (μb s) = (μ s : ℂ)) ∧ μb 0 = μb 0 := by
+    exact ⟨hμb.1, rfl⟩
+  have huniq : shiftedμa = μb := by
+    exact ExistsUnique.unique
+      (expUPL (show (0 : ℝ) < 1 by norm_num) μ (μb 0) (hμb.1 0))
+      hshiftedμa hμb_self
+  have hshift_eq : ∀ s, μb s = μa s + n * (2 * π * I) := by
+    intro s
+    have hfun := congrArg DFunLike.coe huniq
+    simpa [shiftedμa] using (congrFun hfun s).symm
+  let tildeω' : C(Set.Icc a b, ℂ) :=
+    ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
+  have hlift' : deflift CSexp (fun t => (ω' t : ℂ)) tildeω' := by
+    refine ⟨tildeω'.continuous, ?_⟩
+    ext t
+    calc
+      CSexp (tildeω' t) = (H (t, 1) : ℂ) := by
+        simpa [tildeω', Hswap] using htildeH_lifts (1, t)
+      _ = (ω' t : ℂ) := by
+        simpa using congrArg Subtype.val (hone t)
+  have hwind :
+      (tildeω' b0 - tildeω' a0) / (2 * π * I) =
+        (tildeω b0 - tildeω a0) / (2 * π * I) := by
+    have hdiff : tildeω' b0 - tildeω' a0 = tildeω b0 - tildeω a0 := by
+      calc
+        tildeω' b0 - tildeω' a0 = μb 1 - μa 1 := by rfl
+        _ = μb 0 - μa 0 := by
+          rw [hshift_eq 1, hshift_eq 0]
+          ring
+        _ = tildeω b0 - tildeω a0 := by
+          rw [hμb.2, hμa.2]
+    rw [hdiff]
+  have hcomplex : (WNloop hab ω hloop : ℂ) = (WNloop hab ω' hloop' : ℂ) := by
+    calc
+    (WNloop hab ω hloop : ℂ) = (tildeω b0 - tildeω a0) / (2 * π * I) := by
+      symm
+      exact WNloop_eq_of_lift hab ω hloop tildeω hlift
+    _ = (tildeω' b0 - tildeω' a0) / (2 * π * I) := by
+      symm
+      exact hwind
+    _ = (WNloop hab ω' hloop' : ℂ) := by
+      exact WNloop_eq_of_lift hab ω' hloop' tildeω' hlift'
+  exact_mod_cast hcomplex
+
 /-%%
 
-\begin{proof}\uses{homotopyloop, diffinitpoint, constWNomega, expHLP}
-By Definition~\ref{homotopyloop} for all $\{t∈ ℝ : 0≤t≤1\}$ $H(a,t)=H(b,t)$.
-Let $\mu\colon \{t∈ ℝ : 0≤t≤1\} \to \C$ be the path $μ(t)=H(a,t)$.
-By Corollary~\ref{expHLP} since the image of $H$ is contained in $Cstar$,
-there  is a lift $\tilde H\colon [ a, b]\times I$ of $H$ through $CSexp$.
-Then $\tilde H|_{\{a\}\times I}$
-and $\tilde H|_{\{b\}\times I}$ are two liftings of $\mu$. So by Lemma~\ref{diffinitpoint}
-$\tilde H(b,1)-\tilde H(b,0)=\tilde H(a,1)-\tilde H(a,0)$.
-Rewriting we have
-$⁀ H(b,1)-⁀ H(a,1)= \tilde H(b,0)-\tilde H(a,0)$.
-Since $\tilde H(t,0)$ is a lift of $\omega$ through $CSexp$ and  $\tilde H(t,1)$ is a lift of
-$\omega'$
-through $CSexp$,  by Definition~\ref{WNloop}
-$w(\omega')=w(ω)$.
+\begin{proof}\uses{homotopyloop, WNloop_exists_lift, WNloop_eq_of_lift, expHLP, expUPL, periodicity}\leanok
+Choose a lift $\tilde\omega$ of $\omega$ using Lemma~\ref{WNloop_exists_lift}.
+Applying Corollary~\ref{expHLP} to the homotopy $H$ and the initial lift $\tilde\omega$,
+we obtain a lift $\tilde H$ of the whole homotopy.
+
+Now consider the two boundary paths
+\[
+s\mapsto \tilde H(a,s), \qquad s\mapsto \tilde H(b,s).
+\]
+By Definition~\ref{homotopyloop}, the projected paths agree, because
+$H(a,s)=H(b,s)$ for all $s$.
+At time $s=0$, the starting points $\tilde H(a,0)$ and $\tilde H(b,0)$ differ by an integral
+multiple of $2\pi I$ by Lemma~\ref{periodicity}, since $\omega(a)=\omega(b)$.
+Shift the first boundary lift by this constant period. The shifted path is still a lift of the
+same projected path, and now it has the same initial value as the second boundary lift.
+By Corollary~\ref{expUPL}, these two lifts are equal. Therefore
+$\tilde H(b,s)-\tilde H(a,s)$ is independent of $s$.
+
+Evaluating at $s=0$ and $s=1$ shows that
+\[
+\tilde H(b,1)-\tilde H(a,1)=\tilde H(b,0)-\tilde H(a,0).
+\]
+But the slice $t\mapsto \tilde H(t,0)$ is a lift of $\omega$, and the slice
+$t\mapsto \tilde H(t,1)$ is a lift of $\omega'$.
+Lemma~\ref{WNloop_eq_of_lift} therefore identifies the two corresponding endpoint quotients with
+$w(\omega)$ and $w(\omega')$, so these winding numbers are equal.
 \end{proof}
 %%-/
 
