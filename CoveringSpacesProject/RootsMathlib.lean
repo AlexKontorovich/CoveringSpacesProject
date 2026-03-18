@@ -1,23 +1,12 @@
 import Mathlib
 import «CoveringSpacesProject».ComplexPathWinding
+import «CoveringSpacesProject».MetricSphereClosedBall
 
 open Complex TopologicalSpace
 
 open scoped unitInterval
 
 noncomputable section
-
-namespace Metric
-
-/-- The canonical inclusion of a sphere into the corresponding closed ball. -/
-def sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ) :
-    sphere x r → closedBall x r :=
-  Set.inclusion sphere_subset_closedBall
-
-@[simp] theorem coe_sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ)
-    (y : sphere x r) : ((sphereToClosedBall x r y : closedBall x r) : α) = y := rfl
-
-end Metric
 
 namespace Circle
 
