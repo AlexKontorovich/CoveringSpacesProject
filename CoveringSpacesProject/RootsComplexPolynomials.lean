@@ -1185,14 +1185,14 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
   let ψ : X × I ≃ₜ X × I := φ.prodCongr (Homeomorph.refl I)
   have hcomm_symm : f ∘ tildeφ.symm = φ.symm ∘ f := commute_symm_of_commute φ tildeφ hcomm
   let t : Trivialization I f :=
-    { toPartialHomeomorph := e'.toPartialHomeomorph.transHomeomorph ψ
+    { toOpenPartialHomeomorph := e'.toOpenPartialHomeomorph.transHomeomorph ψ
       baseSet := φ '' e.baseSet
       open_baseSet := by
         simpa using φ.isOpenMap _ e.open_baseSet
       source_eq := by
         ext x
         suffices hx : tildeφ.symm x ∈ e.source ↔ x ∈ f ⁻¹' (φ '' e.baseSet) by
-          simpa [PartialHomeomorph.transHomeomorph, e', Trivialization.compHomeomorph] using hx
+          simpa [OpenPartialHomeomorph.transHomeomorph, e', Trivialization.compHomeomorph] using hx
         rw [e.mem_source]
         have hsymm : f (tildeφ.symm x) = φ.symm (f x) := by
           simpa [Function.comp] using congrFun hcomm_symm x
@@ -1207,7 +1207,7 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
       target_eq := by
         ext x
         suffices hx : ψ.symm x ∈ e'.target ↔ x ∈ (φ '' e.baseSet) ×ˢ (Set.univ : Set I) by
-          simpa [PartialHomeomorph.transHomeomorph] using hx
+          simpa [OpenPartialHomeomorph.transHomeomorph] using hx
         rw [e'.target_eq]
         change (φ.symm x.1 ∈ e.baseSet ∧ x.2 ∈ (Set.univ : Set I)) ↔
           x ∈ (φ '' e.baseSet) ×ˢ (Set.univ : Set I)
@@ -1393,9 +1393,8 @@ theorem expCP : IsCoveringOn CSexp Cstar ∧ CSexp ⁻¹' Cstar = Set.univ ∧ S
     have hx' : x ∈ splitPlane ∪ TprimeDef := by
       simpa [TcupTprimeCstar] using hx
     rcases hx' with hxT | hxT'
-    · exact IsEvenlyCovered.to_isEvenlyCovered_preimage ⟨inferInstance, trivOverT, by simpa using hxT⟩
-    · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
-        ⟨inferInstance, trivOverTprime.1, by simpa using hxT'⟩
+    · exact (IsEvenlyCovered.of_trivialization (t := trivOverT) (by simpa using hxT)).to_isEvenlyCovered_preimage
+    · exact (IsEvenlyCovered.of_trivialization (t := trivOverTprime.1) (by simpa using hxT')).to_isEvenlyCovered_preimage
   · ext z
     simp [Cstar, CSexp, Complex.exp_ne_zero]
   · intro z hz
@@ -1666,10 +1665,10 @@ theorem CSexpCstar_isCoveringMap : IsCoveringMap CSexpCstar := by
     have hxC : (x : ℂ) ∈ Cstar := x.property
     simp [TcupTprimeCstar, x.property]
   rcases hx with hs | ht
-  · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
-      ⟨inferInstance, trivOverTCstar, by simpa [trivOverTCstar_baseSet] using hs⟩
-  · exact IsEvenlyCovered.to_isEvenlyCovered_preimage
-      ⟨inferInstance, trivOverTprimeCstar, by simpa [trivOverTprimeCstar_baseSet] using ht⟩
+  · exact (IsEvenlyCovered.of_trivialization (t := trivOverTCstar)
+      (by simpa [trivOverTCstar_baseSet] using hs)).to_isEvenlyCovered_preimage
+  · exact (IsEvenlyCovered.of_trivialization (t := trivOverTprimeCstar)
+      (by simpa [trivOverTprimeCstar_baseSet] using ht)).to_isEvenlyCovered_preimage
 
 /-%%
 \begin{proof}\uses{CSexpCstar, TcupTprimeCstar, trivOverTCstar, trivOverTprimeCstar, trivOverTCstar_baseSet, trivOverTprimeCstar_baseSet}\leanok
@@ -1919,12 +1918,9 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
       intro t ht
       simp only
       rw [hn t]
-      have : (2 : ℂ) * π * I ≠ 0 := by
-        norm_cast
-        have : (π : ℝ) ≠ 0 := by exact Real.pi_ne_zero
-        norm_num
-        exact this
-      field_simp
+      have hpi : (π : ℂ) ≠ 0 := by
+        exact_mod_cast Real.pi_ne_zero
+      field_simp [hpi, Complex.I_ne_zero]
       ring_nf
     have := (continuousOn_congr setEqOn).1 htot
     exact ContinuousOn.coe this
@@ -1974,25 +1970,17 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
   split_ands
   · rw [hℓ]
     ring_nf
-    have : I ≠ 0 := by norm_num
-    have : (π : ℂ) ≠ 0 := by
-      norm_cast
-      exact Real.pi_ne_zero
-    field_simp
-    rw [show ℓ * π * I * I = - (ℓ * π) by ring_nf; norm_cast; simp]
-    norm_cast
+    have hpi : (π : ℂ) ≠ 0 := by
+      exact_mod_cast Real.pi_ne_zero
+    field_simp [hpi, Complex.I_ne_zero]
     ring_nf
   · rw [f2]
     unfold tildeb tildea
     rw [hℓ]
     ring_nf
-    have : I ≠ 0 := by norm_num
-    have : (π : ℂ) ≠ 0 := by
-      norm_cast
-      exact Real.pi_ne_zero
-    field_simp
-    rw [show ℓ * π * I * I = - (ℓ * π) by ring_nf; norm_cast; simp]
-    norm_cast
+    have hpi : (π : ℂ) ≠ 0 := by
+      exact_mod_cast Real.pi_ne_zero
+    field_simp [hpi, Complex.I_ne_zero]
     ring_nf
 
 /-%%
@@ -2060,13 +2048,9 @@ theorem constWNomega {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
   have hbase : (tildeω b0 - tildeω a0) / (2 * π * I) = k := by
     rw [hk]
     ring_nf
-    have : I ≠ 0 := by norm_num
-    have : (π : ℂ) ≠ 0 := by
-      norm_cast
-      exact Real.pi_ne_zero
-    field_simp
-    rw [show k * π * I * I = - (k * π) by ring_nf; norm_cast; simp]
-    norm_cast
+    have hpi : (π : ℂ) ≠ 0 := by
+      exact_mod_cast Real.pi_ne_zero
+    field_simp [hpi, Complex.I_ne_zero]
     ring_nf
   have haeq : CSexp (tildeω' a0) = CSexp (tildeω a0) := by
     calc
@@ -2906,10 +2890,7 @@ theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
       _ ≤ 1 := by
         linarith
   have hJfun_cont : Continuous Jfun := by
-    simpa [Jfun] using
-      (continuous_ofReal.comp
-          (continuous_const.sub (continuous_subtype_val.comp continuous_snd))).mul
-        (continuous_subtype_val.comp continuous_fst)
+    fun_prop
   let J : C(Circle × I01, D2) :=
     ⟨fun x => ⟨Jfun x, hJfun_mem x⟩, Continuous.subtype_mk hJfun_cont hJfun_mem⟩
   let H : C(Circle × I01, Cstar) := F.comp J
@@ -2961,14 +2942,7 @@ theorem walkingdog (ψ ψ' : C(Circle, Cstar))
   let Hfun : Circle × I01 → ℂ := fun x =>
     (((1 - (x.2 : ℝ)) : ℂ) * (ψ x.1 : ℂ)) + (((x.2 : ℝ) : ℂ) * (ψ' x.1 : ℂ))
   have hHfun_cont : Continuous Hfun := by
-    have hψ : Continuous fun x : Circle × I01 => (ψ x.1 : ℂ) :=
-      continuous_subtype_val.comp (ψ.continuous.comp continuous_fst)
-    have hψ' : Continuous fun x : Circle × I01 => (ψ' x.1 : ℂ) :=
-      continuous_subtype_val.comp (ψ'.continuous.comp continuous_fst)
-    simpa [Hfun] using
-      ((continuous_ofReal.comp
-          (continuous_const.sub (continuous_subtype_val.comp continuous_snd))).mul hψ).add
-        ((continuous_ofReal.comp (continuous_subtype_val.comp continuous_snd)).mul hψ')
+    fun_prop
   have hHfun_ne : ∀ x : Circle × I01, Hfun x ≠ 0 := by
     intro x hx
     have hs0 : 0 ≤ (x.2 : ℝ) := x.2.2.1
@@ -3047,14 +3021,18 @@ The map $z \mapsto \alpha_0 (Rz)^k$ from the unit circle to $\Cstar$.
 noncomputable def monomialS1Map (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
     C(Circle, Cstar) := by
   refine ⟨fun z => ⟨α0 * (((R : ℂ) * z) ^ k), ?_⟩, ?_⟩
-  · refine mul_ne_zero hα0 ?_
-    exact pow_ne_zero k <| mul_ne_zero (by exact_mod_cast hR.ne') (Circle.coe_ne_zero z)
+  · have hR0 : (R : ℂ) ≠ 0 := by
+      exact_mod_cast hR.ne'
+    refine mul_ne_zero hα0 ?_
+    exact pow_ne_zero k <| mul_ne_zero hR0 (Circle.coe_ne_zero z)
   · exact Continuous.subtype_mk
       (continuous_const.mul ((continuous_const.mul continuous_subtype_val).pow k))
       (by
         intro z
+        have hR0 : (R : ℂ) ≠ 0 := by
+          exact_mod_cast hR.ne'
         refine mul_ne_zero hα0 ?_
-        exact pow_ne_zero k <| mul_ne_zero (by exact_mod_cast hR.ne') (Circle.coe_ne_zero z))
+        exact pow_ne_zero k <| mul_ne_zero hR0 (Circle.coe_ne_zero z))
 
 /-%%
 \begin{lemma}\label{zkWNk}\lean{zkWNk}\uses{monomialS1Map, DefS1loop, DefS1loop_loop, multiplicativity, expCP, deflift, WNloop_eq_of_lift, WNloop, DefWNS1}\leanok
@@ -3108,11 +3086,14 @@ theorem zkWNk (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
                   (DefS1loop (monomialS1Map α0 k R hR hα0))
                   (DefS1loop_loop (monomialS1Map α0 k R hR hα0))
                   tildeω hlift
+      _ = ((k : ℂ) * (2 * π : ℂ) * I) / (2 * π * I) := by
+            simp [tildeω]
+            ring
       _ = (k : ℂ) := by
             have hpi : (π : ℂ) ≠ 0 := by
               exact_mod_cast Real.pi_ne_zero
             field_simp [tildeω, hpi, Complex.I_ne_zero]
-            ring
+            ring_nf
   exact_mod_cast hwind
 
 /-%%
