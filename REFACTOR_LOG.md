@@ -20,33 +20,38 @@
    Decision: keep `Cstar` as internal-only notation inside that file, and keep the bridge API
    outward-facing in terms of `ℂˣ` when possible.
 
-4. Decide where `ContinuousMap.IsLoopHomotopy` should live.
-   Current location: `CoveringSpacesProject/ComplexPathWinding.lean`.
-   Current issue: it is a generic notion, not specific to complex winding numbers.
-   Likely target: a small helper module if Mathlib does not already have the right abstraction for
-   free homotopies of loops.
+4. [done] Moved `ContinuousMap.IsLoopHomotopy` out of
+   `CoveringSpacesProject/ComplexPathWinding.lean` into the small generic helper module
+   `CoveringSpacesProject/LoopHomotopy.lean`.
+   Decision: keep it project-local for now, but treat it as generic topology infrastructure rather
+   than winding-number-specific API.
 
-5. Revisit the generality of `circleMonomial_windingNumber` in
+5. [done] Revisited the generality of `circleMonomial_windingNumber` in
    `CoveringSpacesProject/RootsMathlib.lean`.
-   Current issue: the theorem is stated for `R : ℝ` with `0 < R`, but the proof is really about a
-   nonzero scaling factor.
-   Goal: separate the genuinely reusable theorem from the circle/radius-facing corollary.
+   Decision: the reusable theorem is now `circleScaledMonomial_windingNumber`, and the
+   radius-parameterized `circleMonomial_windingNumber` is a corollary.
 
-6. Reassess whether `circleLoop` and `circleLoopHomotopy` belong in
-   `CoveringSpacesProject/RootsMathlib.lean`
-   or in a separate circle helper module.
-   Current issue: these are useful circle-specific constructions, but they are not inherently about
-   roots of polynomials.
+6. [done] Moved `circleLoop` and `circleLoopHomotopy` out of
+   `CoveringSpacesProject/RootsMathlib.lean` into the separate circle helper module
+   `CoveringSpacesProject/CirclePathHelpers.lean`.
+   Decision: keep circle-specific path helpers separate from both winding-number infrastructure and
+   polynomial applications.
 
-7. Decide the eventual home of `Metric.sphereToClosedBall`, currently in
-   `CoveringSpacesProject/MetricSphereClosedBall.lean`.
-   Current issue: the lemma is generic and plausibly upstreamable; we only created a local module
-   because the current Mathlib snapshot seems to expose only `sphere_subset_closedBall` plus
-   `Set.inclusion`.
+7. [done] Decided the current home of `Metric.sphereToClosedBall`.
+   Decision: keep it in the dedicated local helper module
+   `CoveringSpacesProject/MetricSphereClosedBall.lean` for now.
+   Note: this still looks plausibly upstreamable once we move onto a fresh Mathlib branch.
 
-8. Consider whether `exists_homotopy_of_norm_sub_lt` should eventually generalize in the codomain
-   from `ℂˣ` to `𝕜ˣ` for a suitable class such as `RCLike 𝕜`.
-   Current issue: the domain generalization is done, but the codomain is still fixed to `ℂ`.
+8. [done] Generalized `exists_homotopy_of_norm_sub_lt` in the codomain from `ℂˣ` to `𝕜ˣ` for
+   `[RCLike 𝕜]`.
+   Note: `windingNumber_eq_of_norm_sub_lt` remains specialized to `ℂˣ` because the current
+   winding-number API is still complex-specific.
+
+### Current status
+
+- The active cleanup checklist above is complete.
+- New follow-up items should be added here as they come up during the eventual Mathlib-branch
+  cleanup.
 
 ### Notes for the eventual Mathlib branch
 

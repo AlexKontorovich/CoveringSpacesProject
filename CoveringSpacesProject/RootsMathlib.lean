@@ -1,6 +1,6 @@
 import Mathlib
+import «CoveringSpacesProject».CirclePathHelpers
 import «CoveringSpacesProject».ComplexPathWinding
-import «CoveringSpacesProject».MetricSphereClosedBall
 
 open Complex TopologicalSpace
 
@@ -8,59 +8,7 @@ open scoped unitInterval
 
 noncomputable section
 
-namespace Circle
-
-/-- The canonical inclusion of the circle into the closed unit disk. -/
-abbrev toClosedUnitDisk : Circle → Metric.closedBall (0 : ℂ) 1 :=
-  Metric.sphereToClosedBall (0 : ℂ) 1
-
-@[simp] theorem coe_toClosedUnitDisk (z : Circle) :
-    ((toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ) = z := rfl
-
-end Circle
-
 namespace ContinuousMap
-
-/-- Precompose a circle map with the standard loop `t ↦ Circle.exp (2πt)` on `I`. -/
-def circleLoop {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) (f 1) where
-  toFun t := f (Circle.exp (2 * Real.pi * (t : ℝ)))
-  continuous_toFun := f.continuous.comp <| Circle.exp.continuous.comp <| by fun_prop
-  source' := by simp
-  target' := by simp [Circle.exp_two_pi]
-
-@[simp] theorem circleLoop_apply {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) (t : I) :
-    f.circleLoop t = f (Circle.exp (2 * Real.pi * (t : ℝ))) := rfl
-
-/-- Precompose a homotopy of circle maps with the standard loop `t ↦ Circle.exp (2πt)`. -/
-def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) : C(I × I, X) :=
-  ⟨fun x => H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))),
-    H.continuous_toFun.comp
-      (continuous_fst.prodMk
-        (Circle.exp.continuous.comp <| by fun_prop))⟩
-
-@[simp] theorem circleLoopHomotopy_apply {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) (x : I × I) :
-    circleLoopHomotopy H x = H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))) := rfl
-
-theorem circleLoopHomotopy_isLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
-  intro s
-  change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
-    H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
-  simp [Circle.exp_two_pi]
-
-@[simp] theorem circleLoopHomotopy_zero_left {X : Type*} [TopologicalSpace X]
-    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
-    circleLoopHomotopy H (0, t) = f.circleLoop t := by
-  change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
-  exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
-
-@[simp] theorem circleLoopHomotopy_one_left {X : Type*} [TopologicalSpace X]
-    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
-    circleLoopHomotopy H (1, t) = g.circleLoop t := by
-  change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
-  exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))
 
 /-- The winding number of a continuous map from the circle to `ℂˣ`. -/
 noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
@@ -82,41 +30,42 @@ theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap
       (circleLoopHomotopy_isLoopHomotopy H) (circleLoopHomotopy_zero_left H)
       (circleLoopHomotopy_one_left H)
 
-theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α] {f g : C(α, ℂˣ)}
-    (hclose : ∀ z : α, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
+theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α]
+    {𝕜 : Type*} [RCLike 𝕜] {f g : C(α, 𝕜ˣ)}
+    (hclose : ∀ z : α, ‖(f z : 𝕜) - g z‖ < ‖(f z : 𝕜)‖) :
     Nonempty (ContinuousMap.Homotopy f g) := by
-  let Hbase : C(I × α, ℂ) :=
+  let Hbase : C(I × α, 𝕜) :=
     ⟨fun x =>
-      (((1 - (x.1 : ℝ)) : ℂ) * (f x.2 : ℂ)) + (((x.1 : ℝ) : ℂ) * (g x.2 : ℂ)), by
+      (((1 - (x.1 : ℝ)) : 𝕜) * (f x.2 : 𝕜)) + (((x.1 : ℝ) : 𝕜) * (g x.2 : 𝕜)), by
         fun_prop⟩
   have hHbase : ∀ x : I × α, Hbase x ≠ 0 := by
     intro x hx
     have hs0 : 0 ≤ (x.1 : ℝ) := x.1.2.1
     have hs1 : (x.1 : ℝ) ≤ 1 := x.1.2.2
-    have hsNorm : ‖((x.1 : ℝ) : ℂ)‖ ≤ 1 := by
+    have hsNorm : ‖((x.1 : ℝ) : 𝕜)‖ ≤ 1 := by
       simpa [RCLike.norm_ofReal, abs_of_nonneg hs0] using hs1
     have hle :
-        ‖((x.1 : ℝ) : ℂ) * ((f x.2 : ℂ) - g x.2)‖ ≤ ‖(f x.2 : ℂ) - g x.2‖ := by
+        ‖((x.1 : ℝ) : 𝕜) * ((f x.2 : 𝕜) - g x.2)‖ ≤ ‖(f x.2 : 𝕜) - g x.2‖ := by
       calc
-        ‖((x.1 : ℝ) : ℂ) * ((f x.2 : ℂ) - g x.2)‖
-            = ‖((x.1 : ℝ) : ℂ)‖ * ‖(f x.2 : ℂ) - g x.2‖ := norm_mul _ _
-        _ ≤ 1 * ‖(f x.2 : ℂ) - g x.2‖ := by gcongr
-        _ = ‖(f x.2 : ℂ) - g x.2‖ := by ring
-    have hEq : (f x.2 : ℂ) = ((x.1 : ℝ) : ℂ) * ((f x.2 : ℂ) - g x.2) := by
+        ‖((x.1 : ℝ) : 𝕜) * ((f x.2 : 𝕜) - g x.2)‖
+            = ‖((x.1 : ℝ) : 𝕜)‖ * ‖(f x.2 : 𝕜) - g x.2‖ := norm_mul _ _
+        _ ≤ 1 * ‖(f x.2 : 𝕜) - g x.2‖ := by gcongr
+        _ = ‖(f x.2 : 𝕜) - g x.2‖ := by ring
+    have hEq : (f x.2 : 𝕜) = ((x.1 : ℝ) : 𝕜) * ((f x.2 : 𝕜) - g x.2) := by
       calc
-        (f x.2 : ℂ) = (f x.2 : ℂ) - Hbase x := by rw [hx]; ring
-        _ = ((x.1 : ℝ) : ℂ) * ((f x.2 : ℂ) - g x.2) := by
+        (f x.2 : 𝕜) = (f x.2 : 𝕜) - Hbase x := by rw [hx]; ring
+        _ = ((x.1 : ℝ) : 𝕜) * ((f x.2 : 𝕜) - g x.2) := by
               simp [Hbase]
               ring
-    have hlt : ‖(f x.2 : ℂ)‖ < ‖(f x.2 : ℂ)‖ := by
+    have hlt : ‖(f x.2 : 𝕜)‖ < ‖(f x.2 : 𝕜)‖ := by
       calc
-        ‖(f x.2 : ℂ)‖
-            = ‖((x.1 : ℝ) : ℂ) * ((f x.2 : ℂ) - g x.2)‖ := by
+        ‖(f x.2 : 𝕜)‖
+            = ‖((x.1 : ℝ) : 𝕜) * ((f x.2 : 𝕜) - g x.2)‖ := by
                 exact congrArg norm hEq
-        _ ≤ ‖(f x.2 : ℂ) - g x.2‖ := hle
-        _ < ‖(f x.2 : ℂ)‖ := hclose x.2
-    exact (lt_irrefl ‖(f x.2 : ℂ)‖ hlt).elim
-  let H : C(I × α, ℂˣ) :=
+        _ ≤ ‖(f x.2 : 𝕜) - g x.2‖ := hle
+        _ < ‖(f x.2 : 𝕜)‖ := hclose x.2
+    exact (lt_irrefl ‖(f x.2 : 𝕜)‖ hlt).elim
+  let H : C(I × α, 𝕜ˣ) :=
     ContinuousMap.unitsOfForallIsUnit (f := Hbase) fun x => isUnit_iff_ne_zero.mpr (hHbase x)
   refine ⟨{ toContinuousMap := H, map_zero_left := ?_, map_one_left := ?_ }⟩
   · intro z
@@ -203,25 +152,32 @@ theorem windingNumber_eq_zero_of_exists_extension' {f : C(Circle, ℂˣ)}
 
 end ContinuousMap
 
-/-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/
-noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : C(Circle, ℂˣ) :=
+/-- The monomial map `z ↦ a * (cz)^n` on the unit circle, valued in `ℂˣ`. -/
+noncomputable def circleScaledMonomial (a c : ℂˣ) (n : ℕ) : C(Circle, ℂˣ) :=
   ContinuousMap.unitsOfForallIsUnit
-    (f := ⟨fun z => a * (((R : ℂ) * z) ^ n), by
+    (f := ⟨fun z => a * (((c : ℂ) * z) ^ n), by
       fun_prop⟩)
     fun z => by
-      have hR0 : (R : ℂ) ≠ 0 := by
-        exact_mod_cast hR.ne'
       exact isUnit_iff_ne_zero.mpr <|
-        mul_ne_zero a.ne_zero (pow_ne_zero n <| mul_ne_zero hR0 (Circle.coe_ne_zero z))
+        mul_ne_zero a.ne_zero (pow_ne_zero n <| mul_ne_zero c.ne_zero (Circle.coe_ne_zero z))
+
+@[simp] theorem coe_circleScaledMonomial_apply (a c : ℂˣ) (n : ℕ) (z : Circle) :
+    ((circleScaledMonomial a c n z : ℂˣ) : ℂ) = a * (((c : ℂ) * z) ^ n) := rfl
+
+/-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/
+noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : C(Circle, ℂˣ) :=
+  circleScaledMonomial a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
 
 @[simp] theorem coe_circleMonomial_apply (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) (z : Circle) :
-    ((circleMonomial a n R hR z : ℂˣ) : ℂ) = a * (((R : ℂ) * z) ^ n) := rfl
+    ((circleMonomial a n R hR z : ℂˣ) : ℂ) = a * (((R : ℂ) * z) ^ n) := by
+  simp [circleMonomial, circleScaledMonomial]
 
-theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
-    (circleMonomial a n R hR).windingNumber = (n : ℤ) := by
-  let c0 : {z : ℂ // z ≠ 0} := ⟨(a : ℂ) * (R : ℂ) ^ n, by
+/-- The winding number of `z ↦ a * (cz)^n` on the unit circle is `n`. -/
+theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
+    (circleScaledMonomial a c n).windingNumber = (n : ℤ) := by
+  let c0 : {z : ℂ // z ≠ 0} := ⟨(a : ℂ) * (c : ℂ) ^ n, by
     refine mul_ne_zero a.ne_zero ?_
-    exact pow_ne_zero n (by exact_mod_cast hR.ne')⟩
+    exact pow_ne_zero n c.ne_zero⟩
   let a0 : ℂ := Complex.log c0
   have ha0 : Complex.exp a0 = (c0 : ℂ) := by
     simpa [a0] using Complex.exp_log c0.property
@@ -230,39 +186,39 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
     fun_prop
   have hlift :
       ∀ t,
-        Complex.exp (tildeω t) = (((circleMonomial a n R hR).circleLoop t : ℂˣ) : ℂ) := by
+        Complex.exp (tildeω t) = (((circleScaledMonomial a c n).circleLoop t : ℂˣ) : ℂ) := by
     intro t
     calc
       Complex.exp (tildeω t)
           = Complex.exp a0 *
               Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
               simp [tildeω, Complex.exp_add]
-      _ = ((a : ℂ) * (R : ℂ) ^ n) *
+      _ = ((a : ℂ) * (c : ℂ) ^ n) *
             Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
             simpa [c0] using
               congrArg
                 (fun z : ℂ => z * Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I))
                 ha0
-      _ = ((a : ℂ) * (R : ℂ) ^ n) *
+      _ = ((a : ℂ) * (c : ℂ) ^ n) *
             Complex.exp ((n : ℂ) * (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) := by
             ring_nf
-      _ = ((a : ℂ) * (R : ℂ) ^ n) *
+      _ = ((a : ℂ) * (c : ℂ) ^ n) *
             (Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) ^ n := by
             rw [Complex.exp_nat_mul]
-      _ = ((a : ℂ) * (R : ℂ) ^ n) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) ^ n := by
+      _ = ((a : ℂ) * (c : ℂ) ^ n) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) ^ n := by
             simp [Circle.coe_exp]
-      _ = (a : ℂ) * (((R : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
+      _ = (a : ℂ) * (((c : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
             rw [mul_pow]
             ring
-      _ = (((circleMonomial a n R hR).circleLoop t : ℂˣ) : ℂ) := by
-            simp [coe_circleMonomial_apply]
-  have hwind : ((circleMonomial a n R hR).windingNumber : ℂ) = n := by
+      _ = (((circleScaledMonomial a c n).circleLoop t : ℂˣ) : ℂ) := by
+            simp [coe_circleScaledMonomial_apply]
+  have hwind : ((circleScaledMonomial a c n).windingNumber : ℂ) = n := by
     calc
-      ((circleMonomial a n R hR).windingNumber : ℂ)
+      ((circleScaledMonomial a c n).windingNumber : ℂ)
           = (tildeω 1 - tildeω 0) / ((2 * Real.pi : ℂ) * Complex.I) := by
               symm
               simpa [ContinuousMap.windingNumber] using
-                Path.unitsWindingNumber_eq_of_lift (circleMonomial a n R hR).circleLoop tildeω hlift
+                Path.unitsWindingNumber_eq_of_lift (circleScaledMonomial a c n).circleLoop tildeω hlift
       _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
             simp [tildeω]
       _ = (n : ℂ) := by
@@ -270,6 +226,12 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
               exact_mod_cast Real.pi_ne_zero
             field_simp [tildeω, hpi, Complex.I_ne_zero]
   exact_mod_cast hwind
+
+/-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/
+theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
+    (circleMonomial a n R hR).windingNumber = (n : ℤ) := by
+  simpa [circleMonomial] using
+    circleScaledMonomial_windingNumber a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
 
 namespace Polynomial
 

@@ -1,4 +1,5 @@
 import Mathlib
+import «CoveringSpacesProject».LoopHomotopy
 
 /-!
 # Winding numbers from the covering map `Complex.exp`
@@ -21,10 +22,6 @@ noncomputable section
 local notation "Cstar" => {z : ℂ // z ≠ 0}
 
 namespace ContinuousMap
-
-/-- A homotopy through loops on `I`. -/
-def IsLoopHomotopy {X : Type*} [TopologicalSpace X] (H : C(I × I, X)) : Prop :=
-  ∀ s, H (s, 0) = H (s, 1)
 
 private noncomputable def complexUnitsHomeomorphNeZero :
     ℂˣ ≃ₜ Cstar :=
