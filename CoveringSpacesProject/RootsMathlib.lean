@@ -7,18 +7,22 @@ open scoped unitInterval
 
 noncomputable section
 
-/-- The closed unit disk in `ℂ`, using the existing project model. -/
-abbrev ClosedUnitDisk := D2
+/-- The closed unit disk in `ℂ`. -/
+abbrev ClosedUnitDisk := { z : ℂ // ‖z‖ ≤ 1 }
 
 namespace Circle
 
 /-- The canonical inclusion of the circle into the closed unit disk. -/
-abbrev toClosedUnitDisk : Circle → ClosedUnitDisk := circleToD2
+def toClosedUnitDisk (z : Circle) : ClosedUnitDisk := ⟨z, by simp [Circle.norm_coe z]⟩
+
+@[simp] theorem coe_toClosedUnitDisk (z : Circle) : ((toClosedUnitDisk z : ClosedUnitDisk) : ℂ) = z := rfl
 
 end Circle
 
 /-- The center of the closed unit disk. -/
-abbrev closedUnitDiskZero : ClosedUnitDisk := zeroD2
+def closedUnitDiskZero : ClosedUnitDisk := ⟨0, by simp⟩
+
+@[simp] theorem coe_closedUnitDiskZero : ((closedUnitDiskZero : ClosedUnitDisk) : ℂ) = 0 := rfl
 
 namespace ContinuousMap
 
@@ -219,12 +223,58 @@ noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : 
 
 theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
     (circleMonomial a n R hR).windingNumber = (n : ℤ) := by
-  have hEq :
-      circleMonomial a n R hR = (monomialS1Map (a : ℂ) n R hR a.ne_zero).fromNonzeroSubtype := by
-    ext z
-    rfl
-  rw [hEq]
-  simpa [ContinuousMap.windingNumber] using zkWNk (a : ℂ) n R hR a.ne_zero
+  let c0 : Cstar := ⟨(a : ℂ) * (R : ℂ) ^ n, by
+    refine mul_ne_zero a.ne_zero ?_
+    exact pow_ne_zero n (by exact_mod_cast hR.ne')⟩
+  have hsurj : Set.SurjOn CSexp Set.univ Cstar := expCP.2.2
+  obtain ⟨a0, -, ha0⟩ : (c0 : ℂ) ∈ CSexp '' Set.univ := hsurj c0.property
+  let tildeω : C(Set.Icc (0 : ℝ) (2 * Real.pi), ℂ) := by
+    refine ⟨fun t => a0 + (n : ℂ) * (t : ℂ) * Complex.I, ?_⟩
+    fun_prop
+  have hlift :
+      deflift CSexp
+        (fun t => (DefS1loop (circleMonomial a n R hR).toNonzeroSubtype t : ℂ))
+        tildeω := by
+    refine ⟨tildeω.continuous, ?_⟩
+    ext t
+    calc
+      CSexp (tildeω t)
+          = CSexp a0 * CSexp ((n : ℂ) * (t : ℂ) * Complex.I) := by
+              rw [show tildeω t = a0 + (n : ℂ) * (t : ℂ) * Complex.I by rfl, multiplicativity]
+      _ = ((a : ℂ) * (R : ℂ) ^ n) * CSexp ((n : ℂ) * (t : ℂ) * Complex.I) := by
+            rw [ha0]
+      _ = ((a : ℂ) * (R : ℂ) ^ n) * CSexp ((n : ℂ) * ((t : ℂ) * Complex.I)) := by
+            ring_nf
+      _ = ((a : ℂ) * (R : ℂ) ^ n) * (CSexp (t * Complex.I)) ^ n := by
+            unfold CSexp
+            rw [Complex.exp_nat_mul]
+      _ = ((a : ℂ) * (R : ℂ) ^ n) * (Circle.exp t : ℂ) ^ n := by
+            unfold CSexp
+            rw [Circle.coe_exp]
+      _ = (a : ℂ) * (((R : ℂ) * (Circle.exp t : ℂ)) ^ n) := by
+            rw [mul_pow]
+            ring
+      _ = (DefS1loop (circleMonomial a n R hR).toNonzeroSubtype t : ℂ) := by
+            rfl
+  have hwind : ((circleMonomial a n R hR).windingNumber : ℂ) = n := by
+    calc
+      ((circleMonomial a n R hR).windingNumber : ℂ)
+          =
+            (tildeω ⟨2 * Real.pi, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ -
+                tildeω ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩) / ((2 * Real.pi : ℂ) * Complex.I) := by
+              symm
+              simpa [ContinuousMap.windingNumber] using
+                WNloop_eq_of_lift Real.two_pi_pos
+                  (DefS1loop (circleMonomial a n R hR).toNonzeroSubtype)
+                  (DefS1loop_loop (circleMonomial a n R hR).toNonzeroSubtype)
+                  tildeω hlift
+      _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
+            simp [tildeω]
+      _ = (n : ℂ) := by
+            have hpi : (Real.pi : ℂ) ≠ 0 := by
+              exact_mod_cast Real.pi_ne_zero
+            field_simp [tildeω, hpi, Complex.I_ne_zero]
+  exact_mod_cast hwind
 
 namespace Polynomial
 
@@ -254,7 +304,84 @@ theorem leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDe
     ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R → ∀ z : Circle,
       ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
         ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ :=
-  zkdominates p hdeg
+  by
+    let S : ℝ := ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i‖
+    let R0 : ℝ := max 1 (S / ‖p.leadingCoeff‖ + 1)
+    refine ⟨R0, lt_of_lt_of_le zero_lt_one (le_max_left _ _), ?_⟩
+    intro R hR z
+    have hp : p ≠ 0 := by
+      intro hp0
+      rw [hp0] at hdeg
+      exact (lt_irrefl 0 hdeg).elim
+    have hlead : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp
+    have hleadPos : 0 < ‖p.leadingCoeff‖ := norm_pos_iff.mpr hlead
+    have hR1 : 1 ≤ R := le_trans (le_max_left _ _) hR
+    have hR0 : 0 ≤ R := le_trans (by norm_num) hR1
+    have hdivlt : S / ‖p.leadingCoeff‖ < R := by
+      have htmp : S / ‖p.leadingCoeff‖ + 1 ≤ R := le_trans (le_max_right _ _) hR
+      exact lt_of_lt_of_le (lt_add_of_pos_right (S / ‖p.leadingCoeff‖) zero_lt_one) htmp
+    have hSlt : S < ‖p.leadingCoeff‖ * R := by
+      simpa [mul_comm] using (div_lt_iff₀ hleadPos).mp hdivlt
+    let x : ℂ := (R : ℂ) * z
+    have hxnorm : ‖x‖ = R := by
+      calc
+        ‖x‖ = ‖(R : ℂ)‖ * ‖(z : ℂ)‖ := by simp [x]
+        _ = |R| * 1 := by simp
+        _ = R := by
+          rw [abs_of_nonneg hR0]
+          ring
+    have hsplit :
+        p.eval x =
+          ∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i + p.leadingCoeff * x ^ p.natDegree := by
+      rw [Polynomial.eval_eq_sum_range, Finset.sum_range_succ, Polynomial.coeff_natDegree]
+    have hsumle :
+        ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ ≤ S * R ^ (p.natDegree - 1) := by
+      calc
+        ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖
+            ≤ ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i * x ^ i‖ := by
+              exact norm_sum_le _ _
+        _ ≤ ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i‖ * R ^ (p.natDegree - 1) := by
+              refine Finset.sum_le_sum ?_
+              intro i hi
+              have hi' : i < p.natDegree := Finset.mem_range.mp hi
+              have hpow : R ^ i ≤ R ^ (p.natDegree - 1) := by
+                exact pow_le_pow_right₀ hR1 (Nat.le_pred_of_lt hi')
+              calc
+                ‖p.coeff i * x ^ i‖ = ‖p.coeff i‖ * ‖x ^ i‖ := norm_mul _ _
+                _ = ‖p.coeff i‖ * R ^ i := by rw [norm_pow, hxnorm]
+                _ ≤ ‖p.coeff i‖ * R ^ (p.natDegree - 1) := by
+                    exact mul_le_mul_of_nonneg_left hpow (norm_nonneg _)
+        _ = S * R ^ (p.natDegree - 1) := by
+              unfold S
+              rw [Finset.sum_mul]
+    have hstrict : S * R ^ (p.natDegree - 1) < ‖p.leadingCoeff‖ * R ^ p.natDegree := by
+      have hRpos : 0 < R := lt_of_lt_of_le zero_lt_one hR1
+      have hpow_pos : 0 < R ^ (p.natDegree - 1) := pow_pos hRpos _
+      have hmul : S * R ^ (p.natDegree - 1) < (‖p.leadingCoeff‖ * R) * R ^ (p.natDegree - 1) := by
+        exact mul_lt_mul_of_pos_right hSlt hpow_pos
+      have hdeg' : (p.natDegree - 1) + 1 = p.natDegree := by
+        exact Nat.sub_add_cancel (Nat.succ_le_of_lt hdeg)
+      calc
+        S * R ^ (p.natDegree - 1) < (‖p.leadingCoeff‖ * R) * R ^ (p.natDegree - 1) := hmul
+        _ = ‖p.leadingCoeff‖ * R ^ ((p.natDegree - 1) + 1) := by
+          rw [pow_add, pow_one]
+          ring
+        _ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by rw [hdeg']
+    have hleadnorm : ‖p.leadingCoeff * x ^ p.natDegree‖ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by
+      calc
+        ‖p.leadingCoeff * x ^ p.natDegree‖ = ‖p.leadingCoeff‖ * ‖x ^ p.natDegree‖ := norm_mul _ _
+        _ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by rw [norm_pow, hxnorm]
+    calc
+      ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖
+          = ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ := by
+              change ‖p.eval x - p.leadingCoeff * x ^ p.natDegree‖ = _
+              rw [hsplit]
+              ring_nf
+              simp [mul_comm]
+      _ ≤ S * R ^ (p.natDegree - 1) := hsumle
+      _ < ‖p.leadingCoeff‖ * R ^ p.natDegree := hstrict
+      _ = ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+            simpa [x] using hleadnorm.symm
 
 theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R →
