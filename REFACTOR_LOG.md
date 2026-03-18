@@ -10,12 +10,10 @@
    Note: `ContinuousMap.windingNumber_eq_of_norm_sub_lt` remains circle-specific because the
    current winding-number API itself is circle-specific.
 
-2. Factor out the repeated “two lifts differ by an integer multiple of `2 * π * I`” argument in
-   `CoveringSpacesProject/ComplexPathWinding.lean`.
-   Current issue: the same transport bookkeeping appears in both `windingNumber_eq_of_lift` and
-   `windingNumber_eq_of_homotopy`.
-   Goal: introduce a private helper lemma to shorten both proofs and make the winding API feel
-   closer to Mathlib style.
+2. [done] Factored out the repeated “two lifts differ by an integer multiple of `2 * π * I`”
+   argument in `CoveringSpacesProject/ComplexPathWinding.lean`.
+   Note: the shared bookkeeping now lives in a private helper comparing two lifts of the same path,
+   and both `windingNumber_eq_of_lift` and `windingNumber_eq_of_homotopy` use it.
 
 3. Reassess the right abstraction and naming for
    `{z : ℂ // z ≠ 0}` in

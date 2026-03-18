@@ -112,11 +112,54 @@ theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     exact hlift t
   · exact h0
 
-private theorem exp_sub_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
-    Complex.exp (z - n * (2 * Real.pi * Complex.I)) = Complex.exp z := by
+private theorem exp_add_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
+    Complex.exp (z + n * (2 * Real.pi * Complex.I)) = Complex.exp z := by
   apply (Complex.exp_eq_exp_iff_exists_int).2
-  refine ⟨-n, ?_⟩
-  simp [sub_eq_add_neg, Int.cast_neg]
+  refine ⟨n, ?_⟩
+  simp
+
+private theorem eq_add_int_mul_two_pi_I_of_lifts {z₀ z₁ : Cstar} (γ : Path z₀ z₁)
+    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, Complex.exp (Γ₀ t) = (γ t : ℂ))
+    (hΓ₁ : ∀ t, Complex.exp (Γ₁ t) = (γ t : ℂ)) :
+    ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * Real.pi * Complex.I) := by
+  have h0eq : Complex.exp (Γ₁ 0) = Complex.exp (Γ₀ 0) := by
+    rw [hΓ₁ 0, hΓ₀ 0]
+  obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 h0eq
+  have hΓ₁0 : Complex.exp (Γ₁ 0) = (z₀ : ℂ) := by
+    calc
+      Complex.exp (Γ₁ 0) = (γ 0 : ℂ) := hΓ₁ 0
+      _ = (z₀ : ℂ) := by
+        simp [γ.source]
+  let shiftedΓ₀ : C(I, ℂ) :=
+    ⟨fun t => Γ₀ t + n * (2 * Real.pi * Complex.I), Γ₀.continuous.add continuous_const⟩
+  have hshiftedΓ₀ : ∀ t, Complex.exp (shiftedΓ₀ t) = (γ t : ℂ) := by
+    intro t
+    calc
+      Complex.exp (shiftedΓ₀ t) = Complex.exp (Γ₀ t) := by
+        exact exp_add_int_mul_two_pi_I_eq _ _
+      _ = (γ t : ℂ) := hΓ₀ t
+  have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
+    calc
+      shiftedΓ₀ 0 = Γ₀ 0 + n * (2 * Real.pi * Complex.I) := by
+        rfl
+      _ = Γ₁ 0 := by
+        simpa using hn.symm
+  have hshifted_eq : shiftedΓ₀ = γ.expLift (Γ₁ 0) hΓ₁0 :=
+    eq_expLift γ (Γ₁ 0) hΓ₁0 shiftedΓ₀ hshiftedΓ₀ hshiftedΓ₀_zero
+  have hΓ₁_eq : Γ₁ = γ.expLift (Γ₁ 0) hΓ₁0 :=
+    eq_expLift γ (Γ₁ 0) hΓ₁0 Γ₁ hΓ₁ rfl
+  have huniq : shiftedΓ₀ = Γ₁ := by
+    calc
+      shiftedΓ₀ = γ.expLift (Γ₁ 0) hΓ₁0 := hshifted_eq
+      _ = Γ₁ := hΓ₁_eq.symm
+  refine ⟨n, ?_⟩
+  intro t
+  have ht : shiftedΓ₀ t = Γ₁ t := by
+    simpa using congrFun (congrArg DFunLike.coe huniq) t
+  calc
+    Γ₁ t = shiftedΓ₀ t := ht.symm
+    _ = Γ₀ t + n * (2 * Real.pi * Complex.I) := by
+      rfl
 
 /-- The winding number of a loop in `ℂ \ {0}`, defined via lifts through `Complex.exp`. -/
 noncomputable def windingNumber {z : Cstar} (γ : Path z z) : ℤ := by
@@ -145,33 +188,7 @@ theorem windingNumber_eq_of_lift {z : Cstar} (γ : Path z z)
   let liftγ : C(I, ℂ) := γ.expLift w0 hw0
   have hliftγ : ∀ t, Complex.exp (liftγ t) = (γ t : ℂ) := fun t =>
     expLift_apply γ w0 hw0 t
-  have h0eq : Complex.exp (Γ 0) = Complex.exp (liftγ 0) := by
-    rw [hlift 0, hliftγ 0]
-  obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 h0eq
-  let shifted : C(I, ℂ) :=
-    ⟨fun t => Γ t - n * (2 * Real.pi * Complex.I), Γ.continuous.sub continuous_const⟩
-  have hshifted_lift : ∀ t, Complex.exp (shifted t) = (γ t : ℂ) := by
-    intro t
-    calc
-      Complex.exp (shifted t) = Complex.exp (Γ t) := by
-        exact exp_sub_int_mul_two_pi_I_eq _ _
-      _ = (γ t : ℂ) := hlift t
-  have hshifted0 : shifted 0 = w0 := by
-    calc
-      shifted 0 = Γ 0 - n * (2 * Real.pi * Complex.I) := by rfl
-      _ = liftγ 0 := by rw [hn]; ring
-      _ = w0 := expLift_zero γ w0 hw0
-  have huniq : shifted = liftγ := by
-    simpa [liftγ] using eq_expLift γ w0 hw0 shifted hshifted_lift hshifted0
-  have hshift_eq : ∀ t, Γ t = liftγ t + n * (2 * Real.pi * Complex.I) := by
-    intro t
-    have ht : shifted t = liftγ t := by
-      simpa using congrFun (congrArg DFunLike.coe huniq) t
-    calc
-      Γ t = (Γ t - n * (2 * Real.pi * Complex.I)) + n * (2 * Real.pi * Complex.I) := by
-        ring
-      _ = shifted t + n * (2 * Real.pi * Complex.I) := by rfl
-      _ = liftγ t + n * (2 * Real.pi * Complex.I) := by rw [ht]
+  obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
   have hbase_eq :
       liftγ 1 = liftγ 0 + γ.windingNumber * (2 * Real.pi * Complex.I) := by
     unfold windingNumber
@@ -252,51 +269,7 @@ theorem windingNumber_eq_of_homotopy {z z' : Cstar}
           simpa using congrArg Subtype.val (hhom s).symm
         _ = (μ s : ℂ) := by rfl
     · simpa [μ1] using htildeH_zero 1
-  have hstart : Complex.exp (tildeγ 1) = Complex.exp (tildeγ 0) := by
-    calc
-      Complex.exp (tildeγ 1) = (γ 1 : ℂ) := htildeγ 1
-      _ = (z : ℂ) := by
-        simp [γ.target]
-      _ = (γ 0 : ℂ) := by
-        simp [γ.source]
-      _ = Complex.exp (tildeγ 0) := by
-        symm
-        exact htildeγ 0
-  obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 hstart
-  let shiftedμ0 : C(I, ℂ) :=
-    ⟨fun s => μ0 s + n * (2 * Real.pi * Complex.I), μ0.continuous.add continuous_const⟩
-  have hshiftedμ0 : (∀ s, Complex.exp (shiftedμ0 s) = (μ s : ℂ)) ∧ shiftedμ0 0 = μ1 0 := by
-    constructor
-    · intro s
-      calc
-        Complex.exp (shiftedμ0 s) = Complex.exp (μ0 s) := by
-          apply (Complex.exp_eq_exp_iff_exists_int).2
-          refine ⟨n, by simp [shiftedμ0]⟩
-        _ = (μ s : ℂ) := hμ0.1 s
-    · calc
-        shiftedμ0 0 = μ0 0 + n * (2 * Real.pi * Complex.I) := by rfl
-        _ = tildeγ 0 + n * (2 * Real.pi * Complex.I) := by rw [hμ0.2]
-        _ = tildeγ 1 := by rw [hn]
-        _ = μ1 0 := by rw [hμ1.2]
-  have hμ10 : Complex.exp (μ1 0) = (z : ℂ) := by
-    calc
-      Complex.exp (μ1 0) = (μ 0 : ℂ) := hμ1.1 0
-      _ = (z : ℂ) := by
-        simp [μ.source]
-  have hshifted_eq :
-      shiftedμ0 = μ.expLift (μ1 0) hμ10 :=
-    eq_expLift μ (μ1 0) hμ10 shiftedμ0 hshiftedμ0.1 hshiftedμ0.2
-  have hμ1_eq :
-      μ1 = μ.expLift (μ1 0) hμ10 :=
-    eq_expLift μ (μ1 0) hμ10 μ1 hμ1.1 rfl
-  have huniq : shiftedμ0 = μ1 := by
-    calc
-      shiftedμ0 = μ.expLift (μ1 0) hμ10 := hshifted_eq
-      _ = μ1 := hμ1_eq.symm
-  have hshift_eq : ∀ s, μ1 s = μ0 s + n * (2 * Real.pi * Complex.I) := by
-    intro s
-    have hfun := congrArg DFunLike.coe huniq
-    simpa [shiftedμ0] using (congrFun hfun s).symm
+  obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
   let tildeγ' : C(I, ℂ) :=
     ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
   have htildeγ' : ∀ t, Complex.exp (tildeγ' t) = (γ' t : ℂ) := by
