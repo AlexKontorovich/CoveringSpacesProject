@@ -179,7 +179,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
 
 theorem windingNumber_eq_zero_of_exists_extension' {f : C(Circle, ℂˣ)}
     {F : C(Metric.closedBall (0 : ℂ) 1, {z : ℂ // z ≠ 0})}
-    (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = complexUnitsHomeomorphNeZero (f z)) :
+    (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f.toNonzeroSubtype z) :
     windingNumber f = 0 := by
   let F' : C(Metric.closedBall (0 : ℂ) 1, ℂˣ) := F.fromNonzeroSubtype
   have hF' : ∀ z : Circle, F' (Circle.toClosedUnitDisk z) = f z := by

@@ -1,5 +1,16 @@
 import Mathlib
 
+/-!
+# Winding numbers from the covering map `Complex.exp`
+
+This file is a thin wrapper around Mathlib's covering-space API for
+`Complex.isCoveringMap_exp`. It does three things:
+
+* reparametrizes path lifting from `unitInterval` to an arbitrary interval `[a, b]`,
+* packages the resulting endpoint integer as a winding number,
+* provides `ℂˣ`-valued wrappers around the subtype-valued covering-map statements.
+-/
+
 open Complex TopologicalSpace
 
 open scoped unitInterval
@@ -14,11 +25,11 @@ def IsLoopHomotopy {X : Type*} [TopologicalSpace X] {a b : ℝ} (hab : a ≤ b)
   ∀ s, H (⟨a, ⟨le_rfl, hab⟩⟩, s) = H (⟨b, ⟨hab, le_rfl⟩⟩, s)
 
 /-- The standard homeomorphism between complex units and nonzero complex numbers. -/
-noncomputable def complexUnitsHomeomorphNeZero :
+private noncomputable def complexUnitsHomeomorphNeZero :
     ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
   unitsHomeomorphNeZero (G₀ := ℂ)
 
-@[simp] theorem coe_complexUnitsHomeomorphNeZero (u : ℂˣ) :
+@[simp] private theorem coe_complexUnitsHomeomorphNeZero (u : ℂˣ) :
     ((complexUnitsHomeomorphNeZero u : {z : ℂ // z ≠ 0}) : ℂ) = u := rfl
 
 /-- View a units-valued continuous map as a map to nonzero complex numbers. -/
@@ -140,7 +151,7 @@ private theorem exp_sub_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
   refine ⟨-n, ?_⟩
   simp [sub_eq_add_neg, Int.cast_neg]
 
-/-- The winding number of a loop in `ℂ \ {0}`. -/
+/-- The winding number of a loop in `ℂ \ {0}`, defined via lifts through `Complex.exp`. -/
 noncomputable def pathWindingNumber {a b : ℝ} (hab : a < b)
     (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0}))
     (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ := by
@@ -372,7 +383,7 @@ theorem pathWindingNumber_eq_of_homotopy {a b : ℝ} (hab : a < b)
     pathWindingNumber_eq_of_lift hab (ContinuousMap.const _ c) rfl tildeω hlift
   simpa [tildeω] using hq.symm
 
-/-- The winding number of a loop in `ℂˣ`. -/
+/-- The winding number of a loop in `ℂˣ`, transported from `pathWindingNumber`. -/
 noncomputable def unitsPathWindingNumber {a b : ℝ} (hab : a < b)
     (ω : C(Set.Icc a b, ℂˣ))
     (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ :=
