@@ -38,29 +38,32 @@ that packages the modern refactor into one place:
 
 ### Porting checklist
 
-5. [pending] Build a correspondence table from the modern code to the blueprint sections, so we can
-   see exactly what needs to be copied and what should be renamed.
+5. [done] Built a correspondence table from the modern code to the blueprint sections.
+   See the table below.
 
-6. [pending] Create the new file skeleton with the same broad narrative order as the blueprint:
+6. [done] Created the new file skeleton with the same broad narrative order as the blueprint:
    winding numbers of loops, winding numbers of circle maps, disk-extension vanishing, polynomial
    winding at infinity, and root existence.
+   Result: `CoveringSpacesProject/RootsComplexPolynomialsNew.lean`.
 
-7. [pending] Copy the generic helper layer into the new file:
+7. [done] Copied the generic helper layer into the new file:
    `ContinuousMap.IsLoopHomotopy` and `Metric.sphereToClosedBall`.
 
-8. [pending] Copy the circle-specific helper layer into the new file:
+8. [done] Copied the circle-specific helper layer into the new file:
    `Circle.toClosedUnitDisk`,
    `ContinuousMap.circleLoop`,
    `ContinuousMap.circleLoopHomotopy`,
    and the associated endpoint/loop lemmas.
 
-9. [pending] Copy the path-lifting and winding-number core into the new file from
+9. [done] Copied the path-lifting and winding-number core into the new file from
    `CoveringSpacesProject/ComplexPathWinding.lean`.
 
-10. [pending] Decide whether the new file should expose the modern `ℂˣ`-based API, the older
-    `Cstar`-based API, or both, and implement the necessary bridge definitions consistently.
+10. [done] Decided the exposed API policy.
+    Decision: keep the modern `ℂˣ`-based API as primary, retain `Cstar` only as internal shorthand
+    plus bridge infrastructure, and place the whole file under the top-level namespace
+    `RootsComplexPolynomialsNew` to avoid collisions with the existing modules.
 
-11. [pending] Copy the circle winding-number layer from `CoveringSpacesProject/RootsMathlib.lean`:
+11. [done] Copied the circle winding-number layer from `CoveringSpacesProject/RootsMathlib.lean`:
     `ContinuousMap.windingNumber`,
     `windingNumber_const`,
     `windingNumber_eq_of_homotopy`,
@@ -69,45 +72,51 @@ that packages the modern refactor into one place:
     `windingNumber_eq_zero_of_exists_extension`,
     and `windingNumber_eq_zero_of_exists_extension'`.
 
-12. [pending] Copy the monomial winding-number layer:
+12. [done] Copied the monomial winding-number layer:
     `circleScaledMonomial`,
     `circleMonomial`,
     `circleScaledMonomial_windingNumber`,
     and `circleMonomial_windingNumber`.
 
-13. [pending] Copy the polynomial circle/disk map layer:
+13. [done] Copied the polynomial circle/disk map layer:
     `Polynomial.mapCircleUnits`,
     `Polynomial.mapClosedUnitDiskUnits`,
     and their coercion lemmas.
 
-14. [pending] Copy the large-radius dominance argument and its winding-number consequence:
+14. [done] Copied the large-radius dominance argument and its winding-number consequence:
     `Polynomial.leadingTerm_dominates_on_circle` and
     `Polynomial.eventually_windingNumber_eq_natDegree`.
 
-15. [pending] Copy the final root-existence theorem:
+15. [done] Copied the final root-existence theorem:
     `Polynomial.exists_root_of_natDegree_pos`.
 
-16. [pending] Add blueprint-style natural-language statement blocks above every copied
+16. [done] Added blueprint-style natural-language statement blocks above every copied
     `def`/`lemma`/`theorem`.
 
-17. [pending] Add blueprint-style natural-language proof/explanation blocks below every copied
+17. [done] Added blueprint-style natural-language proof/explanation blocks below every copied
     `def`/`lemma`/`theorem`.
 
-18. [pending] Add section headers, `\uses{...}` tags, and labels so the new file reads like a real
-    blueprint rather than a raw code dump.
+18. [pending] Add `\uses{...}` tags systematically throughout the new file.
+    Status: section headers, labels, and `\lean{...}` tags are in place, and the file now reads in
+    blueprint style; the remaining stylistic polish is to thread dependency tags more thoroughly.
 
-19. [pending] Make sure the natural-language prose reflects the new Mathlib-style proofs rather than
+19. [done] Rewrote the natural-language prose to reflect the new Mathlib-style proofs rather than
     the old interval-based implementation details when those have changed.
 
-20. [pending] Build the new file by itself.
+20. [done] Built the new file by itself.
+    Verified with `lake build CoveringSpacesProject.RootsComplexPolynomialsNew`.
 
-21. [pending] Build the whole project with the new file added.
+21. [done] Built the whole project with the new file added.
+    Verified with `lake build CoveringSpacesProject`.
 
-22. [pending] Compare the new file against `CoveringSpacesProject/RootsComplexPolynomials.lean` to
-    check for any missing theorem from the relevant winding-number / FTA slice.
+22. [done] Compared the new file against `CoveringSpacesProject/RootsComplexPolynomials.lean` for
+    the relevant winding-number / FTA slice.
+    Result: the correspondence table entries for the circle-loop, winding-number, monomial,
+    polynomial-at-infinity, and root-existence pieces are all represented in the new file.
 
-23. [pending] Decide whether to import the new file from `CoveringSpacesProject.lean`, leave it as a
-    sidecar working file, or eventually use it to replace parts of the old blueprint file.
+23. [done] Decided to import the new file from `CoveringSpacesProject.lean`.
+    Reason: because the file now lives under its own namespace, it can be built as part of the
+    library without colliding with the existing refactor modules.
 
 ### Working correspondence table
 
@@ -134,3 +143,12 @@ that packages the modern refactor into one place:
   `Path`, `I`, `ContinuousMap.Homotopy`, `Complex.isCoveringMap_exp`, and `ℂˣ`.
 - When the old exposition and the new formalization diverge, prefer keeping the stronger modern
   formal statement and rewriting the prose to match it.
+
+### Current status
+
+- The new standalone annotated file now exists at
+  `CoveringSpacesProject/RootsComplexPolynomialsNew.lean`.
+- It is self-contained, imports only `Mathlib`, and is namespaced under
+  `RootsComplexPolynomialsNew`.
+- It builds on its own and as part of the whole project.
+- The main remaining stylistic task is to add `\uses{...}` tags more systematically.
