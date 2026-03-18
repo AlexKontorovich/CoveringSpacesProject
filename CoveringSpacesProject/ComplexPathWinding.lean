@@ -17,6 +17,7 @@ open scoped unitInterval
 
 noncomputable section
 
+-- Internal shorthand only; keep the outward-facing bridge API in terms of `ℂˣ` when possible.
 local notation "Cstar" => {z : ℂ // z ≠ 0}
 
 namespace ContinuousMap

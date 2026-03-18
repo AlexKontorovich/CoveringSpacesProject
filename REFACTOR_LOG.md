@@ -15,13 +15,10 @@
    Note: the shared bookkeeping now lives in a private helper comparing two lifts of the same path,
    and both `windingNumber_eq_of_lift` and `windingNumber_eq_of_homotopy` use it.
 
-3. Reassess the right abstraction and naming for
-   `{z : ℂ // z ≠ 0}` in
+3. [done] Settled the local naming question for `{z : ℂ // z ≠ 0}` in
    `CoveringSpacesProject/ComplexPathWinding.lean`.
-   Current issue: `abbrev Cstar` is fine as an internal name, but it is probably not the final API
-   we want if this material moves toward Mathlib.
-   Options to revisit later: keep `Cstar` internal, use a more explicit local name, or rely even
-   harder on `ℂˣ` wrappers and hide the subtype almost completely.
+   Decision: keep `Cstar` as internal-only notation inside that file, and keep the bridge API
+   outward-facing in terms of `ℂˣ` when possible.
 
 4. Decide where `ContinuousMap.IsLoopHomotopy` should live.
    Current location: `CoveringSpacesProject/ComplexPathWinding.lean`.
