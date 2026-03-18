@@ -69,11 +69,11 @@ theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap
 theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
     (hclose : ∀ z : Circle, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
     Nonempty (ContinuousMap.Homotopy f g) := by
-  let Hbase : C(Set.Icc (0 : ℝ) 1 × Circle, ℂ) :=
+  let Hbase : C(I × Circle, ℂ) :=
     ⟨fun x =>
       (((1 - (x.1 : ℝ)) : ℂ) * (f x.2 : ℂ)) + (((x.1 : ℝ) : ℂ) * (g x.2 : ℂ)), by
         fun_prop⟩
-  have hHbase : ∀ x : Set.Icc (0 : ℝ) 1 × Circle, Hbase x ≠ 0 := by
+  have hHbase : ∀ x : I × Circle, Hbase x ≠ 0 := by
     intro x hx
     have hs0 : 0 ≤ (x.1 : ℝ) := x.1.2.1
     have hs1 : (x.1 : ℝ) ≤ 1 := x.1.2.2
@@ -100,7 +100,7 @@ theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
         _ ≤ ‖(f x.2 : ℂ) - g x.2‖ := hle
         _ < ‖(f x.2 : ℂ)‖ := hclose x.2
     exact (lt_irrefl ‖(f x.2 : ℂ)‖ hlt).elim
-  let H : C(Set.Icc (0 : ℝ) 1 × Circle, ℂˣ) :=
+  let H : C(I × Circle, ℂˣ) :=
     ContinuousMap.unitsOfForallIsUnit (f := Hbase) fun x => isUnit_iff_ne_zero.mpr (hHbase x)
   refine ⟨{ toContinuousMap := H, map_zero_left := ?_, map_one_left := ?_ }⟩
   · intro z
@@ -120,9 +120,9 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     {F : C(Metric.closedBall (0 : ℂ) 1, ℂˣ)}
     (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f z) :
     windingNumber f = 0 := by
-  let Jfun : Set.Icc (0 : ℝ) 1 × Circle → ℂ := fun x =>
+  let Jfun : I × Circle → ℂ := fun x =>
     (((1 - (x.1 : ℝ)) : ℂ) * (x.2 : ℂ))
-  have hJfun_mem : ∀ x : Set.Icc (0 : ℝ) 1 × Circle, Jfun x ∈ Metric.closedBall (0 : ℂ) 1 := by
+  have hJfun_mem : ∀ x : I × Circle, Jfun x ∈ Metric.closedBall (0 : ℂ) 1 := by
     intro x
     have hs0 : 0 ≤ (x.1 : ℝ) := x.1.2.1
     have hs1 : (x.1 : ℝ) ≤ 1 := x.1.2.2
@@ -142,9 +142,9 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
       _ ≤ 1 := by
         linarith
     simpa [Metric.mem_closedBall] using hnorm
-  let J : C(Set.Icc (0 : ℝ) 1 × Circle, Metric.closedBall (0 : ℂ) 1) :=
+  let J : C(I × Circle, Metric.closedBall (0 : ℂ) 1) :=
     ⟨fun x => ⟨Jfun x, hJfun_mem x⟩, Continuous.subtype_mk (by fun_prop) hJfun_mem⟩
-  let H : C(Set.Icc (0 : ℝ) 1 × Circle, ℂˣ) := F.comp J
+  let H : C(I × Circle, ℂˣ) := F.comp J
   have hJ0 : ∀ z : Circle, J (0, z) = Circle.toClosedUnitDisk z := by
     intro z
     apply Subtype.ext
