@@ -18,11 +18,19 @@ noncomputable section
 
 namespace RootsComplexPolynomialsNew
 
-local notation "Cstar" => {z : ℂ // z ≠ 0}
-
 /-%%
 \section{Generic helper maps}
 %%-/
+
+/-%%
+\begin{definition}\label{CstarNew}\lean{RootsComplexPolynomialsNew.Cstar}\leanok
+We use the local notation `Cstar` to refer to the subtype of nonzero complex numbers.
+\begin{verbatim}
+local notation "Cstar" => {z : ℂ // z ≠ 0}
+\end{verbatim}
+\end{definition}
+%%-/
+local notation "Cstar" => {z : ℂ // z ≠ 0}
 
 namespace Metric
 
@@ -30,7 +38,8 @@ namespace Metric
 \begin{definition}\label{sphereToClosedBallNew}\lean{RootsComplexPolynomialsNew.Metric.sphereToClosedBall}\leanok
 The canonical inclusion of a sphere into the corresponding closed ball.
 \begin{verbatim}
-def sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ) :
+def sphereToClosedBall [PseudoMetricSpace α]
+    (x : α) (r : ℝ) :
     Metric.sphere x r → Metric.closedBall x r
 \end{verbatim}
 \end{definition}
@@ -51,8 +60,10 @@ $\operatorname{sphere}(x,r)\subseteq \operatorname{closedBall}(x,r)$.
 \begin{lemma}\label{coe_sphereToClosedBallNew}\lean{RootsComplexPolynomialsNew.Metric.coe_sphereToClosedBall}\uses{sphereToClosedBallNew}\leanok
 After forgetting the subtype, the sphere-to-ball inclusion is the identity on points.
 \begin{verbatim}
-theorem coe_sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ)
-    (y : Metric.sphere x r) : ((sphereToClosedBall x r y : Metric.closedBall x r) : α) = y
+theorem coe_sphereToClosedBall
+    [PseudoMetricSpace α]
+    (x : α) (r : ℝ) (y : Metric.sphere x r) :
+    sphereToClosedBall x r y = y
 \end{verbatim}
 \end{lemma}
 %%-/
@@ -309,11 +320,10 @@ This is the corresponding defining property of a homotopy at time $1$.
 %%-/
 
 /-%%
-\begin{definition}\label{complexUnitsHomeomorphNeZeroNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.complexUnitsHomeomorphNeZero}\leanok
-Internally, we identify $\C^\times$ with the subtype of nonzero complex numbers.
+\begin{definition}\label{complexUnitsHomeomorphNeZeroNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.complexUnitsHomeomorphNeZero}\uses{CstarNew}\leanok
+Internally, we identify $\C^\times$ (as the group of units in $\C$) with the subtype of nonzero complex numbers.
 \begin{verbatim}
-private noncomputable def complexUnitsHomeomorphNeZero :
-    ℂˣ ≃ₜ Cstar
+def complexUnitsHomeomorphNeZero : ℂˣ ≃ₜ Cstar
 \end{verbatim}
 \end{definition}
 %%-/
