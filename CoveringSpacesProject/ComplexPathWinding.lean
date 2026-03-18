@@ -17,6 +17,8 @@ open scoped unitInterval
 
 noncomputable section
 
+abbrev Cstar := {z : ℂ // z ≠ 0}
+
 namespace ContinuousMap
 
 /-- A homotopy through loops on `I`. -/
@@ -24,31 +26,31 @@ def IsLoopHomotopy {X : Type*} [TopologicalSpace X] (H : C(I × I, X)) : Prop :=
   ∀ s, H (s, 0) = H (s, 1)
 
 private noncomputable def complexUnitsHomeomorphNeZero :
-    ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
+    ℂˣ ≃ₜ Cstar :=
   unitsHomeomorphNeZero (G₀ := ℂ)
 
 /-- View a units-valued continuous map as a map to nonzero complex numbers. -/
 noncomputable def toNonzeroSubtype {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ)) :
-    C(α, {z : ℂ // z ≠ 0}) :=
-  (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp f
+    C(α, Cstar) :=
+  (complexUnitsHomeomorphNeZero : C(ℂˣ, Cstar)).comp f
 
 /-- View a continuous map to nonzero complex numbers as a units-valued map. -/
 noncomputable def fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, {z : ℂ // z ≠ 0})) : C(α, ℂˣ) :=
-  (complexUnitsHomeomorphNeZero.symm : C({z : ℂ // z ≠ 0}, ℂˣ)).comp f
+    (f : C(α, Cstar)) : C(α, ℂˣ) :=
+  (complexUnitsHomeomorphNeZero.symm : C(Cstar, ℂˣ)).comp f
 
 @[simp] theorem coe_toNonzeroSubtype_apply {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ))
     (x : α) : (f.toNonzeroSubtype x : ℂ) = (f x : ℂ) := rfl
 
 @[simp] theorem coe_fromNonzeroSubtype_apply {α : Type*} [TopologicalSpace α]
-    (f : C(α, {z : ℂ // z ≠ 0})) (x : α) : ((f.fromNonzeroSubtype x : ℂˣ) : ℂ) = (f x : ℂ) := by
+    (f : C(α, Cstar)) (x : α) : ((f.fromNonzeroSubtype x : ℂˣ) : ℂ) = (f x : ℂ) := by
   have h :
       complexUnitsHomeomorphNeZero (f.fromNonzeroSubtype x) = f x := by
     simp [fromNonzeroSubtype]
   exact congrArg Subtype.val h
 
 @[simp] theorem toNonzeroSubtype_fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, {z : ℂ // z ≠ 0})) : f.fromNonzeroSubtype.toNonzeroSubtype = f := by
+    (f : C(α, Cstar)) : f.fromNonzeroSubtype.toNonzeroSubtype = f := by
   ext x
   simp [fromNonzeroSubtype, toNonzeroSubtype]
 
@@ -66,19 +68,19 @@ open ContinuousMap
 /-- View a units-valued path as a path to nonzero complex numbers. -/
 noncomputable def toNonzeroSubtype {u v : ℂˣ} (γ : Path u v) :
     Path (complexUnitsHomeomorphNeZero u) (complexUnitsHomeomorphNeZero v) :=
-  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
+  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, Cstar)).continuous
 
 @[simp] theorem coe_toNonzeroSubtype_apply {u v : ℂˣ} (γ : Path u v) (t : I) :
-    ((γ.toNonzeroSubtype t : {z : ℂ // z ≠ 0}) : ℂ) = (γ t : ℂ) := rfl
+    ((γ.toNonzeroSubtype t : Cstar) : ℂ) = (γ t : ℂ) := rfl
 
 /-- Lift a path in `ℂ \ {0}` through `Complex.exp` with a prescribed starting point. -/
-noncomputable def expLift {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+noncomputable def expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     (hw0 : Complex.exp w0 = (z₀ : ℂ)) : C(I, ℂ) :=
   Complex.isCoveringMap_exp.liftPath γ.toContinuousMap w0 <| by
     apply Subtype.ext
     simpa using hw0.symm
 
-@[simp] theorem expLift_apply {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+@[simp] theorem expLift_apply {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     (hw0 : Complex.exp w0 = (z₀ : ℂ)) (t : I) :
     Complex.exp (γ.expLift w0 hw0 t) = (γ t : ℂ) := by
   have h :=
@@ -87,7 +89,7 @@ noncomputable def expLift {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z�
       simpa using hw0.symm) t
   simpa using congrArg Subtype.val h
 
-@[simp] theorem expLift_zero {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+@[simp] theorem expLift_zero {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     (hw0 : Complex.exp w0 = (z₀ : ℂ)) :
     γ.expLift w0 hw0 0 = w0 := by
   simpa [expLift] using Complex.isCoveringMap_exp.liftPath_zero (γ := γ.toContinuousMap)
@@ -96,7 +98,7 @@ noncomputable def expLift {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z�
       simpa using hw0.symm)
 
 /-- Uniqueness of path lifts through `Complex.exp`. -/
-theorem eq_expLift {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     (hw0 : Complex.exp w0 = (z₀ : ℂ)) (Γ : C(I, ℂ))
     (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
     Γ = γ.expLift w0 hw0 := by
@@ -117,7 +119,7 @@ private theorem exp_sub_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
   simp [sub_eq_add_neg, Int.cast_neg]
 
 /-- The winding number of a loop in `ℂ \ {0}`, defined via lifts through `Complex.exp`. -/
-noncomputable def windingNumber {z : {z : ℂ // z ≠ 0}} (γ : Path z z) : ℤ := by
+noncomputable def windingNumber {z : Cstar} (γ : Path z z) : ℤ := by
   let w0 : ℂ := Complex.log z
   have hw0 : Complex.exp w0 = (z : ℂ) := by
     simpa [w0] using Complex.exp_log z.property
@@ -134,7 +136,7 @@ noncomputable def windingNumber {z : {z : ℂ // z ≠ 0}} (γ : Path z z) : ℤ
         exact expLift_apply γ w0 hw0 0
   exact Classical.choose ((Complex.exp_eq_exp_iff_exists_int).1 hper)
 
-theorem windingNumber_eq_of_lift {z : {z : ℂ // z ≠ 0}} (γ : Path z z)
+theorem windingNumber_eq_of_lift {z : Cstar} (γ : Path z z)
     (Γ : C(I, ℂ)) (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
     (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = γ.windingNumber := by
   let w0 : ℂ := Complex.log z
@@ -197,8 +199,8 @@ theorem windingNumber_eq_of_lift {z : {z : ℂ // z ≠ 0}} (γ : Path z z)
     _ = (liftγ 1 - liftγ 0) / (2 * Real.pi * Complex.I) := by ring
     _ = γ.windingNumber := hbase
 
-theorem windingNumber_eq_of_homotopy {z z' : {z : ℂ // z ≠ 0}}
-    (γ : Path z z) (γ' : Path z' z') (H : C(I × I, {z : ℂ // z ≠ 0}))
+theorem windingNumber_eq_of_homotopy {z z' : Cstar}
+    (γ : Path z z) (γ' : Path z' z') (H : C(I × I, Cstar))
     (hhom : H.IsLoopHomotopy) (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
     γ.windingNumber = γ'.windingNumber := by
@@ -330,7 +332,7 @@ theorem windingNumber_eq_of_homotopy {z z' : {z : ℂ // z ≠ 0}}
             exact windingNumber_eq_of_lift γ' tildeγ' htildeγ'
   exact_mod_cast hcast
 
-@[simp] theorem windingNumber_refl (z : {z : ℂ // z ≠ 0}) :
+@[simp] theorem windingNumber_refl (z : Cstar) :
     (Path.refl z).windingNumber = 0 := by
   let Γ : C(I, ℂ) := ContinuousMap.const _ (Complex.log z)
   have hlift : ∀ t, Complex.exp (Γ t) = ((Path.refl z) t : ℂ) := by
@@ -357,7 +359,7 @@ theorem unitsWindingNumber_eq_of_homotopy {u u' : ℂˣ}
     (hhom : H.IsLoopHomotopy) (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
     γ.unitsWindingNumber = γ'.unitsWindingNumber := by
-  let H' : C(I × I, {z : ℂ // z ≠ 0}) := H.toNonzeroSubtype
+  let H' : C(I × I, Cstar) := H.toNonzeroSubtype
   have hhom' : H'.IsLoopHomotopy := by
     intro s
     apply Subtype.ext
@@ -380,10 +382,10 @@ theorem unitsWindingNumber_eq_of_homotopy {u u' : ℂˣ}
     (Path.refl u).unitsWindingNumber = 0 := by
   have h :
       (Path.refl u).toNonzeroSubtype =
-        Path.refl (⟨(u : ℂ), u.ne_zero⟩ : {z : ℂ // z ≠ 0}) := by
+        Path.refl (⟨(u : ℂ), u.ne_zero⟩ : Cstar) := by
     ext t
     rfl
   rw [unitsWindingNumber, h]
-  exact windingNumber_refl (⟨(u : ℂ), u.ne_zero⟩ : {z : ℂ // z ≠ 0})
+  exact windingNumber_refl (⟨(u : ℂ), u.ne_zero⟩ : Cstar)
 
 end Path
