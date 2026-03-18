@@ -30,6 +30,37 @@ def circleLoop {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) 
 @[simp] theorem circleLoop_apply {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) (t : I) :
     f.circleLoop t = f (Circle.exp (2 * Real.pi * (t : ℝ))) := rfl
 
+/-- Precompose a homotopy of circle maps with the standard loop `t ↦ Circle.exp (2πt)`. -/
+def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
+    (H : ContinuousMap.Homotopy f g) : C(I × I, X) :=
+  ⟨fun x => H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))),
+    H.continuous_toFun.comp
+      (continuous_fst.prodMk
+        (Circle.exp.continuous.comp <| by fun_prop))⟩
+
+@[simp] theorem circleLoopHomotopy_apply {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
+    (H : ContinuousMap.Homotopy f g) (x : I × I) :
+    circleLoopHomotopy H x = H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))) := rfl
+
+theorem circleLoopHomotopy_isLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
+    (H : ContinuousMap.Homotopy f g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
+  intro s
+  change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
+    H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
+  simp [Circle.exp_two_pi]
+
+@[simp] theorem circleLoopHomotopy_zero_left {X : Type*} [TopologicalSpace X]
+    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
+    circleLoopHomotopy H (0, t) = f.circleLoop t := by
+  change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
+  exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
+
+@[simp] theorem circleLoopHomotopy_one_left {X : Type*} [TopologicalSpace X]
+    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
+    circleLoopHomotopy H (1, t) = g.circleLoop t := by
+  change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
+  exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))
+
 /-- The winding number of a continuous map from the circle to `ℂˣ`. -/
 noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
   f.circleLoop.unitsWindingNumber
@@ -45,26 +76,10 @@ noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
 
 theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap.Homotopy f g) :
     windingNumber f = windingNumber g := by
-  let Hbase : C(I × I, ℂˣ) :=
-    ⟨fun x => H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))),
-      H.continuous.comp
-        (continuous_fst.prodMk
-          (Circle.exp.continuous.comp <| by fun_prop))⟩
-  have hhom : Hbase.IsLoopHomotopy := by
-    intro s
-    change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
-      H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
-    simp [Circle.exp_two_pi]
-  have hzero : ∀ t, Hbase (0, t) = f.circleLoop t := by
-    intro t
-    change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
-    exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
-  have hone : ∀ t, Hbase (1, t) = g.circleLoop t := by
-    intro t
-    change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
-    exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))
   simpa [windingNumber] using
-    Path.unitsWindingNumber_eq_of_homotopy f.circleLoop g.circleLoop Hbase hhom hzero hone
+    Path.unitsWindingNumber_eq_of_homotopy f.circleLoop g.circleLoop (circleLoopHomotopy H)
+      (circleLoopHomotopy_isLoopHomotopy H) (circleLoopHomotopy_zero_left H)
+      (circleLoopHomotopy_one_left H)
 
 theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
     (hclose : ∀ z : Circle, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
