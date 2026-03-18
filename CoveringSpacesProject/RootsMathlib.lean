@@ -234,19 +234,12 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
             (Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) ^ n := by
             rw [Complex.exp_nat_mul]
       _ = ((a : ℂ) * (R : ℂ) ^ n) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) ^ n := by
-            have hexp :
-                Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I) =
-                  (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) := by
-              simpa using (Circle.coe_exp (2 * Real.pi * (t : ℝ))).symm
-            rw [hexp]
+            simp [Circle.coe_exp]
       _ = (a : ℂ) * (((R : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
             rw [mul_pow]
             ring
-      _ = ((circleMonomial a n R hR (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ) := by
-            symm
-            exact coe_circleMonomial_apply a n R hR (Circle.exp (2 * Real.pi * (t : ℝ)))
       _ = (((circleMonomial a n R hR).circleLoop t : ℂˣ) : ℂ) := by
-            rfl
+            simp [coe_circleMonomial_apply]
   have hwind : ((circleMonomial a n R hR).windingNumber : ℂ) = n := by
     calc
       ((circleMonomial a n R hR).windingNumber : ℂ)

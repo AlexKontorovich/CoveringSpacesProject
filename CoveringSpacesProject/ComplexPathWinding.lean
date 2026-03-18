@@ -126,9 +126,9 @@ noncomputable def windingNumber {z : {z : ℂ // z ≠ 0}} (γ : Path z z) : ℤ
     calc
       Complex.exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
       _ = (z : ℂ) := by
-        simpa using congrArg Subtype.val γ.target
+        simp [γ.target]
       _ = (γ 0 : ℂ) := by
-        simpa using congrArg Subtype.val γ.source
+        simp [γ.source]
       _ = Complex.exp (Γ 0) := by
         symm
         exact expLift_apply γ w0 hw0 0
@@ -178,9 +178,9 @@ theorem windingNumber_eq_of_lift {z : {z : ℂ // z ≠ 0}} (γ : Path z z)
       calc
         Complex.exp ((γ.expLift w0 hw0) 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
         _ = (z : ℂ) := by
-          simpa using congrArg Subtype.val γ.target
+          simp [γ.target]
         _ = (γ 0 : ℂ) := by
-          simpa using (congrArg Subtype.val γ.source).symm
+          simp [γ.source]
         _ = Complex.exp ((γ.expLift w0 hw0) 0) := by
           symm
           exact expLift_apply γ w0 hw0 0)
@@ -254,9 +254,9 @@ theorem windingNumber_eq_of_homotopy {z z' : {z : ℂ // z ≠ 0}}
     calc
       Complex.exp (tildeγ 1) = (γ 1 : ℂ) := htildeγ 1
       _ = (z : ℂ) := by
-        simpa using congrArg Subtype.val γ.target
+        simp [γ.target]
       _ = (γ 0 : ℂ) := by
-        simpa using (congrArg Subtype.val γ.source).symm
+        simp [γ.source]
       _ = Complex.exp (tildeγ 0) := by
         symm
         exact htildeγ 0
@@ -280,7 +280,7 @@ theorem windingNumber_eq_of_homotopy {z z' : {z : ℂ // z ≠ 0}}
     calc
       Complex.exp (μ1 0) = (μ 0 : ℂ) := hμ1.1 0
       _ = (z : ℂ) := by
-        simpa using congrArg Subtype.val μ.source
+        simp [μ.source]
   have hshifted_eq :
       shiftedμ0 = μ.expLift (μ1 0) hμ10 :=
     eq_expLift μ (μ1 0) hμ10 shiftedμ0 hshiftedμ0.1 hshiftedμ0.2
