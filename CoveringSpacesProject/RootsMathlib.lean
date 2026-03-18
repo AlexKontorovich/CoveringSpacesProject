@@ -33,75 +33,56 @@ theorem circlePath_source_eq_target {X : Type*} [TopologicalSpace X] (f : C(Circ
       f.circlePath ⟨2 * Real.pi, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ := by
   simp [circlePath, Circle.exp_two_pi]
 
-/-- View a units-valued continuous map as a map to the subtype of nonzero complex numbers. -/
-def toNonzeroSubtype {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ)) :
-    C(α, {z : ℂ // z ≠ 0}) :=
-  ⟨fun x => ⟨(f x : ℂ), (f x).ne_zero⟩,
-    Continuous.subtype_mk (Units.continuous_val.comp f.continuous) fun x => (f x).ne_zero⟩
+noncomputable def complexUnitsHomeomorphNeZero :
+    ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
+  unitsHomeomorphNeZero (G₀ := ℂ)
 
-/-- View a continuous map to the subtype of nonzero complex numbers as a units-valued map. -/
-def fromNonzeroSubtype {α : Type*} [TopologicalSpace α] (f : C(α, {z : ℂ // z ≠ 0})) :
-    C(α, ℂˣ) :=
-  ContinuousMap.unitsOfForallIsUnit
-    (f := ⟨fun x => (f x : ℂ), continuous_subtype_val.comp f.continuous⟩)
-    fun x => isUnit_iff_ne_zero.mpr (f x).property
-
-@[simp] theorem coe_toNonzeroSubtype_apply {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ))
-    (x : α) : (f.toNonzeroSubtype x : ℂ) = f x := rfl
-
-@[simp] theorem coe_fromNonzeroSubtype_apply {α : Type*} [TopologicalSpace α]
-    (f : C(α, {z : ℂ // z ≠ 0})) (x : α) : ((f.fromNonzeroSubtype x : ℂˣ) : ℂ) = f x := rfl
-
-@[simp] theorem toNonzeroSubtype_fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, {z : ℂ // z ≠ 0})) : f.fromNonzeroSubtype.toNonzeroSubtype = f := by
-  ext x
-  rfl
-
-@[simp] theorem fromNonzeroSubtype_toNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, ℂˣ)) : f.toNonzeroSubtype.fromNonzeroSubtype = f := by
-  ext x
-  rfl
+@[simp] theorem coe_complexUnitsHomeomorphNeZero (u : ℂˣ) :
+    ((complexUnitsHomeomorphNeZero u : {z : ℂ // z ≠ 0}) : ℂ) = u := rfl
 
 /-- The winding number of a continuous map from the circle to `ℂˣ`. -/
-noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
-  pathWindingNumber Real.two_pi_pos
-    f.toNonzeroSubtype.circlePath
-    f.toNonzeroSubtype.circlePath_source_eq_target
+noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ := by
+  let f' : C(Circle, {z : ℂ // z ≠ 0}) :=
+    (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp f
+  exact pathWindingNumber Real.two_pi_pos f'.circlePath f'.circlePath_source_eq_target
 
 @[simp] theorem windingNumber_const (c : ℂˣ) :
     windingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
-  let c0 : {z : ℂ // z ≠ 0} := ⟨(c : ℂ), c.ne_zero⟩
+  let c0 : {z : ℂ // z ≠ 0} := complexUnitsHomeomorphNeZero c
   change pathWindingNumber Real.two_pi_pos (ContinuousMap.const _ c0) rfl = 0
   exact pathWindingNumber_const Real.two_pi_pos c0
 
 theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap.Homotopy f g) :
     windingNumber f = windingNumber g := by
+  let e := complexUnitsHomeomorphNeZero
+  let f' : C(Circle, {z : ℂ // z ≠ 0}) := (e : C(ℂˣ, {z : ℂ // z ≠ 0})).comp f
+  let g' : C(Circle, {z : ℂ // z ≠ 0}) := (e : C(ℂˣ, {z : ℂ // z ≠ 0})).comp g
+  let Hbase : C(Set.Icc (0 : ℝ) (2 * Real.pi) × Set.Icc (0 : ℝ) 1, ℂˣ) :=
+    ⟨fun x => H (x.2, Circle.exp x.1),
+      H.continuous.comp
+        (continuous_snd.prodMk
+          (Circle.exp.continuous.comp (continuous_subtype_val.comp continuous_fst)))⟩
   let H' : C(Set.Icc (0 : ℝ) (2 * Real.pi) × Set.Icc (0 : ℝ) 1, {z : ℂ // z ≠ 0}) :=
-    ⟨fun x => ⟨(H (x.2, Circle.exp x.1) : ℂ), (H (x.2, Circle.exp x.1)).ne_zero⟩,
-      Continuous.subtype_mk
-        ((Units.continuous_val.comp H.continuous).comp
-          (continuous_snd.prodMk
-            (Circle.exp.continuous.comp (continuous_subtype_val.comp continuous_fst))))
-        fun x => (H (x.2, Circle.exp x.1)).ne_zero⟩
+    (e : C(ℂˣ, {z : ℂ // z ≠ 0})).comp Hbase
   have hhom : IsLoopHomotopy Real.two_pi_pos.le H' := by
     intro s
-    apply Subtype.ext
-    change (H (s, Circle.exp 0) : ℂ) = (H (s, Circle.exp (2 * Real.pi)) : ℂ)
+    change e (H (s, Circle.exp 0)) = e (H (s, Circle.exp (2 * Real.pi)))
     rw [Circle.exp_zero, Circle.exp_two_pi]
-  have hzero : ∀ t, H' (t, 0) = f.toNonzeroSubtype.circlePath t := by
+  have hzero : ∀ t, H' (t, 0) = f'.circlePath t := by
     intro t
-    apply Subtype.ext
-    exact congrArg (fun z : ℂˣ => (z : ℂ)) (H.map_zero_left (Circle.exp t))
-  have hone : ∀ t, H' (t, 1) = g.toNonzeroSubtype.circlePath t := by
+    simpa [H', Hbase, f', circlePath] using congrArg e (H.map_zero_left (Circle.exp t))
+  have hone : ∀ t, H' (t, 1) = g'.circlePath t := by
     intro t
-    apply Subtype.ext
-    exact congrArg (fun z : ℂˣ => (z : ℂ)) (H.map_one_left (Circle.exp t))
-  simpa [windingNumber] using
+    simpa [H', Hbase, g', circlePath] using congrArg e (H.map_one_left (Circle.exp t))
+  change
+    pathWindingNumber Real.two_pi_pos f'.circlePath f'.circlePath_source_eq_target =
+      pathWindingNumber Real.two_pi_pos g'.circlePath g'.circlePath_source_eq_target
+  exact
     pathWindingNumber_eq_of_homotopy Real.two_pi_pos
-      f.toNonzeroSubtype.circlePath
-      g.toNonzeroSubtype.circlePath
-      f.toNonzeroSubtype.circlePath_source_eq_target
-      g.toNonzeroSubtype.circlePath_source_eq_target
+      f'.circlePath
+      g'.circlePath
+      f'.circlePath_source_eq_target
+      g'.circlePath_source_eq_target
       H' hhom hzero hone
 
 theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
@@ -214,12 +195,14 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
 
 theorem windingNumber_eq_zero_of_exists_extension' {f : C(Circle, ℂˣ)}
     {F : C(Metric.closedBall (0 : ℂ) 1, {z : ℂ // z ≠ 0})}
-    (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f.toNonzeroSubtype z) :
+    (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = complexUnitsHomeomorphNeZero (f z)) :
     windingNumber f = 0 := by
-  have hF' : ∀ z : Circle, F.fromNonzeroSubtype (Circle.toClosedUnitDisk z) = f z := by
+  let e := complexUnitsHomeomorphNeZero
+  let F' : C(Metric.closedBall (0 : ℂ) 1, ℂˣ) := (e.symm : C({z : ℂ // z ≠ 0}, ℂˣ)).comp F
+  have hF' : ∀ z : Circle, F' (Circle.toClosedUnitDisk z) = f z := by
     intro z
-    apply Units.ext
-    simpa using congrArg Subtype.val (hF z)
+    apply e.injective
+    simpa [F'] using hF z
   exact windingNumber_eq_zero_of_exists_extension hF'
 
 end ContinuousMap
@@ -240,6 +223,9 @@ noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : 
 
 theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
     (circleMonomial a n R hR).windingNumber = (n : ℤ) := by
+  let f' : C(Circle, {z : ℂ // z ≠ 0}) :=
+    (ContinuousMap.complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp
+      (circleMonomial a n R hR)
   let c0 : {z : ℂ // z ≠ 0} := ⟨(a : ℂ) * (R : ℂ) ^ n, by
     refine mul_ne_zero a.ne_zero ?_
     exact pow_ne_zero n (by exact_mod_cast hR.ne')⟩
@@ -251,8 +237,7 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
     fun_prop
   have hlift :
       ∀ t,
-        Complex.exp (tildeω t) =
-          ((circleMonomial a n R hR).toNonzeroSubtype.circlePath t : ℂ) := by
+        Complex.exp (tildeω t) = (f'.circlePath t : ℂ) := by
     intro t
     calc
       Complex.exp (tildeω t)
@@ -270,8 +255,11 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
       _ = (a : ℂ) * (((R : ℂ) * (Circle.exp t : ℂ)) ^ n) := by
             rw [mul_pow]
             ring
-      _ = ((circleMonomial a n R hR).toNonzeroSubtype.circlePath t : ℂ) := by
-            rfl
+      _ = ((circleMonomial a n R hR (Circle.exp t) : ℂˣ) : ℂ) := by
+            symm
+            exact coe_circleMonomial_apply a n R hR (Circle.exp t)
+      _ = (f'.circlePath t : ℂ) := by
+            simp [f', ContinuousMap.circlePath]
   have hwind : ((circleMonomial a n R hR).windingNumber : ℂ) = n := by
     calc
       ((circleMonomial a n R hR).windingNumber : ℂ)
@@ -279,10 +267,10 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
             (tildeω ⟨2 * Real.pi, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ -
                 tildeω ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩) / ((2 * Real.pi : ℂ) * Complex.I) := by
               symm
-              simpa [ContinuousMap.windingNumber] using
+              simpa [ContinuousMap.windingNumber, f'] using
                 ContinuousMap.pathWindingNumber_eq_of_lift Real.two_pi_pos
-                  (circleMonomial a n R hR).toNonzeroSubtype.circlePath
-                  (circleMonomial a n R hR).toNonzeroSubtype.circlePath_source_eq_target
+                  f'.circlePath
+                  f'.circlePath_source_eq_target
                   tildeω hlift
       _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
             simp [tildeω]
