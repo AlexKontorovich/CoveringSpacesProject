@@ -952,7 +952,7 @@ lemma CSexp_tildeShomeo_invFun_complex (x : ℂ) :
   apply (periodicity _ _).2
   refine ⟨-(tildeShomeo_floor x), ?_⟩
   unfold tildeShomeo_invFun_complex
-  simp [sub_eq_add_neg, mul_assoc, mul_left_comm, mul_comm]
+  simp [sub_eq_add_neg, mul_left_comm, mul_comm]
 
 /-%%
 \begin{proof}\uses{periodicity, tildeShomeo_invFun_complex, tildeShomeo_floor}\leanok
@@ -1006,7 +1006,7 @@ lemma floor_shift_PBlog (z : ℂ) (hz : z ∈ splitPlane) (n : ℤ) :
   have hzIm : -π < im (PBlog z) ∧ im (PBlog z) < π := (ContPBlog.2 z hz)
   have h2pi : (0 : ℝ) < 2 * π := by linarith [Real.pi_pos]
   have him : (PBlog z + (2 * n : ℂ) * π * I).im = (PBlog z).im + 2 * n * π := by
-    simp [mul_assoc, mul_left_comm, mul_comm]
+    simp [mul_left_comm, mul_comm]
   rw [Int.floor_eq_iff]
   constructor
   · rw [le_div_iff₀ h2pi]
@@ -1223,7 +1223,7 @@ noncomputable def homeoInv {E X I : Type*} [TopologicalSpace E] [TopologicalSpac
         intro p hp
         have hp' : p ∈ e'.source := by simpa using hp
         change (ψ (e' p)).1 = f p
-        simp [ψ, Equiv.prodCongr_apply]
+        simp only [Homeomorph.coe_prodCongr, Homeomorph.refl_apply, Prod.map_fst, ψ]
         have hproj : (e' p).1 = f (tildeφ.symm p) := by
           simpa [Function.comp] using e'.proj_toFun p hp'
         simpa [hproj, Function.comp] using (congrFun hcomm (tildeφ.symm p)).symm }
@@ -2877,10 +2877,10 @@ theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
       simpa using (RCLike.norm_ofReal (K := ℂ) (1 - (x.2 : ℝ)))
     calc
       ‖Jfun x‖ = ‖((1 - (x.2 : ℝ)) : ℂ)‖ * ‖(x.1 : ℂ)‖ := by
-        simp [Jfun, norm_mul]
+        simp [Jfun]
       _ = |1 - (x.2 : ℝ)| * 1 := by
         rw [hreal]
-        simp [Circle.norm_coe]
+        simp
       _ = (1 - (x.2 : ℝ)) * 1 := by
         rw [abs_of_nonneg hnonneg]
       _ ≤ 1 := by
@@ -2899,7 +2899,7 @@ theorem boundsWN0 (ρ : C(Circle, Cstar)) (F : C(D2, Cstar))
     intro z
     apply Subtype.ext
     change Jfun (z, 1) = 0
-    simp [Jfun, zeroD2]
+    simp [Jfun]
   have hzero : ∀ z, H (z, 0) = ρ z := by
     intro z
     calc
@@ -3162,8 +3162,8 @@ theorem zkdominates (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
   let x : ℂ := (R : ℂ) * z
   have hxnorm : ‖x‖ = R := by
     calc
-      ‖x‖ = ‖(R : ℂ)‖ * ‖(z : ℂ)‖ := by simp [x, norm_mul]
-      _ = |R| * 1 := by simp [Circle.norm_coe]
+      ‖x‖ = ‖(R : ℂ)‖ * ‖(z : ℂ)‖ := by simp [x]
+      _ = |R| * 1 := by simp
       _ = R := by rw [abs_of_nonneg hR0]; ring
   have hsplit :
       p.eval x =
