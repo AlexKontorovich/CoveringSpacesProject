@@ -106,7 +106,7 @@ This is the general sphere-to-closed-ball inclusion specialized to the unit circ
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\uses{circleToClosedUnitDiskNew}\leanok
+\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\uses{circleToClosedUnitDiskNew, coe_sphereToClosedBallNew}\leanok
 After forgetting the subtype, the inclusion of the circle into the closed disk does not change the
 underlying complex number.
 \end{lemma}
@@ -615,7 +615,7 @@ winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_lift}\uses{pathWindingNumberNew, eq_add_int_mul_two_pi_I_of_liftsNew, expLiftNew}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_lift}\uses{pathWindingNumberNew, eq_add_int_mul_two_pi_I_of_liftsNew, expLiftNew, expLift_applyNew}\leanok
 If $\Gamma$ is any lift of a loop in $\C\setminus\{0\}$, then the endpoint quotient
 $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \end{lemma}
@@ -666,7 +666,7 @@ endpoint difference and hence the quotient by $2\pi i$ are unchanged.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_liftNew, eq_add_int_mul_two_pi_I_of_liftsNew, IsLoopHomotopyNew, expLiftNew}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_liftNew, eq_add_int_mul_two_pi_I_of_liftsNew, IsLoopHomotopyNew, expLiftNew, expLift_applyNew, expLift_zeroNew}\leanok
 Loops in $\C\setminus\{0\}$ that are freely homotopic through loops have the same winding number.
 \end{lemma}
 %%-/
@@ -807,7 +807,7 @@ Use the homeomorphism between $\C^\times$ and the subtype of nonzero complex num
 %%-/
 
 /-%%
-\begin{lemma}\label{unitsWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_lift}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_liftNew}\leanok
+\begin{lemma}\label{unitsWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_lift}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_liftNew, path_coe_toNonzeroSubtype_applyNew}\leanok
 Any exponential lift of a loop in $\C^\times$ computes its winding number by the same endpoint
 quotient formula.
 \end{lemma}
@@ -828,7 +828,7 @@ After transporting the loop to the nonzero subtype, this is exactly the previous
 %%-/
 
 /-%%
-\begin{lemma}\label{unitsWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_homotopy}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_homotopyNew, toNonzeroSubtypeNew, pathToNonzeroSubtypeNew, IsLoopHomotopyNew}\leanok
+\begin{lemma}\label{unitsWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_homotopy}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_homotopyNew, toNonzeroSubtypeNew, pathToNonzeroSubtypeNew, IsLoopHomotopyNew, coe_toNonzeroSubtype_applyNew}\leanok
 Freely homotopic loops in $\C^\times$ have the same winding number.
 \end{lemma}
 %%-/
@@ -933,7 +933,7 @@ The associated loop of a constant circle map is the constant loop, whose winding
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumberNew, unitsWindingNumber_eq_of_homotopyNew, circleLoopHomotopyNew, circleLoopHomotopy_isLoopHomotopyNew, circleLoopHomotopy_zero_leftNew, circleLoopHomotopy_one_leftNew}\leanok
+\begin{lemma}\label{circleWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumberNew, unitsWindingNumber_eq_of_homotopyNew, circleLoopHomotopyNew, circleLoopHomotopy_applyNew, circleLoopHomotopy_isLoopHomotopyNew, circleLoopHomotopy_zero_leftNew, circleLoopHomotopy_one_leftNew}\leanok
 Homotopic circle maps into $\C^\times$ have the same winding number.
 \end{lemma}
 %%-/
@@ -1103,7 +1103,7 @@ zero.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension'}\uses{circleWindingNumber_eq_zero_of_exists_extensionNew, toNonzeroSubtypeNew, fromNonzeroSubtypeNew}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension'}\uses{circleWindingNumber_eq_zero_of_exists_extensionNew, toNonzeroSubtypeNew, fromNonzeroSubtypeNew, coe_fromNonzeroSubtype_applyNew, toNonzeroSubtype_fromNonzeroSubtypeNew, fromNonzeroSubtype_toNonzeroSubtypeNew}\leanok
 The same vanishing result holds for extensions valued in the nonzero-complex subtype, after
 transporting through the units/nonzero bridge.
 \end{theorem}
@@ -1203,7 +1203,7 @@ Unfold the specialized definition and simplify.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, circleWindingNumberNew, unitsWindingNumber_eq_of_liftNew, circleLoopNew}\leanok
+\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, coe_circleScaledMonomial_applyNew, circleWindingNumberNew, unitsWindingNumber_eq_of_liftNew, circleLoopNew, circleLoop_applyNew}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \end{theorem}
 %%-/
@@ -1465,7 +1465,7 @@ strictly smaller quantity than the norm of the leading term.
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegreeNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{leadingTerm_dominates_on_circleNew, mapCircleUnitsNew, circleMonomialNew, circleWindingNumber_eq_of_norm_sub_ltNew, circleMonomial_windingNumberNew}\leanok
+\begin{theorem}\label{eventually_windingNumber_eq_natDegreeNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{leadingTerm_dominates_on_circleNew, mapCircleUnitsNew, coe_mapCircleUnits_applyNew, circleMonomialNew, coe_circleMonomial_applyNew, circleWindingNumber_eq_of_norm_sub_ltNew, circleMonomial_windingNumberNew}\leanok
 For sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of radius $R$
 has winding number equal to the degree of the polynomial.
 \end{theorem}
@@ -1516,7 +1516,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, circleToClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, coe_mapClosedUnitDiskUnits_applyNew, circleToClosedUnitDiskNew, coe_toClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew, circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\leanok
 Every nonconstant complex polynomial has a complex root.
 \end{theorem}
 %%-/
