@@ -13,6 +13,43 @@ def IsLoopHomotopy {X : Type*} [TopologicalSpace X] {a b : ℝ} (hab : a ≤ b)
     (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, X)) : Prop :=
   ∀ s, H (⟨a, ⟨le_rfl, hab⟩⟩, s) = H (⟨b, ⟨hab, le_rfl⟩⟩, s)
 
+/-- The standard homeomorphism between complex units and nonzero complex numbers. -/
+noncomputable def complexUnitsHomeomorphNeZero :
+    ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
+  unitsHomeomorphNeZero (G₀ := ℂ)
+
+@[simp] theorem coe_complexUnitsHomeomorphNeZero (u : ℂˣ) :
+    ((complexUnitsHomeomorphNeZero u : {z : ℂ // z ≠ 0}) : ℂ) = u := rfl
+
+/-- View a units-valued continuous map as a map to nonzero complex numbers. -/
+noncomputable def toNonzeroSubtype {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ)) :
+    C(α, {z : ℂ // z ≠ 0}) :=
+  (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp f
+
+/-- View a continuous map to nonzero complex numbers as a units-valued map. -/
+noncomputable def fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
+    (f : C(α, {z : ℂ // z ≠ 0})) : C(α, ℂˣ) :=
+  (complexUnitsHomeomorphNeZero.symm : C({z : ℂ // z ≠ 0}, ℂˣ)).comp f
+
+@[simp] theorem coe_toNonzeroSubtype_apply {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ))
+    (x : α) : (f.toNonzeroSubtype x : ℂ) = f x := rfl
+
+@[simp] theorem coe_fromNonzeroSubtype_apply {α : Type*} [TopologicalSpace α]
+    (f : C(α, {z : ℂ // z ≠ 0})) (x : α) : ((f.fromNonzeroSubtype x : ℂˣ) : ℂ) = (f x : ℂ) := by
+  have h' : complexUnitsHomeomorphNeZero (f.fromNonzeroSubtype x) = f x := by
+    simp [fromNonzeroSubtype]
+  exact congrArg Subtype.val h'
+
+@[simp] theorem toNonzeroSubtype_fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
+    (f : C(α, {z : ℂ // z ≠ 0})) : f.fromNonzeroSubtype.toNonzeroSubtype = f := by
+  ext x
+  simp [fromNonzeroSubtype, toNonzeroSubtype]
+
+@[simp] theorem fromNonzeroSubtype_toNonzeroSubtype {α : Type*} [TopologicalSpace α]
+    (f : C(α, ℂˣ)) : f.toNonzeroSubtype.fromNonzeroSubtype = f := by
+  ext x
+  simp [fromNonzeroSubtype, toNonzeroSubtype]
+
 /-- Lift a path in `ℂ \ {0}` through `Complex.exp` with a prescribed starting point. -/
 noncomputable def expLift {a b : ℝ} (hab : a < b)
     (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0})) (z0 : ℂ)
@@ -334,5 +371,70 @@ theorem pathWindingNumber_eq_of_homotopy {a b : ℝ} (hab : a < b)
         pathWindingNumber hab (ContinuousMap.const _ c) rfl :=
     pathWindingNumber_eq_of_lift hab (ContinuousMap.const _ c) rfl tildeω hlift
   simpa [tildeω] using hq.symm
+
+/-- The winding number of a loop in `ℂˣ`. -/
+noncomputable def unitsPathWindingNumber {a b : ℝ} (hab : a < b)
+    (ω : C(Set.Icc a b, ℂˣ))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ :=
+  pathWindingNumber hab ω.toNonzeroSubtype <| by
+    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop
+
+theorem unitsPathWindingNumber_eq_of_lift {a b : ℝ} (hab : a < b)
+    (ω : C(Set.Icc a b, ℂˣ))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (tildeω : C(Set.Icc a b, ℂ))
+    (hlift : ∀ t, Complex.exp (tildeω t) = (ω t : ℂ)) :
+    (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) / (2 * Real.pi * Complex.I) =
+      unitsPathWindingNumber hab ω hloop := by
+  have hloop' :
+      ω.toNonzeroSubtype ⟨a, ⟨le_rfl, hab.le⟩⟩ =
+        ω.toNonzeroSubtype ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
+    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop
+  simpa [unitsPathWindingNumber, hloop'] using
+    pathWindingNumber_eq_of_lift hab ω.toNonzeroSubtype hloop' tildeω (by
+      intro t
+      simpa [toNonzeroSubtype] using hlift t)
+
+theorem unitsPathWindingNumber_eq_of_homotopy {a b : ℝ} (hab : a < b)
+    (ω ω' : C(Set.Icc a b, ℂˣ))
+    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (hloop' : ω' ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω' ⟨b, ⟨hab.le, le_rfl⟩⟩)
+    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, ℂˣ))
+    (hhom : IsLoopHomotopy hab.le H)
+    (hzero : ∀ t, H (t, 0) = ω t)
+    (hone : ∀ t, H (t, 1) = ω' t) :
+    unitsPathWindingNumber hab ω hloop = unitsPathWindingNumber hab ω' hloop' := by
+  let H' : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, {z : ℂ // z ≠ 0}) := H.toNonzeroSubtype
+  have hloop0 :
+      ω.toNonzeroSubtype ⟨a, ⟨le_rfl, hab.le⟩⟩ =
+        ω.toNonzeroSubtype ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
+    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop
+  have hloop1 :
+      ω'.toNonzeroSubtype ⟨a, ⟨le_rfl, hab.le⟩⟩ =
+        ω'.toNonzeroSubtype ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
+    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop'
+  have hhom' : IsLoopHomotopy hab.le H' := by
+    intro s
+    simpa [H', toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero (hhom s)
+  have hzero' : ∀ t, H' (t, 0) = ω.toNonzeroSubtype t := by
+    intro t
+    simpa [H', toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero (hzero t)
+  have hone' : ∀ t, H' (t, 1) = ω'.toNonzeroSubtype t := by
+    intro t
+    simpa [H', toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero (hone t)
+  simpa [unitsPathWindingNumber, hloop0, hloop1] using
+    pathWindingNumber_eq_of_homotopy hab
+      ω.toNonzeroSubtype
+      ω'.toNonzeroSubtype
+      hloop0
+      hloop1
+      H' hhom' hzero' hone'
+
+@[simp] theorem unitsPathWindingNumber_const {a b : ℝ} (hab : a < b)
+    (c : ℂˣ) :
+    unitsPathWindingNumber hab (ContinuousMap.const _ c) rfl = 0 := by
+  let c0 : {z : ℂ // z ≠ 0} := complexUnitsHomeomorphNeZero c
+  change pathWindingNumber hab (ContinuousMap.const _ c0) rfl = 0
+  exact pathWindingNumber_const hab c0
 
 end ContinuousMap
