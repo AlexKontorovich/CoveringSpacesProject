@@ -96,9 +96,9 @@ that packages the modern refactor into one place:
 17. [done] Added blueprint-style natural-language proof/explanation blocks below every copied
     `def`/`lemma`/`theorem`.
 
-18. [pending] Add `\uses{...}` tags systematically throughout the new file.
-    Status: section headers, labels, and `\lean{...}` tags are in place, and the file now reads in
-    blueprint style; the remaining stylistic polish is to thread dependency tags more thoroughly.
+18. [done] Added `\uses{...}` tags systematically throughout the statement environments of the new
+    file.
+    Verified by rebuilding the blueprint successfully with `make blueprint`.
 
 19. [done] Rewrote the natural-language prose to reflect the new Mathlib-style proofs rather than
     the old interval-based implementation details when those have changed.
@@ -151,4 +151,4 @@ that packages the modern refactor into one place:
 - It is self-contained, imports only `Mathlib`, and is namespaced under
   `RootsComplexPolynomialsNew`.
 - It builds on its own and as part of the whole project.
-- The main remaining stylistic task is to add `\uses{...}` tags more systematically.
+- The current standalone blueprint file is now feature-complete for this migration pass.

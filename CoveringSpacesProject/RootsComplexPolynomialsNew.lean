@@ -44,7 +44,7 @@ $\operatorname{sphere}(x,r)\subseteq \operatorname{closedBall}(x,r)$.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_sphereToClosedBallNew}\lean{RootsComplexPolynomialsNew.Metric.coe_sphereToClosedBall}\leanok
+\begin{lemma}\label{coe_sphereToClosedBallNew}\lean{RootsComplexPolynomialsNew.Metric.coe_sphereToClosedBall}\uses{sphereToClosedBallNew}\leanok
 After forgetting the subtype, the sphere-to-ball inclusion is the identity on points.
 \end{lemma}
 %%-/
@@ -91,7 +91,7 @@ end ContinuousMap
 namespace Circle
 
 /-%%
-\begin{definition}\label{circleToClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.toClosedUnitDisk}\leanok
+\begin{definition}\label{circleToClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.toClosedUnitDisk}\uses{sphereToClosedBallNew}\leanok
 The canonical inclusion of the unit circle into the closed unit disk.
 \end{definition}
 %%-/
@@ -106,7 +106,7 @@ This is the general sphere-to-closed-ball inclusion specialized to the unit circ
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\leanok
+\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\uses{circleToClosedUnitDiskNew}\leanok
 After forgetting the subtype, the inclusion of the circle into the closed disk does not change the
 underlying complex number.
 \end{lemma}
@@ -146,7 +146,7 @@ takes both $0$ and $1$ to the point $1\in S^1$.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoop_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoop_apply}\leanok
+\begin{lemma}\label{circleLoop_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoop_apply}\uses{circleLoopNew}\leanok
 The associated loop evaluates at $t\in I$ as $\psi(\exp(2\pi i t))$.
 \end{lemma}
 %%-/
@@ -161,7 +161,7 @@ This is just the defining formula for the associated loop.
 %%-/
 
 /-%%
-\begin{definition}\label{circleLoopHomotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy}\leanok
+\begin{definition}\label{circleLoopHomotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy}\uses{circleLoopNew}\leanok
 A homotopy of circle maps induces a homotopy of the associated loops by precomposing with the
 standard circle parametrization.
 \end{definition}
@@ -181,7 +181,7 @@ This is obtained by composing the given homotopy with the standard map from $I$ 
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_apply}\leanok
+\begin{lemma}\label{circleLoopHomotopy_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_apply}\uses{circleLoopHomotopyNew}\leanok
 The induced homotopy evaluates by the expected formula
 $\widehat H(s,t)=H(s,\exp(2\pi i t))$.
 \end{lemma}
@@ -198,7 +198,7 @@ This is immediate from the definition of the induced homotopy.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_isLoopHomotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_isLoopHomotopy}\leanok
+\begin{lemma}\label{circleLoopHomotopy_isLoopHomotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_isLoopHomotopy}\uses{circleLoopHomotopyNew, IsLoopHomotopyNew}\leanok
 The induced homotopy of associated loops is a homotopy through loops.
 \end{lemma}
 %%-/
@@ -218,7 +218,7 @@ $\exp(0)=\exp(2\pi i)=1$.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_zero_leftNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_zero_left}\leanok
+\begin{lemma}\label{circleLoopHomotopy_zero_leftNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_zero_left}\uses{circleLoopHomotopyNew, circleLoopNew}\leanok
 At the left endpoint of the homotopy parameter, the induced loop homotopy recovers the associated
 loop of the initial map.
 \end{lemma}
@@ -238,7 +238,7 @@ parametrization.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_one_leftNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_one_left}\leanok
+\begin{lemma}\label{circleLoopHomotopy_one_leftNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_one_left}\uses{circleLoopHomotopyNew, circleLoopNew}\leanok
 At the right endpoint of the homotopy parameter, the induced loop homotopy recovers the associated
 loop of the terminal map.
 \end{lemma}
@@ -277,7 +277,7 @@ This is the standard homeomorphism between units in a field and the correspondin
 %%-/
 
 /-%%
-\begin{definition}\label{toNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.toNonzeroSubtype}\leanok
+\begin{definition}\label{toNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.toNonzeroSubtype}\uses{complexUnitsHomeomorphNeZeroNew}\leanok
 A units-valued continuous map can be viewed as a continuous map to nonzero complex numbers.
 \end{definition}
 %%-/
@@ -293,7 +293,7 @@ Compose the given map with the homeomorphism from $\C^\times$ to the nonzero-com
 %%-/
 
 /-%%
-\begin{definition}\label{fromNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.fromNonzeroSubtype}\leanok
+\begin{definition}\label{fromNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.fromNonzeroSubtype}\uses{complexUnitsHomeomorphNeZeroNew}\leanok
 A continuous map to nonzero complex numbers can be viewed as a units-valued continuous map.
 \end{definition}
 %%-/
@@ -309,7 +309,7 @@ This is the inverse construction, using the inverse homeomorphism.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_toNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.coe_toNonzeroSubtype_apply}\leanok
+\begin{lemma}\label{coe_toNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.coe_toNonzeroSubtype_apply}\uses{toNonzeroSubtypeNew}\leanok
 After coercing to $\C$, the map obtained by passing from units to the nonzero subtype has the same
 values as the original map.
 \end{lemma}
@@ -325,7 +325,7 @@ Both sides are definitionally the same underlying complex number.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_fromNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.coe_fromNonzeroSubtype_apply}\leanok
+\begin{lemma}\label{coe_fromNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.coe_fromNonzeroSubtype_apply}\uses{fromNonzeroSubtypeNew, complexUnitsHomeomorphNeZeroNew}\leanok
 After coercing to $\C$, the map obtained by passing from the nonzero subtype to units has the same
 values as the original map.
 \end{lemma}
@@ -347,7 +347,7 @@ map, and coercing to $\C$ then gives the claim.
 %%-/
 
 /-%%
-\begin{lemma}\label{toNonzeroSubtype_fromNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.toNonzeroSubtype_fromNonzeroSubtype}\leanok
+\begin{lemma}\label{toNonzeroSubtype_fromNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.toNonzeroSubtype_fromNonzeroSubtype}\uses{toNonzeroSubtypeNew, fromNonzeroSubtypeNew}\leanok
 Passing from the nonzero subtype to units and back again does not change a continuous map.
 \end{lemma}
 %%-/
@@ -365,7 +365,7 @@ This is the left-inverse identity for the homeomorphism between units and the no
 %%-/
 
 /-%%
-\begin{lemma}\label{fromNonzeroSubtype_toNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.fromNonzeroSubtype_toNonzeroSubtype}\leanok
+\begin{lemma}\label{fromNonzeroSubtype_toNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.fromNonzeroSubtype_toNonzeroSubtype}\uses{toNonzeroSubtypeNew, fromNonzeroSubtypeNew}\leanok
 Passing from units to the nonzero subtype and back again does not change a continuous map.
 \end{lemma}
 %%-/
@@ -389,7 +389,7 @@ namespace Path
 open ContinuousMap
 
 /-%%
-\begin{definition}\label{pathToNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.Path.toNonzeroSubtype}\leanok
+\begin{definition}\label{pathToNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.Path.toNonzeroSubtype}\uses{complexUnitsHomeomorphNeZeroNew}\leanok
 A units-valued path can be viewed as a path in the nonzero-complex subtype.
 \end{definition}
 %%-/
@@ -405,7 +405,7 @@ Map the path through the same homeomorphism from units to nonzero complex number
 %%-/
 
 /-%%
-\begin{lemma}\label{path_coe_toNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.Path.coe_toNonzeroSubtype_apply}\leanok
+\begin{lemma}\label{path_coe_toNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.Path.coe_toNonzeroSubtype_apply}\uses{pathToNonzeroSubtypeNew}\leanok
 After coercing to $\C$, the converted path has the same pointwise values as the original path.
 \end{lemma}
 %%-/
@@ -439,7 +439,7 @@ This is the path-lifting theorem for the already-upstream covering map `Complex.
 %%-/
 
 /-%%
-\begin{lemma}\label{expLift_applyNew}\lean{RootsComplexPolynomialsNew.Path.expLift_apply}\leanok
+\begin{lemma}\label{expLift_applyNew}\lean{RootsComplexPolynomialsNew.Path.expLift_apply}\uses{expLiftNew}\leanok
 The lifted path projects back to the original path under the exponential map.
 \end{lemma}
 %%-/
@@ -461,7 +461,7 @@ codomain subtype.
 %%-/
 
 /-%%
-\begin{lemma}\label{expLift_zeroNew}\lean{RootsComplexPolynomialsNew.Path.expLift_zero}\leanok
+\begin{lemma}\label{expLift_zeroNew}\lean{RootsComplexPolynomialsNew.Path.expLift_zero}\uses{expLiftNew}\leanok
 The lifted path starts at the prescribed basepoint.
 \end{lemma}
 %%-/
@@ -481,7 +481,7 @@ This is the standard initial-value property of the lifted path.
 %%-/
 
 /-%%
-\begin{lemma}\label{eq_expLiftNew}\lean{RootsComplexPolynomialsNew.Path.eq_expLift}\leanok
+\begin{lemma}\label{eq_expLiftNew}\lean{RootsComplexPolynomialsNew.Path.eq_expLift}\uses{expLiftNew}\leanok
 Any other lift of the same path with the same starting point agrees with the canonical lifted path.
 \end{lemma}
 %%-/
@@ -526,7 +526,7 @@ This is the usual $2\pi i$-periodicity of the complex exponential map.
 %%-/
 
 /-%%
-\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_liftsNew}\lean{RootsComplexPolynomialsNew.Path.eq_add_int_mul_two_pi_I_of_lifts}\leanok
+\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_liftsNew}\lean{RootsComplexPolynomialsNew.Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLiftNew, exp_add_int_mul_two_pi_I_eqNew}\leanok
 Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
 \end{lemma}
 %%-/
@@ -583,7 +583,7 @@ and uniqueness of lifts then shows the two lifts agree everywhere.
 %%-/
 
 /-%%
-\begin{definition}\label{pathWindingNumberNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber}\leanok
+\begin{definition}\label{pathWindingNumberNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber}\uses{expLiftNew}\leanok
 The winding number of a loop in $\C\setminus\{0\}$ is defined from the endpoint difference of a
 lift through the exponential covering map.
 \end{definition}
@@ -615,7 +615,7 @@ winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_lift}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_lift}\uses{pathWindingNumberNew, eq_add_int_mul_two_pi_I_of_liftsNew, expLiftNew}\leanok
 If $\Gamma$ is any lift of a loop in $\C\setminus\{0\}$, then the endpoint quotient
 $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \end{lemma}
@@ -666,7 +666,7 @@ endpoint difference and hence the quotient by $2\pi i$ are unchanged.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_liftNew, eq_add_int_mul_two_pi_I_of_liftsNew, IsLoopHomotopyNew, expLiftNew}\leanok
 Loops in $\C\setminus\{0\}$ that are freely homotopic through loops have the same winding number.
 \end{lemma}
 %%-/
@@ -769,7 +769,7 @@ differences agree and hence their winding numbers agree.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_reflNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_refl}\leanok
+\begin{lemma}\label{pathWindingNumber_reflNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_refl}\uses{pathWindingNumber_eq_of_liftNew}\leanok
 The constant loop has winding number zero.
 \end{lemma}
 %%-/
@@ -791,7 +791,7 @@ The constant loop is lifted by a constant logarithm, whose endpoint difference i
 %%-/
 
 /-%%
-\begin{definition}\label{unitsWindingNumberNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber}\leanok
+\begin{definition}\label{unitsWindingNumberNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber}\uses{pathToNonzeroSubtypeNew, pathWindingNumberNew}\leanok
 The winding number of a loop in $\C^\times$ is defined by transporting the loop to
 $\C\setminus\{0\}$ and using the previous definition.
 \end{definition}
@@ -807,7 +807,7 @@ Use the homeomorphism between $\C^\times$ and the subtype of nonzero complex num
 %%-/
 
 /-%%
-\begin{lemma}\label{unitsWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_lift}\leanok
+\begin{lemma}\label{unitsWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_lift}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_liftNew}\leanok
 Any exponential lift of a loop in $\C^\times$ computes its winding number by the same endpoint
 quotient formula.
 \end{lemma}
@@ -828,7 +828,7 @@ After transporting the loop to the nonzero subtype, this is exactly the previous
 %%-/
 
 /-%%
-\begin{lemma}\label{unitsWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_homotopy}\leanok
+\begin{lemma}\label{unitsWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_homotopy}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_homotopyNew, toNonzeroSubtypeNew, pathToNonzeroSubtypeNew, IsLoopHomotopyNew}\leanok
 Freely homotopic loops in $\C^\times$ have the same winding number.
 \end{lemma}
 %%-/
@@ -865,7 +865,7 @@ homotopy invariance there.
 %%-/
 
 /-%%
-\begin{lemma}\label{unitsWindingNumber_reflNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_refl}\leanok
+\begin{lemma}\label{unitsWindingNumber_reflNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_refl}\uses{unitsWindingNumberNew, pathWindingNumber_reflNew, pathToNonzeroSubtypeNew}\leanok
 The constant loop in $\C^\times$ has winding number zero.
 \end{lemma}
 %%-/
@@ -895,7 +895,7 @@ end Path
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{circleWindingNumberNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber}\leanok
+\begin{definition}\label{circleWindingNumberNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber}\uses{circleLoopNew, unitsWindingNumberNew}\leanok
 The winding number of a continuous map from the circle to $\C^\times$ is the winding number of its
 associated loop.
 \end{definition}
@@ -912,7 +912,7 @@ taking the loop winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_constNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_const}\leanok
+\begin{lemma}\label{circleWindingNumber_constNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_const}\uses{circleWindingNumberNew, unitsWindingNumber_reflNew, circleLoopNew}\leanok
 A constant map from the circle to $\C^\times$ has winding number zero.
 \end{lemma}
 %%-/
@@ -933,7 +933,7 @@ The associated loop of a constant circle map is the constant loop, whose winding
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\leanok
+\begin{lemma}\label{circleWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumberNew, unitsWindingNumber_eq_of_homotopyNew, circleLoopHomotopyNew, circleLoopHomotopy_isLoopHomotopyNew, circleLoopHomotopy_zero_leftNew, circleLoopHomotopy_one_leftNew}\leanok
 Homotopic circle maps into $\C^\times$ have the same winding number.
 \end{lemma}
 %%-/
@@ -1013,7 +1013,7 @@ $f=t(f-g)$ there, which would force $\|f\|\le \|f-g\|$, contradicting the hypoth
 %%-/
 
 /-%%
-\begin{corollary}\label{circleWindingNumber_eq_of_norm_sub_ltNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_norm_sub_lt}\leanok
+\begin{corollary}\label{circleWindingNumber_eq_of_norm_sub_ltNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_norm_sub_lt}\uses{exists_homotopy_of_norm_sub_ltNew, circleWindingNumber_eq_of_homotopyNew}\leanok
 Circle maps satisfying the walking-dog inequality have the same winding number.
 \end{corollary}
 %%-/
@@ -1032,7 +1032,7 @@ number.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension}\uses{circleToClosedUnitDiskNew, circleWindingNumber_eq_of_homotopyNew, circleWindingNumber_constNew}\leanok
 If a map from the unit circle to $\C^\times$ extends to the closed unit disk through maps into
 $\C^\times$, then its winding number is zero.
 \end{theorem}
@@ -1103,7 +1103,7 @@ zero.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension'}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension'}\uses{circleWindingNumber_eq_zero_of_exists_extensionNew, toNonzeroSubtypeNew, fromNonzeroSubtypeNew}\leanok
 The same vanishing result holds for extensions valued in the nonzero-complex subtype, after
 transporting through the units/nonzero bridge.
 \end{theorem}
@@ -1155,7 +1155,7 @@ the circle are nonzero.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_circleScaledMonomial_applyNew}\lean{RootsComplexPolynomialsNew.coe_circleScaledMonomial_apply}\leanok
+\begin{lemma}\label{coe_circleScaledMonomial_applyNew}\lean{RootsComplexPolynomialsNew.coe_circleScaledMonomial_apply}\uses{circleScaledMonomialNew}\leanok
 After coercing to $\C$, the scaled monomial has the expected pointwise formula
 $a\,(cz)^n$.
 \end{lemma}
@@ -1171,7 +1171,7 @@ This is immediate from the definition.
 %%-/
 
 /-%%
-\begin{definition}\label{circleMonomialNew}\lean{RootsComplexPolynomialsNew.circleMonomial}\leanok
+\begin{definition}\label{circleMonomialNew}\lean{RootsComplexPolynomialsNew.circleMonomial}\uses{circleScaledMonomialNew}\leanok
 For $R>0$, the map $z\mapsto a\,(Rz)^n$ is obtained by specializing the previous construction to
 the nonzero scalar $R$.
 \end{definition}
@@ -1187,7 +1187,7 @@ This is just the scaled monomial with $c=R\in \C^\times$.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_circleMonomial_applyNew}\lean{RootsComplexPolynomialsNew.coe_circleMonomial_apply}\leanok
+\begin{lemma}\label{coe_circleMonomial_applyNew}\lean{RootsComplexPolynomialsNew.coe_circleMonomial_apply}\uses{circleMonomialNew, circleScaledMonomialNew}\leanok
 After coercing to $\C$, the circle monomial evaluates as $a\,(Rz)^n$.
 \end{lemma}
 %%-/
@@ -1203,7 +1203,7 @@ Unfold the specialized definition and simplify.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\leanok
+\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, circleWindingNumberNew, unitsWindingNumber_eq_of_liftNew, circleLoopNew}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \end{theorem}
 %%-/
@@ -1272,7 +1272,7 @@ exactly $2\pi n i$.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleMonomial_windingNumber}\leanok
+\begin{theorem}\label{circleMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleMonomial_windingNumber}\uses{circleMonomialNew, circleScaledMonomial_windingNumberNew}\leanok
 For $R>0$, the winding number of the map $z\mapsto a\,(Rz)^n$ on the unit circle is $n$.
 \end{theorem}
 %%-/
@@ -1335,7 +1335,7 @@ This is the disk-valued analogue of the previous construction.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_mapCircleUnits_applyNew}\lean{RootsComplexPolynomialsNew.Polynomial.coe_mapCircleUnits_apply}\leanok
+\begin{lemma}\label{coe_mapCircleUnits_applyNew}\lean{RootsComplexPolynomialsNew.Polynomial.coe_mapCircleUnits_apply}\uses{mapCircleUnitsNew}\leanok
 After coercing to $\C$, the circle-valued units map evaluates as $p(Rz)$.
 \end{lemma}
 %%-/
@@ -1351,7 +1351,7 @@ This is immediate from the definition.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_mapClosedUnitDiskUnits_applyNew}\lean{RootsComplexPolynomialsNew.Polynomial.coe_mapClosedUnitDiskUnits_apply}\leanok
+\begin{lemma}\label{coe_mapClosedUnitDiskUnits_applyNew}\lean{RootsComplexPolynomialsNew.Polynomial.coe_mapClosedUnitDiskUnits_apply}\uses{mapClosedUnitDiskUnitsNew}\leanok
 After coercing to $\C$, the disk-valued units map evaluates as $p(Rz)$.
 \end{lemma}
 %%-/
@@ -1465,7 +1465,7 @@ strictly smaller quantity than the norm of the leading term.
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegreeNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\leanok
+\begin{theorem}\label{eventually_windingNumber_eq_natDegreeNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{leadingTerm_dominates_on_circleNew, mapCircleUnitsNew, circleMonomialNew, circleWindingNumber_eq_of_norm_sub_ltNew, circleMonomial_windingNumberNew}\leanok
 For sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of radius $R$
 has winding number equal to the degree of the polynomial.
 \end{theorem}
@@ -1516,7 +1516,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, circleToClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew}\leanok
 Every nonconstant complex polynomial has a complex root.
 \end{theorem}
 %%-/
