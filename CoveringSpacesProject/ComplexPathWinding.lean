@@ -17,7 +17,7 @@ open scoped unitInterval
 
 noncomputable section
 
-abbrev Cstar := {z : ℂ // z ≠ 0}
+local notation "Cstar" => {z : ℂ // z ≠ 0}
 
 namespace ContinuousMap
 

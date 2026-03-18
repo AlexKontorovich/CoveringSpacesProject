@@ -82,14 +82,14 @@ theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap
       (circleLoopHomotopy_isLoopHomotopy H) (circleLoopHomotopy_zero_left H)
       (circleLoopHomotopy_one_left H)
 
-theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
-    (hclose : ∀ z : Circle, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
+theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α] {f g : C(α, ℂˣ)}
+    (hclose : ∀ z : α, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
     Nonempty (ContinuousMap.Homotopy f g) := by
-  let Hbase : C(I × Circle, ℂ) :=
+  let Hbase : C(I × α, ℂ) :=
     ⟨fun x =>
       (((1 - (x.1 : ℝ)) : ℂ) * (f x.2 : ℂ)) + (((x.1 : ℝ) : ℂ) * (g x.2 : ℂ)), by
         fun_prop⟩
-  have hHbase : ∀ x : I × Circle, Hbase x ≠ 0 := by
+  have hHbase : ∀ x : I × α, Hbase x ≠ 0 := by
     intro x hx
     have hs0 : 0 ≤ (x.1 : ℝ) := x.1.2.1
     have hs1 : (x.1 : ℝ) ≤ 1 := x.1.2.2
@@ -116,7 +116,7 @@ theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
         _ ≤ ‖(f x.2 : ℂ) - g x.2‖ := hle
         _ < ‖(f x.2 : ℂ)‖ := hclose x.2
     exact (lt_irrefl ‖(f x.2 : ℂ)‖ hlt).elim
-  let H : C(I × Circle, ℂˣ) :=
+  let H : C(I × α, ℂˣ) :=
     ContinuousMap.unitsOfForallIsUnit (f := Hbase) fun x => isUnit_iff_ne_zero.mpr (hHbase x)
   refine ⟨{ toContinuousMap := H, map_zero_left := ?_, map_one_left := ?_ }⟩
   · intro z

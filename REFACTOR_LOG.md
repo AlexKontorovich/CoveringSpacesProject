@@ -4,13 +4,11 @@
 
 ### Current cleanup list
 
-1. Generalize `ContinuousMap.exists_homotopy_of_norm_sub_lt` and
-   `ContinuousMap.windingNumber_eq_of_norm_sub_lt` in
-   `CoveringSpacesProject/RootsMathlib.lean`.
-   Current issue: both theorems are specialized to `Circle`, but the proof only uses a generic
-   domain parameter.
-   Likely target: `α : Type*` with `[TopologicalSpace α]`, possibly later a version over a more
-   general normed field than `ℂ`.
+1. [done] Generalized `ContinuousMap.exists_homotopy_of_norm_sub_lt` in
+   `CoveringSpacesProject/RootsMathlib.lean` from `Circle` to an arbitrary
+   `α : Type*` with `[TopologicalSpace α]`.
+   Note: `ContinuousMap.windingNumber_eq_of_norm_sub_lt` remains circle-specific because the
+   current winding-number API itself is circle-specific.
 
 2. Factor out the repeated “two lifts differ by an integer multiple of `2 * π * I`” argument in
    `CoveringSpacesProject/ComplexPathWinding.lean`.
@@ -50,6 +48,10 @@
    Current issue: the lemma is generic and plausibly upstreamable; we only created a local module
    because the current Mathlib snapshot seems to expose only `sphere_subset_closedBall` plus
    `Set.inclusion`.
+
+8. Consider whether `exists_homotopy_of_norm_sub_lt` should eventually generalize in the codomain
+   from `ℂˣ` to `𝕜ˣ` for a suitable class such as `RCLike 𝕜`.
+   Current issue: the domain generalization is done, but the codomain is still fixed to `ℂ`.
 
 ### Notes for the eventual Mathlib branch
 
