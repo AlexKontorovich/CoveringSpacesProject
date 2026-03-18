@@ -6,8 +6,8 @@ import Mathlib
 This file is a thin wrapper around Mathlib's covering-space API for
 `Complex.isCoveringMap_exp`. It does three things:
 
-* reparametrizes path lifting from `unitInterval` to an arbitrary interval `[a, b]`,
-* packages the resulting endpoint integer as a winding number,
+* packages homotopies through loops on `I`,
+* defines winding numbers of loops in `ℂ \ {0}` via lifts through `Complex.exp`,
 * provides `ℂˣ`-valued wrappers around the subtype-valued covering-map statements.
 -/
 
@@ -19,18 +19,13 @@ noncomputable section
 
 namespace ContinuousMap
 
-/-- A homotopy through loops on the interval `[a, b]`. -/
-def IsLoopHomotopy {X : Type*} [TopologicalSpace X] {a b : ℝ} (hab : a ≤ b)
-    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, X)) : Prop :=
-  ∀ s, H (⟨a, ⟨le_rfl, hab⟩⟩, s) = H (⟨b, ⟨hab, le_rfl⟩⟩, s)
+/-- A homotopy through loops on `I`. -/
+def IsLoopHomotopy {X : Type*} [TopologicalSpace X] (H : C(I × I, X)) : Prop :=
+  ∀ s, H (s, 0) = H (s, 1)
 
-/-- The standard homeomorphism between complex units and nonzero complex numbers. -/
 private noncomputable def complexUnitsHomeomorphNeZero :
     ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
   unitsHomeomorphNeZero (G₀ := ℂ)
-
-@[simp] private theorem coe_complexUnitsHomeomorphNeZero (u : ℂˣ) :
-    ((complexUnitsHomeomorphNeZero u : {z : ℂ // z ≠ 0}) : ℂ) = u := rfl
 
 /-- View a units-valued continuous map as a map to nonzero complex numbers. -/
 noncomputable def toNonzeroSubtype {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ)) :
@@ -43,13 +38,14 @@ noncomputable def fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
   (complexUnitsHomeomorphNeZero.symm : C({z : ℂ // z ≠ 0}, ℂˣ)).comp f
 
 @[simp] theorem coe_toNonzeroSubtype_apply {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ))
-    (x : α) : (f.toNonzeroSubtype x : ℂ) = f x := rfl
+    (x : α) : (f.toNonzeroSubtype x : ℂ) = (f x : ℂ) := rfl
 
 @[simp] theorem coe_fromNonzeroSubtype_apply {α : Type*} [TopologicalSpace α]
     (f : C(α, {z : ℂ // z ≠ 0})) (x : α) : ((f.fromNonzeroSubtype x : ℂˣ) : ℂ) = (f x : ℂ) := by
-  have h' : complexUnitsHomeomorphNeZero (f.fromNonzeroSubtype x) = f x := by
+  have h :
+      complexUnitsHomeomorphNeZero (f.fromNonzeroSubtype x) = f x := by
     simp [fromNonzeroSubtype]
-  exact congrArg Subtype.val h'
+  exact congrArg Subtype.val h
 
 @[simp] theorem toNonzeroSubtype_fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
     (f : C(α, {z : ℂ // z ≠ 0})) : f.fromNonzeroSubtype.toNonzeroSubtype = f := by
@@ -61,89 +57,58 @@ noncomputable def fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
   ext x
   simp [fromNonzeroSubtype, toNonzeroSubtype]
 
+end ContinuousMap
+
+namespace Path
+
+open ContinuousMap
+
+/-- View a units-valued path as a path to nonzero complex numbers. -/
+noncomputable def toNonzeroSubtype {u v : ℂˣ} (γ : Path u v) :
+    Path (complexUnitsHomeomorphNeZero u) (complexUnitsHomeomorphNeZero v) :=
+  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
+
+@[simp] theorem coe_toNonzeroSubtype_apply {u v : ℂˣ} (γ : Path u v) (t : I) :
+    ((γ.toNonzeroSubtype t : {z : ℂ // z ≠ 0}) : ℂ) = (γ t : ℂ) := rfl
+
 /-- Lift a path in `ℂ \ {0}` through `Complex.exp` with a prescribed starting point. -/
-noncomputable def expLift {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0})) (z0 : ℂ)
-    (hz0 : Complex.exp z0 = (ω ⟨a, ⟨le_rfl, hab.le⟩⟩ : ℂ)) : C(Set.Icc a b, ℂ) := by
-  let e := iccHomeoI a b hab
-  let γ : C(↑unitInterval, {z : ℂ // z ≠ 0}) :=
-    ⟨fun t => ω (e.symm t), ω.continuous.comp e.symm.continuous⟩
-  have hleft : e.symm 0 = ⟨a, ⟨le_rfl, hab.le⟩⟩ := by
+noncomputable def expLift {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (z₀ : ℂ)) : C(I, ℂ) :=
+  Complex.isCoveringMap_exp.liftPath γ.toContinuousMap w0 <| by
     apply Subtype.ext
-    simp [e]
-  have hγ0 : γ 0 = ⟨Complex.exp z0, Complex.exp_ne_zero z0⟩ := by
-    apply Subtype.ext
-    simpa [γ, hleft] using hz0.symm
-  let Γ := Complex.isCoveringMap_exp.liftPath γ z0 hγ0
-  exact ⟨fun t => Γ (e t), Γ.continuous.comp e.continuous⟩
+    simpa using hw0.symm
 
-@[simp] theorem expLift_apply {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0})) (z0 : ℂ)
-    (hz0 : Complex.exp z0 = (ω ⟨a, ⟨le_rfl, hab.le⟩⟩ : ℂ)) (t : Set.Icc a b) :
-    Complex.exp (expLift hab ω z0 hz0 t) = (ω t : ℂ) := by
-  let e := iccHomeoI a b hab
-  let γ : C(↑unitInterval, {z : ℂ // z ≠ 0}) :=
-    ⟨fun s => ω (e.symm s), ω.continuous.comp e.symm.continuous⟩
-  have hleft : e.symm 0 = ⟨a, ⟨le_rfl, hab.le⟩⟩ := by
-    apply Subtype.ext
-    simp [e]
-  have hγ0 : γ 0 = ⟨Complex.exp z0, Complex.exp_ne_zero z0⟩ := by
-    apply Subtype.ext
-    simpa [γ, hleft] using hz0.symm
-  have hΓ :=
-    congrFun (Complex.isCoveringMap_exp.liftPath_lifts γ z0 hγ0) (e t)
-  simpa [expLift, γ, e] using congrArg Subtype.val hΓ
+@[simp] theorem expLift_apply {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (z₀ : ℂ)) (t : I) :
+    Complex.exp (γ.expLift w0 hw0 t) = (γ t : ℂ) := by
+  have h :=
+    congrFun (Complex.isCoveringMap_exp.liftPath_lifts γ.toContinuousMap w0 <| by
+      apply Subtype.ext
+      simpa using hw0.symm) t
+  simpa using congrArg Subtype.val h
 
-@[simp] theorem expLift_source {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0})) (z0 : ℂ)
-    (hz0 : Complex.exp z0 = (ω ⟨a, ⟨le_rfl, hab.le⟩⟩ : ℂ)) :
-    expLift hab ω z0 hz0 ⟨a, ⟨le_rfl, hab.le⟩⟩ = z0 := by
-  let e := iccHomeoI a b hab
-  let γ : C(↑unitInterval, {z : ℂ // z ≠ 0}) :=
-    ⟨fun s => ω (e.symm s), ω.continuous.comp e.symm.continuous⟩
-  have hleft : e.symm 0 = ⟨a, ⟨le_rfl, hab.le⟩⟩ := by
-    apply Subtype.ext
-    simp [e]
-  have hright : e ⟨a, ⟨le_rfl, hab.le⟩⟩ = 0 := by
-    apply Subtype.ext
-    simp [e]
-  have hγ0 : γ 0 = ⟨Complex.exp z0, Complex.exp_ne_zero z0⟩ := by
-    apply Subtype.ext
-    simpa [γ, hleft] using hz0.symm
-  simpa [expLift, e, hright] using Complex.isCoveringMap_exp.liftPath_zero (γ := γ) (e := z0)
-    (γ_0 := hγ0)
+@[simp] theorem expLift_zero {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (z₀ : ℂ)) :
+    γ.expLift w0 hw0 0 = w0 := by
+  simpa [expLift] using Complex.isCoveringMap_exp.liftPath_zero (γ := γ.toContinuousMap)
+    (e := w0) (γ_0 := by
+      apply Subtype.ext
+      simpa using hw0.symm)
 
-/-- Uniqueness of path lifts through `Complex.exp` on an arbitrary interval. -/
-theorem eq_expLift {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0})) (z0 : ℂ)
-    (hz0 : Complex.exp z0 = (ω ⟨a, ⟨le_rfl, hab.le⟩⟩ : ℂ))
-    (tildeω : C(Set.Icc a b, ℂ))
-    (hlift : ∀ t, Complex.exp (tildeω t) = (ω t : ℂ))
-    (h0 : tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩ = z0) :
-    tildeω = expLift hab ω z0 hz0 := by
-  let e := iccHomeoI a b hab
-  let γ : C(↑unitInterval, {z : ℂ // z ≠ 0}) :=
-    ⟨fun s => ω (e.symm s), ω.continuous.comp e.symm.continuous⟩
-  have hleft : e.symm 0 = ⟨a, ⟨le_rfl, hab.le⟩⟩ := by
-    apply Subtype.ext
-    simp [e]
-  have hγ0 : γ 0 = ⟨Complex.exp z0, Complex.exp_ne_zero z0⟩ := by
-    apply Subtype.ext
-    simpa [γ, hleft] using hz0.symm
-  let Γ' : C(↑unitInterval, ℂ) :=
-    ⟨fun s => tildeω (e.symm s), tildeω.continuous.comp e.symm.continuous⟩
-  have hΓ' : Γ' = Complex.isCoveringMap_exp.liftPath γ z0 hγ0 := by
-    apply (Complex.isCoveringMap_exp.eq_liftPath_iff' (γ := γ) (e := z0) (γ_0 := hγ0)
-      (Γ := Γ')).2
-    constructor
-    · ext s
-      change Complex.exp (tildeω (e.symm s)) = (ω (e.symm s) : ℂ)
-      exact hlift (e.symm s)
-    · change tildeω (e.symm 0) = z0
-      simpa [hleft] using h0
-  ext t
-  have hval := congrFun (congrArg DFunLike.coe hΓ') (e t)
-  simpa [Γ', expLift, e] using hval
+/-- Uniqueness of path lifts through `Complex.exp`. -/
+theorem eq_expLift {z₀ z₁ : {z : ℂ // z ≠ 0}} (γ : Path z₀ z₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (z₀ : ℂ)) (Γ : C(I, ℂ))
+    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
+    Γ = γ.expLift w0 hw0 := by
+  apply (Complex.isCoveringMap_exp.eq_liftPath_iff' (γ := γ.toContinuousMap) (e := w0)
+    (γ_0 := by
+      apply Subtype.ext
+      simpa using hw0.symm) (Γ := Γ)).2
+  constructor
+  · ext t
+    show Complex.exp (Γ t) = (γ t : ℂ)
+    exact hlift t
+  · exact h0
 
 private theorem exp_sub_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
     Complex.exp (z - n * (2 * Real.pi * Complex.I)) = Complex.exp z := by
@@ -152,300 +117,273 @@ private theorem exp_sub_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
   simp [sub_eq_add_neg, Int.cast_neg]
 
 /-- The winding number of a loop in `ℂ \ {0}`, defined via lifts through `Complex.exp`. -/
-noncomputable def pathWindingNumber {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0}))
-    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ := by
-  let a0 : Set.Icc a b := ⟨a, ⟨le_rfl, hab.le⟩⟩
-  let b0 : Set.Icc a b := ⟨b, ⟨hab.le, le_rfl⟩⟩
-  let z0 : ℂ := Complex.log (ω a0)
-  have hz0 : Complex.exp z0 = (ω a0 : ℂ) := by
-    simpa [z0] using Complex.exp_log (ω a0).property
-  let tildeω := expLift hab ω z0 hz0
-  have hper : Complex.exp (tildeω b0) = Complex.exp (tildeω a0) := by
+noncomputable def windingNumber {z : {z : ℂ // z ≠ 0}} (γ : Path z z) : ℤ := by
+  let w0 : ℂ := Complex.log z
+  have hw0 : Complex.exp w0 = (z : ℂ) := by
+    simpa [w0] using Complex.exp_log z.property
+  let Γ := γ.expLift w0 hw0
+  have hper : Complex.exp (Γ 1) = Complex.exp (Γ 0) := by
     calc
-      Complex.exp (tildeω b0) = (ω b0 : ℂ) := expLift_apply hab ω z0 hz0 b0
-      _ = (ω a0 : ℂ) := by
-        simpa [a0, b0] using congrArg Subtype.val hloop.symm
-      _ = Complex.exp (tildeω a0) := by
-        exact (expLift_apply hab ω z0 hz0 a0).symm
+      Complex.exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
+      _ = (z : ℂ) := by
+        simpa using congrArg Subtype.val γ.target
+      _ = (γ 0 : ℂ) := by
+        simpa using congrArg Subtype.val γ.source
+      _ = Complex.exp (Γ 0) := by
+        symm
+        exact expLift_apply γ w0 hw0 0
   exact Classical.choose ((Complex.exp_eq_exp_iff_exists_int).1 hper)
 
-theorem pathWindingNumber_eq_of_lift {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, {z : ℂ // z ≠ 0}))
-    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
-    (tildeω : C(Set.Icc a b, ℂ))
-    (hlift : ∀ t, Complex.exp (tildeω t) = (ω t : ℂ)) :
-    (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) / (2 * Real.pi * Complex.I) =
-      pathWindingNumber hab ω hloop := by
-  let a0 : Set.Icc a b := ⟨a, ⟨le_rfl, hab.le⟩⟩
-  let b0 : Set.Icc a b := ⟨b, ⟨hab.le, le_rfl⟩⟩
-  let z0 : ℂ := Complex.log (ω a0)
-  have hz0 : Complex.exp z0 = (ω a0 : ℂ) := by
-    simpa [z0] using Complex.exp_log (ω a0).property
-  let liftω : C(Set.Icc a b, ℂ) := expLift hab ω z0 hz0
-  have hliftω : ∀ t, Complex.exp (liftω t) = (ω t : ℂ) := fun t =>
-    expLift_apply hab ω z0 hz0 t
-  have haeq : Complex.exp (tildeω a0) = Complex.exp (liftω a0) := by
-    rw [hlift a0, hliftω a0]
-  obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 haeq
-  let shifted : C(Set.Icc a b, ℂ) :=
-    ⟨fun t => tildeω t - n * (2 * Real.pi * Complex.I), tildeω.continuous.sub continuous_const⟩
-  have hshifted_lift : ∀ t, Complex.exp (shifted t) = (ω t : ℂ) := by
+theorem windingNumber_eq_of_lift {z : {z : ℂ // z ≠ 0}} (γ : Path z z)
+    (Γ : C(I, ℂ)) (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
+    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = γ.windingNumber := by
+  let w0 : ℂ := Complex.log z
+  have hw0 : Complex.exp w0 = (z : ℂ) := by
+    simpa [w0] using Complex.exp_log z.property
+  let liftγ : C(I, ℂ) := γ.expLift w0 hw0
+  have hliftγ : ∀ t, Complex.exp (liftγ t) = (γ t : ℂ) := fun t =>
+    expLift_apply γ w0 hw0 t
+  have h0eq : Complex.exp (Γ 0) = Complex.exp (liftγ 0) := by
+    rw [hlift 0, hliftγ 0]
+  obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 h0eq
+  let shifted : C(I, ℂ) :=
+    ⟨fun t => Γ t - n * (2 * Real.pi * Complex.I), Γ.continuous.sub continuous_const⟩
+  have hshifted_lift : ∀ t, Complex.exp (shifted t) = (γ t : ℂ) := by
     intro t
     calc
-      Complex.exp (shifted t) = Complex.exp (tildeω t) := by
+      Complex.exp (shifted t) = Complex.exp (Γ t) := by
         exact exp_sub_int_mul_two_pi_I_eq _ _
-      _ = (ω t : ℂ) := hlift t
-  have hshifted0 : shifted a0 = z0 := by
+      _ = (γ t : ℂ) := hlift t
+  have hshifted0 : shifted 0 = w0 := by
     calc
-      shifted a0 = tildeω a0 - n * (2 * Real.pi * Complex.I) := by rfl
-      _ = liftω a0 := by rw [hn]; ring
-      _ = z0 := by
-        change expLift hab ω z0 hz0 ⟨a, ⟨le_rfl, hab.le⟩⟩ = z0
-        exact expLift_source hab ω z0 hz0
-  have huniq : shifted = liftω := by
-    simpa [liftω] using eq_expLift hab ω z0 hz0 shifted hshifted_lift hshifted0
-  have hshift_eq : ∀ t, tildeω t = liftω t + n * (2 * Real.pi * Complex.I) := by
+      shifted 0 = Γ 0 - n * (2 * Real.pi * Complex.I) := by rfl
+      _ = liftγ 0 := by rw [hn]; ring
+      _ = w0 := expLift_zero γ w0 hw0
+  have huniq : shifted = liftγ := by
+    simpa [liftγ] using eq_expLift γ w0 hw0 shifted hshifted_lift hshifted0
+  have hshift_eq : ∀ t, Γ t = liftγ t + n * (2 * Real.pi * Complex.I) := by
     intro t
-    have ht : shifted t = liftω t := by
+    have ht : shifted t = liftγ t := by
       simpa using congrFun (congrArg DFunLike.coe huniq) t
     calc
-      tildeω t = (tildeω t - n * (2 * Real.pi * Complex.I)) + n * (2 * Real.pi * Complex.I) := by
+      Γ t = (Γ t - n * (2 * Real.pi * Complex.I)) + n * (2 * Real.pi * Complex.I) := by
         ring
       _ = shifted t + n * (2 * Real.pi * Complex.I) := by rfl
-      _ = liftω t + n * (2 * Real.pi * Complex.I) := by rw [ht]
+      _ = liftγ t + n * (2 * Real.pi * Complex.I) := by rw [ht]
   have hbase_eq :
-      liftω b0 = liftω a0 + pathWindingNumber hab ω hloop * (2 * Real.pi * Complex.I) := by
-    unfold pathWindingNumber
-    dsimp [liftω]
-    exact Classical.choose_spec ((Complex.exp_eq_exp_iff_exists_int).1 <|
-      by
-        calc
-          Complex.exp ((expLift hab ω z0 hz0) b0) = (ω b0 : ℂ) := expLift_apply hab ω z0 hz0 b0
-          _ = (ω a0 : ℂ) := by
-            simpa [a0, b0] using congrArg Subtype.val hloop.symm
-          _ = Complex.exp ((expLift hab ω z0 hz0) a0) := by
-            exact (expLift_apply hab ω z0 hz0 a0).symm)
+      liftγ 1 = liftγ 0 + γ.windingNumber * (2 * Real.pi * Complex.I) := by
+    unfold windingNumber
+    dsimp [liftγ]
+    exact Classical.choose_spec ((Complex.exp_eq_exp_iff_exists_int).1 <| by
+      calc
+        Complex.exp ((γ.expLift w0 hw0) 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
+        _ = (z : ℂ) := by
+          simpa using congrArg Subtype.val γ.target
+        _ = (γ 0 : ℂ) := by
+          simpa using (congrArg Subtype.val γ.source).symm
+        _ = Complex.exp ((γ.expLift w0 hw0) 0) := by
+          symm
+          exact expLift_apply γ w0 hw0 0)
   have hbase :
-      (liftω b0 - liftω a0) / (2 * Real.pi * Complex.I) = pathWindingNumber hab ω hloop := by
+      (liftγ 1 - liftγ 0) / (2 * Real.pi * Complex.I) = γ.windingNumber := by
     rw [hbase_eq]
     ring_nf
     field_simp [Complex.two_pi_I_ne_zero]
   calc
-    (tildeω b0 - tildeω a0) / (2 * Real.pi * Complex.I)
-        = ((liftω b0 + n * (2 * Real.pi * Complex.I)) -
-            (liftω a0 + n * (2 * Real.pi * Complex.I))) / (2 * Real.pi * Complex.I) := by
-            rw [hshift_eq b0, hshift_eq a0]
-    _ = (liftω b0 - liftω a0) / (2 * Real.pi * Complex.I) := by ring
-    _ = pathWindingNumber hab ω hloop := hbase
+    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I)
+        = ((liftγ 1 + n * (2 * Real.pi * Complex.I)) -
+            (liftγ 0 + n * (2 * Real.pi * Complex.I))) / (2 * Real.pi * Complex.I) := by
+            rw [hshift_eq 1, hshift_eq 0]
+    _ = (liftγ 1 - liftγ 0) / (2 * Real.pi * Complex.I) := by ring
+    _ = γ.windingNumber := hbase
 
-theorem pathWindingNumber_eq_of_homotopy {a b : ℝ} (hab : a < b)
-    (ω ω' : C(Set.Icc a b, {z : ℂ // z ≠ 0}))
-    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
-    (hloop' : ω' ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω' ⟨b, ⟨hab.le, le_rfl⟩⟩)
-    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, {z : ℂ // z ≠ 0}))
-    (hhom : IsLoopHomotopy hab.le H)
-    (hzero : ∀ t, H (t, 0) = ω t)
-    (hone : ∀ t, H (t, 1) = ω' t) :
-    pathWindingNumber hab ω hloop = pathWindingNumber hab ω' hloop' := by
-  let a0 : Set.Icc a b := ⟨a, ⟨le_rfl, hab.le⟩⟩
-  let b0 : Set.Icc a b := ⟨b, ⟨hab.le, le_rfl⟩⟩
-  let z0 : ℂ := Complex.log (ω a0)
-  have hz0 : Complex.exp z0 = (ω a0 : ℂ) := by
-    simpa [z0] using Complex.exp_log (ω a0).property
-  let tildeω : C(Set.Icc a b, ℂ) := expLift hab ω z0 hz0
-  have htildeω : ∀ t, Complex.exp (tildeω t) = (ω t : ℂ) := fun t =>
-    expLift_apply hab ω z0 hz0 t
-  let Hswap : C(Set.Icc (0 : ℝ) 1 × Set.Icc a b, {z : ℂ // z ≠ 0}) :=
-    ⟨fun x => H (x.2, x.1), H.continuous.comp (continuous_snd.prodMk continuous_fst)⟩
-  have hHswap0 : ∀ t, Hswap (0, t) = ⟨Complex.exp (tildeω t), (Complex.exp_ne_zero _ )⟩ := by
+theorem windingNumber_eq_of_homotopy {z z' : {z : ℂ // z ≠ 0}}
+    (γ : Path z z) (γ' : Path z' z') (H : C(I × I, {z : ℂ // z ≠ 0}))
+    (hhom : H.IsLoopHomotopy) (hzero : ∀ t, H (0, t) = γ t)
+    (hone : ∀ t, H (1, t) = γ' t) :
+    γ.windingNumber = γ'.windingNumber := by
+  let w0 : ℂ := Complex.log z
+  have hw0 : Complex.exp w0 = (z : ℂ) := by
+    simpa [w0] using Complex.exp_log z.property
+  let tildeγ : C(I, ℂ) := γ.expLift w0 hw0
+  have htildeγ : ∀ t, Complex.exp (tildeγ t) = (γ t : ℂ) := fun t =>
+    expLift_apply γ w0 hw0 t
+  have hH0 : ∀ t, H (0, t) = ⟨Complex.exp (tildeγ t), Complex.exp_ne_zero _⟩ := by
     intro t
     apply Subtype.ext
     calc
-      (Hswap (0, t) : ℂ) = (H (t, 0) : ℂ) := rfl
-      _ = (ω t : ℂ) := by simpa using congrArg Subtype.val (hzero t)
-      _ = Complex.exp (tildeω t) := by symm; exact htildeω t
-  let tildeH : C(Set.Icc (0 : ℝ) 1 × Set.Icc a b, ℂ) :=
-    Complex.isCoveringMap_exp.liftHomotopy Hswap tildeω hHswap0
-  have htildeH_lifts : ∀ x, Complex.exp (tildeH x) = (Hswap x : ℂ) := by
+      (H (0, t) : ℂ) = (γ t : ℂ) := by
+        simpa using congrArg Subtype.val (hzero t)
+      _ = Complex.exp (tildeγ t) := by
+        symm
+        exact htildeγ t
+  let tildeH : C(I × I, ℂ) := Complex.isCoveringMap_exp.liftHomotopy H tildeγ hH0
+  have htildeH_lifts : ∀ x, Complex.exp (tildeH x) = (H x : ℂ) := by
     intro x
-    exact congrArg Subtype.val (congrFun
-      (Complex.isCoveringMap_exp.liftHomotopy_lifts Hswap tildeω hHswap0) x)
-  have htildeH_zero : ∀ t, tildeH (0, t) = tildeω t := by
+    exact congrArg Subtype.val <| congrFun
+      (Complex.isCoveringMap_exp.liftHomotopy_lifts H tildeγ hH0) x
+  have htildeH_zero : ∀ t, tildeH (0, t) = tildeγ t := by
     intro t
-    simpa using Complex.isCoveringMap_exp.liftHomotopy_zero (H := Hswap) (f := tildeω)
-      (H_0 := hHswap0) t
-  let μ : C(Set.Icc (0 : ℝ) 1, {z : ℂ // z ≠ 0}) :=
-    ⟨fun s => H (a0, s), H.continuous.comp (continuous_const.prodMk continuous_id)⟩
-  let μa : C(Set.Icc (0 : ℝ) 1, ℂ) :=
-    ⟨fun s => tildeH (s, a0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  let μb : C(Set.Icc (0 : ℝ) 1, ℂ) :=
-    ⟨fun s => tildeH (s, b0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  have hμa : (∀ s, Complex.exp (μa s) = (μ s : ℂ)) ∧ μa 0 = tildeω a0 := by
+    simpa using Complex.isCoveringMap_exp.liftHomotopy_zero (H := H) (f := tildeγ)
+      (H_0 := hH0) t
+  let μ : Path z z' := {
+    toFun := fun s => H (s, 0)
+    continuous_toFun := H.continuous.comp (continuous_id.prodMk continuous_const)
+    source' := by simpa using hzero 0
+    target' := by simpa using hone 0 }
+  let μ0 : C(I, ℂ) :=
+    ⟨fun s => tildeH (s, 0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
+  let μ1 : C(I, ℂ) :=
+    ⟨fun s => tildeH (s, 1), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
+  have hμ0 : (∀ s, Complex.exp (μ0 s) = (μ s : ℂ)) ∧ μ0 0 = tildeγ 0 := by
     constructor
     · intro s
-      simpa [μa, μ, Hswap] using htildeH_lifts (s, a0)
-    · simpa [μa] using htildeH_zero a0
-  have hμb : (∀ s, Complex.exp (μb s) = (μ s : ℂ)) ∧ μb 0 = tildeω b0 := by
+      simpa [μ, μ0] using htildeH_lifts (s, 0)
+    · simpa [μ0] using htildeH_zero 0
+  have hμ1 : (∀ s, Complex.exp (μ1 s) = (μ s : ℂ)) ∧ μ1 0 = tildeγ 1 := by
     constructor
     · intro s
       calc
-        Complex.exp (μb s) = (H (b0, s) : ℂ) := by
-          simpa [μb, Hswap] using htildeH_lifts (s, b0)
-        _ = (H (a0, s) : ℂ) := by
-          simpa [a0, b0] using congrArg Subtype.val (hhom s).symm
+        Complex.exp (μ1 s) = (H (s, 1) : ℂ) := by
+          simpa [μ1] using htildeH_lifts (s, 1)
+        _ = (H (s, 0) : ℂ) := by
+          simpa using congrArg Subtype.val (hhom s).symm
         _ = (μ s : ℂ) := by rfl
-    · simpa [μb] using htildeH_zero b0
-  have hstart : Complex.exp (tildeω b0) = Complex.exp (tildeω a0) := by
+    · simpa [μ1] using htildeH_zero 1
+  have hstart : Complex.exp (tildeγ 1) = Complex.exp (tildeγ 0) := by
     calc
-      Complex.exp (tildeω b0) = (ω b0 : ℂ) := htildeω b0
-      _ = (ω a0 : ℂ) := by
-        simpa [a0, b0] using congrArg Subtype.val hloop.symm
-      _ = Complex.exp (tildeω a0) := by symm; exact htildeω a0
+      Complex.exp (tildeγ 1) = (γ 1 : ℂ) := htildeγ 1
+      _ = (z : ℂ) := by
+        simpa using congrArg Subtype.val γ.target
+      _ = (γ 0 : ℂ) := by
+        simpa using (congrArg Subtype.val γ.source).symm
+      _ = Complex.exp (tildeγ 0) := by
+        symm
+        exact htildeγ 0
   obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 hstart
-  let shiftedμa : C(Set.Icc (0 : ℝ) 1, ℂ) :=
-    ⟨fun s => μa s + n * (2 * Real.pi * Complex.I), μa.continuous.add continuous_const⟩
-  have hshiftedμa : (∀ s, Complex.exp (shiftedμa s) = (μ s : ℂ)) ∧ shiftedμa 0 = μb 0 := by
+  let shiftedμ0 : C(I, ℂ) :=
+    ⟨fun s => μ0 s + n * (2 * Real.pi * Complex.I), μ0.continuous.add continuous_const⟩
+  have hshiftedμ0 : (∀ s, Complex.exp (shiftedμ0 s) = (μ s : ℂ)) ∧ shiftedμ0 0 = μ1 0 := by
     constructor
     · intro s
       calc
-        Complex.exp (shiftedμa s) = Complex.exp (μa s) := by
+        Complex.exp (shiftedμ0 s) = Complex.exp (μ0 s) := by
           apply (Complex.exp_eq_exp_iff_exists_int).2
-          refine ⟨n, by simp [shiftedμa]⟩
-        _ = (μ s : ℂ) := hμa.1 s
+          refine ⟨n, by simp [shiftedμ0]⟩
+        _ = (μ s : ℂ) := hμ0.1 s
     · calc
-        shiftedμa 0 = μa 0 + n * (2 * Real.pi * Complex.I) := by rfl
-        _ = tildeω a0 + n * (2 * Real.pi * Complex.I) := by rw [hμa.2]
-        _ = tildeω b0 := by rw [hn]
-        _ = μb 0 := by rw [hμb.2]
-  have hshifted_eq :
-      shiftedμa = expLift (show (0 : ℝ) < 1 by norm_num) μ (μb 0) (hμb.1 0) :=
-    eq_expLift (show (0 : ℝ) < 1 by norm_num) μ (μb 0) (hμb.1 0) shiftedμa hshiftedμa.1
-      hshiftedμa.2
-  have hμb_eq :
-      μb = expLift (show (0 : ℝ) < 1 by norm_num) μ (μb 0) (hμb.1 0) :=
-    eq_expLift (show (0 : ℝ) < 1 by norm_num) μ (μb 0) (hμb.1 0) μb hμb.1 rfl
-  have huniq : shiftedμa = μb := by
+        shiftedμ0 0 = μ0 0 + n * (2 * Real.pi * Complex.I) := by rfl
+        _ = tildeγ 0 + n * (2 * Real.pi * Complex.I) := by rw [hμ0.2]
+        _ = tildeγ 1 := by rw [hn]
+        _ = μ1 0 := by rw [hμ1.2]
+  have hμ10 : Complex.exp (μ1 0) = (z : ℂ) := by
     calc
-      shiftedμa = expLift (show (0 : ℝ) < 1 by norm_num) μ (μb 0) (hμb.1 0) := hshifted_eq
-      _ = μb := hμb_eq.symm
-  have hshift_eq : ∀ s, μb s = μa s + n * (2 * Real.pi * Complex.I) := by
+      Complex.exp (μ1 0) = (μ 0 : ℂ) := hμ1.1 0
+      _ = (z : ℂ) := by
+        simpa using congrArg Subtype.val μ.source
+  have hshifted_eq :
+      shiftedμ0 = μ.expLift (μ1 0) hμ10 :=
+    eq_expLift μ (μ1 0) hμ10 shiftedμ0 hshiftedμ0.1 hshiftedμ0.2
+  have hμ1_eq :
+      μ1 = μ.expLift (μ1 0) hμ10 :=
+    eq_expLift μ (μ1 0) hμ10 μ1 hμ1.1 rfl
+  have huniq : shiftedμ0 = μ1 := by
+    calc
+      shiftedμ0 = μ.expLift (μ1 0) hμ10 := hshifted_eq
+      _ = μ1 := hμ1_eq.symm
+  have hshift_eq : ∀ s, μ1 s = μ0 s + n * (2 * Real.pi * Complex.I) := by
     intro s
     have hfun := congrArg DFunLike.coe huniq
-    simpa [shiftedμa] using (congrFun hfun s).symm
-  let tildeω' : C(Set.Icc a b, ℂ) :=
+    simpa [shiftedμ0] using (congrFun hfun s).symm
+  let tildeγ' : C(I, ℂ) :=
     ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
-  have htildeω' : ∀ t, Complex.exp (tildeω' t) = (ω' t : ℂ) := by
+  have htildeγ' : ∀ t, Complex.exp (tildeγ' t) = (γ' t : ℂ) := by
     intro t
     calc
-      Complex.exp (tildeω' t) = (H (t, 1) : ℂ) := by
-        simpa [tildeω', Hswap] using htildeH_lifts (1, t)
-      _ = (ω' t : ℂ) := by
+      Complex.exp (tildeγ' t) = (H (1, t) : ℂ) := by
+        simpa [tildeγ'] using htildeH_lifts (1, t)
+      _ = (γ' t : ℂ) := by
         simpa using congrArg Subtype.val (hone t)
   have hwind :
-      (tildeω' b0 - tildeω' a0) / (2 * Real.pi * Complex.I) =
-        (tildeω b0 - tildeω a0) / (2 * Real.pi * Complex.I) := by
-    have hdiff : tildeω' b0 - tildeω' a0 = tildeω b0 - tildeω a0 := by
+      (tildeγ' 1 - tildeγ' 0) / (2 * Real.pi * Complex.I) =
+        (tildeγ 1 - tildeγ 0) / (2 * Real.pi * Complex.I) := by
+    have hdiff : tildeγ' 1 - tildeγ' 0 = tildeγ 1 - tildeγ 0 := by
       calc
-        tildeω' b0 - tildeω' a0 = μb 1 - μa 1 := by rfl
-        _ = μb 0 - μa 0 := by
+        tildeγ' 1 - tildeγ' 0 = μ1 1 - μ0 1 := by rfl
+        _ = μ1 0 - μ0 0 := by
           rw [hshift_eq 1, hshift_eq 0]
           ring
-        _ = tildeω b0 - tildeω a0 := by
-          rw [hμb.2, hμa.2]
+        _ = tildeγ 1 - tildeγ 0 := by
+          rw [hμ1.2, hμ0.2]
     rw [hdiff]
   have hcast :
-      ((pathWindingNumber hab ω hloop : ℤ) : ℂ) =
-        ((pathWindingNumber hab ω' hloop' : ℤ) : ℂ) := by
+      ((γ.windingNumber : ℤ) : ℂ) = ((γ'.windingNumber : ℤ) : ℂ) := by
     calc
-      ((pathWindingNumber hab ω hloop : ℤ) : ℂ)
-          = (tildeω b0 - tildeω a0) / (2 * Real.pi * Complex.I) := by
+      ((γ.windingNumber : ℤ) : ℂ)
+          = (tildeγ 1 - tildeγ 0) / (2 * Real.pi * Complex.I) := by
               symm
-              exact pathWindingNumber_eq_of_lift hab ω hloop tildeω htildeω
-      _ = (tildeω' b0 - tildeω' a0) / (2 * Real.pi * Complex.I) := by
+              exact windingNumber_eq_of_lift γ tildeγ htildeγ
+      _ = (tildeγ' 1 - tildeγ' 0) / (2 * Real.pi * Complex.I) := by
             symm
             exact hwind
-      _ = ((pathWindingNumber hab ω' hloop' : ℤ) : ℂ) := by
-            exact pathWindingNumber_eq_of_lift hab ω' hloop' tildeω' htildeω'
+      _ = ((γ'.windingNumber : ℤ) : ℂ) := by
+            exact windingNumber_eq_of_lift γ' tildeγ' htildeγ'
   exact_mod_cast hcast
 
-@[simp] theorem pathWindingNumber_const {a b : ℝ} (hab : a < b)
-    (c : {z : ℂ // z ≠ 0}) :
-    pathWindingNumber hab (ContinuousMap.const _ c) rfl = 0 := by
-  let tildeω : C(Set.Icc a b, ℂ) := ContinuousMap.const _ (Complex.log c)
-  have hlift : ∀ t, Complex.exp (tildeω t) = ((ContinuousMap.const _ c : C(Set.Icc a b, {z : ℂ // z ≠ 0})) t : ℂ) := by
+@[simp] theorem windingNumber_refl (z : {z : ℂ // z ≠ 0}) :
+    (Path.refl z).windingNumber = 0 := by
+  let Γ : C(I, ℂ) := ContinuousMap.const _ (Complex.log z)
+  have hlift : ∀ t, Complex.exp (Γ t) = ((Path.refl z) t : ℂ) := by
     intro t
-    simpa [tildeω] using Complex.exp_log c.property
-  have hq :
-      (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) /
-          (2 * Real.pi * Complex.I) =
-        pathWindingNumber hab (ContinuousMap.const _ c) rfl :=
-    pathWindingNumber_eq_of_lift hab (ContinuousMap.const _ c) rfl tildeω hlift
-  simpa [tildeω] using hq.symm
+    simpa [Γ] using Complex.exp_log z.property
+  have hq : (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = (Path.refl z).windingNumber :=
+    windingNumber_eq_of_lift (Path.refl z) Γ hlift
+  simpa [Γ] using hq.symm
 
-/-- The winding number of a loop in `ℂˣ`, transported from `pathWindingNumber`. -/
-noncomputable def unitsPathWindingNumber {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, ℂˣ))
-    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩) : ℤ :=
-  pathWindingNumber hab ω.toNonzeroSubtype <| by
-    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop
+/-- The winding number of a loop in `ℂˣ`. -/
+noncomputable def unitsWindingNumber {u : ℂˣ} (γ : Path u u) : ℤ :=
+  γ.toNonzeroSubtype.windingNumber
 
-theorem unitsPathWindingNumber_eq_of_lift {a b : ℝ} (hab : a < b)
-    (ω : C(Set.Icc a b, ℂˣ))
-    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
-    (tildeω : C(Set.Icc a b, ℂ))
-    (hlift : ∀ t, Complex.exp (tildeω t) = (ω t : ℂ)) :
-    (tildeω ⟨b, ⟨hab.le, le_rfl⟩⟩ - tildeω ⟨a, ⟨le_rfl, hab.le⟩⟩) / (2 * Real.pi * Complex.I) =
-      unitsPathWindingNumber hab ω hloop := by
-  have hloop' :
-      ω.toNonzeroSubtype ⟨a, ⟨le_rfl, hab.le⟩⟩ =
-        ω.toNonzeroSubtype ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
-    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop
-  simpa [unitsPathWindingNumber, hloop'] using
-    pathWindingNumber_eq_of_lift hab ω.toNonzeroSubtype hloop' tildeω (by
+theorem unitsWindingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
+    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
+    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = γ.unitsWindingNumber := by
+  simpa [unitsWindingNumber] using
+    windingNumber_eq_of_lift γ.toNonzeroSubtype Γ (by
       intro t
-      simpa [toNonzeroSubtype] using hlift t)
+      simpa using hlift t)
 
-theorem unitsPathWindingNumber_eq_of_homotopy {a b : ℝ} (hab : a < b)
-    (ω ω' : C(Set.Icc a b, ℂˣ))
-    (hloop : ω ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω ⟨b, ⟨hab.le, le_rfl⟩⟩)
-    (hloop' : ω' ⟨a, ⟨le_rfl, hab.le⟩⟩ = ω' ⟨b, ⟨hab.le, le_rfl⟩⟩)
-    (H : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, ℂˣ))
-    (hhom : IsLoopHomotopy hab.le H)
-    (hzero : ∀ t, H (t, 0) = ω t)
-    (hone : ∀ t, H (t, 1) = ω' t) :
-    unitsPathWindingNumber hab ω hloop = unitsPathWindingNumber hab ω' hloop' := by
-  let H' : C(Set.Icc a b × Set.Icc (0 : ℝ) 1, {z : ℂ // z ≠ 0}) := H.toNonzeroSubtype
-  have hloop0 :
-      ω.toNonzeroSubtype ⟨a, ⟨le_rfl, hab.le⟩⟩ =
-        ω.toNonzeroSubtype ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
-    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop
-  have hloop1 :
-      ω'.toNonzeroSubtype ⟨a, ⟨le_rfl, hab.le⟩⟩ =
-        ω'.toNonzeroSubtype ⟨b, ⟨hab.le, le_rfl⟩⟩ := by
-    simpa [toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero hloop'
-  have hhom' : IsLoopHomotopy hab.le H' := by
+theorem unitsWindingNumber_eq_of_homotopy {u u' : ℂˣ}
+    (γ : Path u u) (γ' : Path u' u') (H : C(I × I, ℂˣ))
+    (hhom : H.IsLoopHomotopy) (hzero : ∀ t, H (0, t) = γ t)
+    (hone : ∀ t, H (1, t) = γ' t) :
+    γ.unitsWindingNumber = γ'.unitsWindingNumber := by
+  let H' : C(I × I, {z : ℂ // z ≠ 0}) := H.toNonzeroSubtype
+  have hhom' : H'.IsLoopHomotopy := by
     intro s
-    simpa [H', toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero (hhom s)
-  have hzero' : ∀ t, H' (t, 0) = ω.toNonzeroSubtype t := by
+    apply Subtype.ext
+    simpa [H', ContinuousMap.toNonzeroSubtype] using
+      congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s)
+  have hzero' : ∀ t, H' (0, t) = γ.toNonzeroSubtype t := by
     intro t
-    simpa [H', toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero (hzero t)
-  have hone' : ∀ t, H' (t, 1) = ω'.toNonzeroSubtype t := by
+    apply Subtype.ext
+    simpa [H', ContinuousMap.toNonzeroSubtype, Path.toNonzeroSubtype] using
+      congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
+  have hone' : ∀ t, H' (1, t) = γ'.toNonzeroSubtype t := by
     intro t
-    simpa [H', toNonzeroSubtype] using congrArg complexUnitsHomeomorphNeZero (hone t)
-  simpa [unitsPathWindingNumber, hloop0, hloop1] using
-    pathWindingNumber_eq_of_homotopy hab
-      ω.toNonzeroSubtype
-      ω'.toNonzeroSubtype
-      hloop0
-      hloop1
-      H' hhom' hzero' hone'
+    apply Subtype.ext
+    simpa [H', ContinuousMap.toNonzeroSubtype, Path.toNonzeroSubtype] using
+      congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
+  simpa [unitsWindingNumber] using
+    windingNumber_eq_of_homotopy γ.toNonzeroSubtype γ'.toNonzeroSubtype H' hhom' hzero' hone'
 
-@[simp] theorem unitsPathWindingNumber_const {a b : ℝ} (hab : a < b)
-    (c : ℂˣ) :
-    unitsPathWindingNumber hab (ContinuousMap.const _ c) rfl = 0 := by
-  let c0 : {z : ℂ // z ≠ 0} := complexUnitsHomeomorphNeZero c
-  change pathWindingNumber hab (ContinuousMap.const _ c0) rfl = 0
-  exact pathWindingNumber_const hab c0
+@[simp] theorem unitsWindingNumber_refl (u : ℂˣ) :
+    (Path.refl u).unitsWindingNumber = 0 := by
+  have h :
+      (Path.refl u).toNonzeroSubtype =
+        Path.refl (⟨(u : ℂ), u.ne_zero⟩ : {z : ℂ // z ≠ 0}) := by
+    ext t
+    rfl
+  rw [unitsWindingNumber, h]
+  exact windingNumber_refl (⟨(u : ℂ), u.ne_zero⟩ : {z : ℂ // z ≠ 0})
 
-end ContinuousMap
+end Path

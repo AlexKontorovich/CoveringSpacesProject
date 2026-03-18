@@ -20,54 +20,51 @@ end Circle
 
 namespace ContinuousMap
 
-/-- Precompose a circle map with the standard parametrization `Circle.exp`. -/
-def circlePath {X : Type*} [TopologicalSpace X]
-    (f : C(Circle, X)) : C(Set.Icc (0 : ℝ) (2 * Real.pi), X) :=
-  ⟨fun t => f (Circle.exp t), f.continuous.comp (Circle.exp.continuous.comp continuous_subtype_val)⟩
+/-- Precompose a circle map with the standard loop `t ↦ Circle.exp (2πt)` on `I`. -/
+def circleLoop {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) (f 1) where
+  toFun t := f (Circle.exp (2 * Real.pi * (t : ℝ)))
+  continuous_toFun := f.continuous.comp <| Circle.exp.continuous.comp <| by fun_prop
+  source' := by simp
+  target' := by simp [Circle.exp_two_pi]
 
-@[simp] theorem circlePath_apply {X : Type*} [TopologicalSpace X] (f : C(Circle, X))
-    (t : Set.Icc (0 : ℝ) (2 * Real.pi)) : f.circlePath t = f (Circle.exp t) := rfl
-
-theorem circlePath_source_eq_target {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) :
-    f.circlePath ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩ =
-      f.circlePath ⟨2 * Real.pi, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ := by
-  simp [circlePath, Circle.exp_two_pi]
+@[simp] theorem circleLoop_apply {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) (t : I) :
+    f.circleLoop t = f (Circle.exp (2 * Real.pi * (t : ℝ))) := rfl
 
 /-- The winding number of a continuous map from the circle to `ℂˣ`. -/
 noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
-  unitsPathWindingNumber Real.two_pi_pos f.circlePath f.circlePath_source_eq_target
+  f.circleLoop.unitsWindingNumber
 
 @[simp] theorem windingNumber_const (c : ℂˣ) :
     windingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
-  change unitsPathWindingNumber Real.two_pi_pos (ContinuousMap.const _ c) rfl = 0
-  exact unitsPathWindingNumber_const Real.two_pi_pos c
+  change (ContinuousMap.const _ c : C(Circle, ℂˣ)).circleLoop.unitsWindingNumber = 0
+  have hloop : (ContinuousMap.const _ c : C(Circle, ℂˣ)).circleLoop = Path.refl c := by
+    ext t
+    rfl
+  rw [hloop]
+  exact Path.unitsWindingNumber_refl c
 
 theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap.Homotopy f g) :
     windingNumber f = windingNumber g := by
-  let Hbase : C(Set.Icc (0 : ℝ) (2 * Real.pi) × Set.Icc (0 : ℝ) 1, ℂˣ) :=
-    ⟨fun x => H (x.2, Circle.exp x.1),
+  let Hbase : C(I × I, ℂˣ) :=
+    ⟨fun x => H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))),
       H.continuous.comp
-        (continuous_snd.prodMk
-          (Circle.exp.continuous.comp (continuous_subtype_val.comp continuous_fst)))⟩
-  have hhom : IsLoopHomotopy Real.two_pi_pos.le Hbase := by
+        (continuous_fst.prodMk
+          (Circle.exp.continuous.comp <| by fun_prop))⟩
+  have hhom : Hbase.IsLoopHomotopy := by
     intro s
-    change H (s, Circle.exp 0) = H (s, Circle.exp (2 * Real.pi))
-    rw [Circle.exp_zero, Circle.exp_two_pi]
-  have hzero : ∀ t, Hbase (t, 0) = f.circlePath t := by
+    change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
+      H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
+    simp [Circle.exp_two_pi]
+  have hzero : ∀ t, Hbase (0, t) = f.circleLoop t := by
     intro t
-    change H (0, Circle.exp t) = f (Circle.exp t)
-    exact H.map_zero_left (Circle.exp t)
-  have hone : ∀ t, Hbase (t, 1) = g.circlePath t := by
+    change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
+    exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
+  have hone : ∀ t, Hbase (1, t) = g.circleLoop t := by
     intro t
-    change H (1, Circle.exp t) = g (Circle.exp t)
-    exact H.map_one_left (Circle.exp t)
+    change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
+    exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))
   simpa [windingNumber] using
-    unitsPathWindingNumber_eq_of_homotopy Real.two_pi_pos
-      f.circlePath
-      g.circlePath
-      f.circlePath_source_eq_target
-      g.circlePath_source_eq_target
-      Hbase hhom hzero hone
+    Path.unitsWindingNumber_eq_of_homotopy f.circleLoop g.circleLoop Hbase hhom hzero hone
 
 theorem exists_homotopy_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
     (hclose : ∀ z : Circle, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
@@ -212,46 +209,51 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
   let a0 : ℂ := Complex.log c0
   have ha0 : Complex.exp a0 = (c0 : ℂ) := by
     simpa [a0] using Complex.exp_log c0.property
-  let tildeω : C(Set.Icc (0 : ℝ) (2 * Real.pi), ℂ) := by
-    refine ⟨fun t => a0 + (n : ℂ) * (t : ℂ) * Complex.I, ?_⟩
+  let tildeω : C(I, ℂ) := by
+    refine ⟨fun t => a0 + (n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I, ?_⟩
     fun_prop
   have hlift :
       ∀ t,
-        Complex.exp (tildeω t) = (((circleMonomial a n R hR).circlePath t : ℂˣ) : ℂ) := by
+        Complex.exp (tildeω t) = (((circleMonomial a n R hR).circleLoop t : ℂˣ) : ℂ) := by
     intro t
     calc
       Complex.exp (tildeω t)
-          = Complex.exp a0 * Complex.exp ((n : ℂ) * (t : ℂ) * Complex.I) := by
+          = Complex.exp a0 *
+              Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
               simp [tildeω, Complex.exp_add]
-      _ = ((a : ℂ) * (R : ℂ) ^ n) * Complex.exp ((n : ℂ) * (t : ℂ) * Complex.I) := by
-            simpa [c0] using congrArg (fun z : ℂ => z * Complex.exp ((n : ℂ) * (t : ℂ) * Complex.I))
-              ha0
-      _ = ((a : ℂ) * (R : ℂ) ^ n) * Complex.exp ((n : ℂ) * ((t : ℂ) * Complex.I)) := by
+      _ = ((a : ℂ) * (R : ℂ) ^ n) *
+            Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
+            simpa [c0] using
+              congrArg
+                (fun z : ℂ => z * Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I))
+                ha0
+      _ = ((a : ℂ) * (R : ℂ) ^ n) *
+            Complex.exp ((n : ℂ) * (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) := by
             ring_nf
-      _ = ((a : ℂ) * (R : ℂ) ^ n) * (Complex.exp (t * Complex.I)) ^ n := by
+      _ = ((a : ℂ) * (R : ℂ) ^ n) *
+            (Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) ^ n := by
             rw [Complex.exp_nat_mul]
-      _ = ((a : ℂ) * (R : ℂ) ^ n) * (Circle.exp t : ℂ) ^ n := by
-            rw [Circle.coe_exp]
-      _ = (a : ℂ) * (((R : ℂ) * (Circle.exp t : ℂ)) ^ n) := by
+      _ = ((a : ℂ) * (R : ℂ) ^ n) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) ^ n := by
+            have hexp :
+                Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I) =
+                  (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) := by
+              simpa using (Circle.coe_exp (2 * Real.pi * (t : ℝ))).symm
+            rw [hexp]
+      _ = (a : ℂ) * (((R : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
             rw [mul_pow]
             ring
-      _ = ((circleMonomial a n R hR (Circle.exp t) : ℂˣ) : ℂ) := by
+      _ = ((circleMonomial a n R hR (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ) := by
             symm
-            exact coe_circleMonomial_apply a n R hR (Circle.exp t)
-      _ = (((circleMonomial a n R hR).circlePath t : ℂˣ) : ℂ) := by
+            exact coe_circleMonomial_apply a n R hR (Circle.exp (2 * Real.pi * (t : ℝ)))
+      _ = (((circleMonomial a n R hR).circleLoop t : ℂˣ) : ℂ) := by
             rfl
   have hwind : ((circleMonomial a n R hR).windingNumber : ℂ) = n := by
     calc
       ((circleMonomial a n R hR).windingNumber : ℂ)
-          =
-            (tildeω ⟨2 * Real.pi, ⟨Real.two_pi_pos.le, le_rfl⟩⟩ -
-                tildeω ⟨0, ⟨le_rfl, Real.two_pi_pos.le⟩⟩) / ((2 * Real.pi : ℂ) * Complex.I) := by
+          = (tildeω 1 - tildeω 0) / ((2 * Real.pi : ℂ) * Complex.I) := by
               symm
               simpa [ContinuousMap.windingNumber] using
-                ContinuousMap.unitsPathWindingNumber_eq_of_lift Real.two_pi_pos
-                  (circleMonomial a n R hR).circlePath
-                  (circleMonomial a n R hR).circlePath_source_eq_target
-                  tildeω hlift
+                Path.unitsWindingNumber_eq_of_lift (circleMonomial a n R hR).circleLoop tildeω hlift
       _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
             simp [tildeω]
       _ = (n : ℂ) := by
