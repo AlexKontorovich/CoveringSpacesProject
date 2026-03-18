@@ -7,11 +7,23 @@ open scoped unitInterval
 
 noncomputable section
 
+namespace Metric
+
+/-- The canonical inclusion of a sphere into the corresponding closed ball. -/
+def sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ) :
+    sphere x r → closedBall x r :=
+  Set.inclusion sphere_subset_closedBall
+
+@[simp] theorem coe_sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ)
+    (y : sphere x r) : ((sphereToClosedBall x r y : closedBall x r) : α) = y := rfl
+
+end Metric
+
 namespace Circle
 
 /-- The canonical inclusion of the circle into the closed unit disk. -/
-def toClosedUnitDisk (z : Circle) : Metric.closedBall (0 : ℂ) 1 :=
-  ⟨z, by simp [Metric.mem_closedBall, Circle.norm_coe z]⟩
+abbrev toClosedUnitDisk : Circle → Metric.closedBall (0 : ℂ) 1 :=
+  Metric.sphereToClosedBall (0 : ℂ) 1
 
 @[simp] theorem coe_toClosedUnitDisk (z : Circle) :
     ((toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ) = z := rfl
