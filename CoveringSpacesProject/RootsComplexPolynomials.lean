@@ -1921,7 +1921,6 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
       have hpi : (π : ℂ) ≠ 0 := by
         exact_mod_cast Real.pi_ne_zero
       field_simp [hpi, Complex.I_ne_zero]
-      ring_nf
     have := (continuousOn_congr setEqOn).1 htot
     exact ContinuousOn.coe this
   have nConst : ∃ k : ℤ, ∀ t ∈ Icc a b, n t = k := by
@@ -1973,7 +1972,6 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
     have hpi : (π : ℂ) ≠ 0 := by
       exact_mod_cast Real.pi_ne_zero
     field_simp [hpi, Complex.I_ne_zero]
-    ring_nf
   · rw [f2]
     unfold tildeb tildea
     rw [hℓ]
@@ -1981,7 +1979,6 @@ lemma diffinitpoint {a b : ℝ} (hab : a ≤ b) (ω : ℝ → ℂ)
     have hpi : (π : ℂ) ≠ 0 := by
       exact_mod_cast Real.pi_ne_zero
     field_simp [hpi, Complex.I_ne_zero]
-    ring_nf
 
 /-%%
 \begin{proof}\uses{deflift, loop, periodicity, DefWNlift, ContinuousOn.coe, isConnected_range_of_continuousOn, Singleton_of_isConnected_SetInt}\leanok
@@ -2051,7 +2048,6 @@ theorem constWNomega {a b : ℝ} (hab : a < b) (ω : C(Set.Icc a b, Cstar))
     have hpi : (π : ℂ) ≠ 0 := by
       exact_mod_cast Real.pi_ne_zero
     field_simp [hpi, Complex.I_ne_zero]
-    ring_nf
   have haeq : CSexp (tildeω' a0) = CSexp (tildeω a0) := by
     calc
       CSexp (tildeω' a0) = (ω a0 : ℂ) := by simpa [Function.comp] using congrFun hlift'.2 a0
@@ -3088,12 +3084,10 @@ theorem zkWNk (α0 : ℂ) (k : ℕ) (R : ℝ) (hR : 0 < R) (hα0 : α0 ≠ 0) :
                   tildeω hlift
       _ = ((k : ℂ) * (2 * π : ℂ) * I) / (2 * π * I) := by
             simp [tildeω]
-            ring
       _ = (k : ℂ) := by
             have hpi : (π : ℂ) ≠ 0 := by
               exact_mod_cast Real.pi_ne_zero
             field_simp [tildeω, hpi, Complex.I_ne_zero]
-            ring_nf
   exact_mod_cast hwind
 
 /-%%
