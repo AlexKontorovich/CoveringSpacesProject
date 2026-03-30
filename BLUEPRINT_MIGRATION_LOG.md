@@ -211,3 +211,68 @@ Verified with:
 ```sh
 lake build CoveringSpacesProject.RootsComplexPolynomialsNew
 ```
+
+## 2026-03-30
+
+### Mathlib-quality pass and dependency bump
+
+Goal: reevaluate `CoveringSpacesProject/RootsComplexPolynomialsNew.lean` from the point of view of
+upstream mathlib quality, record likely file placement, and bump the project to the latest
+available mathlib snapshot.
+
+Review conclusion:
+
+1. The reusable declarations in `RootsComplexPolynomialsNew.lean` are mostly at the right level of
+   generality already:
+   - `Metric.sphereToClosedBall`
+   - `ContinuousMap.IsLoopHomotopy`
+   - `ContinuousMap.circleLoop`
+   - `ContinuousMap.circleLoopHomotopy`
+   - `ContinuousMap.exists_homotopy_of_norm_sub_lt`
+   - `Path.expLift`
+   - `Path.windingNumber`
+
+2. The main mathlib-quality issue is not naming so much as file scope: the standalone blueprint
+   file mixes generic topology helpers, reusable complex covering-map lemmas, and project-specific
+   polynomial applications in one place.
+
+Changes made:
+
+3. Added an explicit upstreaming note to the header of
+   `CoveringSpacesProject/RootsComplexPolynomialsNew.lean` explaining the likely split:
+   - topology/path-support layer for `sphereToClosedBall` and `IsLoopHomotopy`,
+   - circle-specific helpers near the existing complex-circle API,
+   - winding-number lemmas next to `Mathlib/Analysis/Complex/CoveringMap.lean`,
+   - monomial/polynomial applications kept downstream.
+
+4. Bumped the project from Lean/mathlib `v4.28.0` to the latest available mathlib snapshot on
+   2026-03-30:
+   - Lean toolchain: `leanprover/lean4:v4.29.0-rc8`
+   - mathlib pin: commit `47aa862678fb83cdc5d377e5c04d198d5acae5c8`
+     (the `master-2026-03-30` snapshot)
+   - doc-gen4 pin: `v4.29.0-rc8`
+
+5. Reordered `require` lines in `lakefile.lean` so mathlib’s dependency versions take precedence
+   over the optional `doc-gen4` dependency. This was needed for the cache hook to succeed under
+   the upgraded package graph.
+
+6. Updated `lake-manifest.json` by rerunning `lake update` under the new toolchain.
+
+7. Built ProofWidgets’ JavaScript once locally after the bump, because the upgraded dependency
+   graph invalidated the packaged widget build and the sandboxed npm run could not write its cache
+   and log files.
+
+8. Applied a small compatibility patch to the legacy file
+   `CoveringSpacesProject/RootsComplexPolynomials.lean`:
+   - opened `Bundle` so unqualified `Trivialization` names still resolve under the newer mathlib;
+   - replaced deprecated `push_neg` with `push Not`.
+
+### Verification
+
+Verified with:
+
+```sh
+lake build CoveringSpacesProject.RootsComplexPolynomialsNew
+lake build CoveringSpacesProject.RootsComplexPolynomials
+lake build
+```

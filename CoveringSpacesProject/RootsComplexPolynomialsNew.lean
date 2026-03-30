@@ -8,6 +8,20 @@ single self-contained module. The exposition follows the style of
 `CoveringSpacesProject/RootsComplexPolynomials.lean`, while the formal development uses the newer
 Mathlib-facing abstractions based on `Path`, `I`, `ContinuousMap.Homotopy`, `Complex.exp`, and
 `ℂˣ`.
+
+## Upstreaming note
+
+From a mathlib-quality point of view, this standalone file is intentionally too broad. A likely
+upstream split would be:
+
+* `Metric.sphereToClosedBall` and `ContinuousMap.IsLoopHomotopy` in a topology/path-support layer;
+* `Circle.toClosedUnitDisk`, `ContinuousMap.circleLoop`, and `ContinuousMap.circleLoopHomotopy`
+  near the existing circle API in `Mathlib/Analysis/SpecialFunctions/Complex/Circle.lean` and the
+  path/homotopy API in `Mathlib/Topology/Homotopy/Path.lean`;
+* `Path.expLift` and the `Path.windingNumber` API in or next to
+  `Mathlib/Analysis/Complex/CoveringMap.lean` as a small winding-number companion file;
+* the monomial and polynomial applications left downstream, since they are project-specific rather
+  than reusable core library material.
 -/
 
 open Complex TopologicalSpace Set

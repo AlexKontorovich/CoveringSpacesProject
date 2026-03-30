@@ -17,8 +17,8 @@ lean_lib «CoveringSpacesProject»
 -- fast for us to keep up. If you need to bump the version of mathlib, change
 -- the commit to a more recent one.
 --
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "v4.28.0"
-
 meta if get_config? env = some "dev" then require «doc-gen4» from git
-  "https://github.com/leanprover/doc-gen4.git" @ "v4.28.0"
+  "https://github.com/leanprover/doc-gen4.git" @ "v4.29.0-rc8"
+
+require mathlib from git
+  "https://github.com/leanprover-community/mathlib4.git" @ "47aa862678fb83cdc5d377e5c04d198d5acae5c8" -- master-2026-03-30

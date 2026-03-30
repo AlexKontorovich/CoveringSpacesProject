@@ -2,7 +2,7 @@ import Mathlib
 
 --- TODO : make a glossary of everything we're defining here, to be able to quickly access everything...
 
-open TopologicalSpace Function
+open Bundle TopologicalSpace Function
 
 open Complex Set
 
@@ -326,7 +326,7 @@ theorem CSexpInS {w : ℂ} (hw : w ∈ Sstrip) :
   simp only [gt_iff_lt, ne_eq, mem_setOf_eq]
   simp only [mem_setOf_eq] at hw
   by_contra h
-  push_neg at h
+  push Not at h
   rw [Complex.exp_im] at h
   have := h.2
   have : Real.sin w.im = 0 := by
