@@ -24,8 +24,6 @@ upstream split would be:
   than reusable core library material.
 -/
 
-open Complex TopologicalSpace Set
-
 open scoped unitInterval
 
 noncomputable section
@@ -355,6 +353,12 @@ private noncomputable def toNonzeroPath {u v : ℂˣ} (γ : Path u v) :
     Path (complexUnitsHomeomorphNeZero u) (complexUnitsHomeomorphNeZero v) :=
   γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
 
+private noncomputable def unitLog (u : ℂˣ) : ℂ :=
+  Complex.log (u : ℂ)
+
+@[simp] private theorem exp_unitLog (u : ℂˣ) : Complex.exp (unitLog u) = (u : ℂ) := by
+  simpa [unitLog] using Complex.exp_log u.ne_zero
+
 /-%%
 \begin{definition}\label{expLiftNew}\lean{RootsComplexPolynomialsNew.Path.expLift}\leanok
 Given a path in $\C^\times$ and a chosen logarithm of its starting point, lift the path through the
@@ -576,20 +580,17 @@ noncomputable def windingNumber
 %%-/
 
 noncomputable def windingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
-  let w0 : ℂ := Complex.log (u : ℂ)
-  have hw0 : Complex.exp w0 = (u : ℂ) := by
-    simpa [w0] using Complex.exp_log u.ne_zero
-  let Γ := Path.expLift γ w0 hw0
+  let Γ := Path.expLift γ (unitLog u) (exp_unitLog u)
   have hper : Complex.exp (Γ 1) = Complex.exp (Γ 0) := by
     calc
-      Complex.exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
+      Complex.exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ (unitLog u) (exp_unitLog u) 1
       _ = (u : ℂ) := by
         simp [γ.target]
       _ = (γ 0 : ℂ) := by
         simp [γ.source]
       _ = Complex.exp (Γ 0) := by
         symm
-        exact expLift_apply γ w0 hw0 0
+        exact expLift_apply γ (unitLog u) (exp_unitLog u) 0
   exact Classical.choose ((Complex.exp_eq_exp_iff_exists_int).1 hper)
 
 /-%%
@@ -617,12 +618,9 @@ theorem windingNumber_eq_of_lift
 theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
     (Γ : C(I, ℂ)) (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
     (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber γ := by
-  let w0 : ℂ := Complex.log (u : ℂ)
-  have hw0 : Complex.exp w0 = (u : ℂ) := by
-    simpa [w0] using Complex.exp_log u.ne_zero
-  let liftγ : C(I, ℂ) := Path.expLift γ w0 hw0
+  let liftγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
   have hliftγ : ∀ t, Complex.exp (liftγ t) = (γ t : ℂ) := fun t =>
-    expLift_apply γ w0 hw0 t
+    expLift_apply γ (unitLog u) (exp_unitLog u) t
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
   have hbase_eq :
       liftγ 1 = liftγ 0 + Path.windingNumber γ * (2 * Real.pi * Complex.I) := by
@@ -630,14 +628,15 @@ theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
     dsimp [liftγ]
     exact Classical.choose_spec ((Complex.exp_eq_exp_iff_exists_int).1 <| by
       calc
-        Complex.exp ((Path.expLift γ w0 hw0) 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
+        Complex.exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = (γ 1 : ℂ) := by
+          exact expLift_apply γ (unitLog u) (exp_unitLog u) 1
         _ = (u : ℂ) := by
           simp [γ.target]
         _ = (γ 0 : ℂ) := by
           simp [γ.source]
-        _ = Complex.exp ((Path.expLift γ w0 hw0) 0) := by
+        _ = Complex.exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 0) := by
           symm
-          exact expLift_apply γ w0 hw0 0)
+          exact expLift_apply γ (unitLog u) (exp_unitLog u) 0)
   have hbase :
       (liftγ 1 - liftγ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber γ := by
     rw [hbase_eq]
@@ -678,12 +677,9 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
     (hhom : ContinuousMap.IsLoopHomotopy H) (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
     Path.windingNumber γ = Path.windingNumber γ' := by
-  let w0 : ℂ := Complex.log (u : ℂ)
-  have hw0 : Complex.exp w0 = (u : ℂ) := by
-    simpa [w0] using Complex.exp_log u.ne_zero
-  let tildeγ : C(I, ℂ) := Path.expLift γ w0 hw0
+  let tildeγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
   have htildeγ : ∀ t, Complex.exp (tildeγ t) = (γ t : ℂ) := fun t =>
-    expLift_apply γ w0 hw0 t
+    expLift_apply γ (unitLog u) (exp_unitLog u) t
   let H' : C(I × I, {z : ℂ // z ≠ 0}) :=
     (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp H
   have hH0 : ∀ t, H' (0, t) = ⟨Complex.exp (tildeγ t), Complex.exp_ne_zero _⟩ := by
@@ -787,10 +783,10 @@ theorem windingNumber_refl
 
 @[simp] theorem windingNumber_refl (u : ℂˣ) :
     Path.windingNumber (Path.refl u) = 0 := by
-  let Γ : C(I, ℂ) := ContinuousMap.const _ (Complex.log (u : ℂ))
+  let Γ : C(I, ℂ) := ContinuousMap.const _ (unitLog u)
   have hlift : ∀ t, Complex.exp (Γ t) = ((Path.refl u) t : ℂ) := by
     intro t
-    simpa [Γ] using Complex.exp_log u.ne_zero
+    simp [Γ]
   have hq : (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber (Path.refl u) :=
     windingNumber_eq_of_lift (Path.refl u) Γ hlift
   simpa [Γ] using hq.symm
@@ -1369,8 +1365,8 @@ Again this is immediate from the definition.
 
 /-%%
 \begin{lemma}\label{leadingTerm_dominates_on_circleNew}\lean{RootsComplexPolynomialsNew.Polynomial.leadingTerm_dominates_on_circle}\leanok
-For a nonconstant complex polynomial, the leading term eventually dominates the sum of the lower
-terms on circles of large radius.
+For a nonconstant complex polynomial, there is a radius beyond which the leading term dominates the
+sum of the lower terms on every circle of larger radius.
 \begin{verbatim}
 theorem leadingTerm_dominates_on_circle
     (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
@@ -1474,39 +1470,67 @@ strictly smaller quantity than the norm of the leading term.
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegreeNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{leadingTerm_dominates_on_circleNew, mapCircleUnitsNew, coe_mapCircleUnits_applyNew, circleMonomialNew, coe_circleMonomial_applyNew, circleWindingNumber_eq_of_norm_sub_ltNew, circleMonomial_windingNumberNew}\leanok
-For sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of radius $R$
-has winding number equal to the degree of the polynomial.
+\begin{corollary}\label{eventually_leadingTerm_dominates_on_circleNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_leadingTerm_dominates_on_circle}\uses{leadingTerm_dominates_on_circleNew}\leanok
+Equivalently, the leading-term domination estimate holds eventually along the filter $R\to +\infty$.
+\begin{verbatim}
+theorem eventually_leadingTerm_dominates_on_circle
+    (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
+    ∀ᶠ R : ℝ in Filter.atTop, ∀ z : Circle,
+      ‖p.eval ((R : ℂ) * z) -
+        p.leadingCoeff * (((R : ℂ) * z) ^
+          p.natDegree)‖ <
+        ‖p.leadingCoeff * (((R : ℂ) * z) ^
+          p.natDegree)‖
+\end{verbatim}
+\end{corollary}
+%%-/
+
+theorem eventually_leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
+    ∀ᶠ R : ℝ in Filter.atTop, ∀ z : Circle,
+      ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
+        ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+  obtain ⟨R0, -, hdom⟩ := leadingTerm_dominates_on_circle p hdeg
+  exact Filter.eventually_atTop.2 ⟨R0, fun R hR => hdom R hR⟩
+
+/-%%
+\begin{proof}\leanok
+This is the previous threshold statement rewritten in the standard `atTop` language.
+\end{proof}
+%%-/
+
+/-%%
+\begin{theorem}\label{eventually_windingNumber_eq_natDegreeNew}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circleNew, mapCircleUnitsNew, coe_mapCircleUnits_applyNew, circleMonomialNew, coe_circleMonomial_applyNew, circleWindingNumber_eq_of_norm_sub_ltNew, circleMonomial_windingNumberNew}\leanok
+For all sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of
+radius $R$ has winding number equal to the degree of the polynomial.
 \begin{verbatim}
 theorem eventually_windingNumber_eq_natDegree
     (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
-    ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R →
-    ∃ f : C(Circle, ℂˣ), (∀ z, (f z : ℂ) = p.eval
-    ((R : ℂ) * z)) ∧ ContinuousMap.windingNumber f
-    = (p.natDegree : ℤ)
+    ∀ᶠ R : ℝ in Filter.atTop,
+      ∃ f : C(Circle, ℂˣ), (∀ z, (f z : ℂ) = p.eval
+      ((R : ℂ) * z)) ∧ ContinuousMap.windingNumber f
+      = (p.natDegree : ℤ)
 \end{verbatim}
 \end{theorem}
 %%-/
 
 theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
-    ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R →
+    ∀ᶠ R : ℝ in Filter.atTop,
       ∃ f : C(Circle, ℂˣ), (∀ z, (f z : ℂ) = p.eval ((R : ℂ) * z)) ∧
         ContinuousMap.windingNumber f = (p.natDegree : ℤ) := by
-  obtain ⟨R0, hR0pos, hdom⟩ := leadingTerm_dominates_on_circle p hdeg
-  refine ⟨R0, hR0pos, ?_⟩
-  intro R hR
+  filter_upwards [Filter.eventually_gt_atTop (0 : ℝ),
+      eventually_leadingTerm_dominates_on_circle p hdeg]
+      with R hRpos hdom
   have hp : p ≠ 0 := by
     intro hp0
     simp [hp0] at hdeg
   have hlead : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp
   let a0 : ℂˣ := Units.mk0 p.leadingCoeff hlead
-  have hRpos : 0 < R := lt_of_lt_of_le hR0pos hR
   have hpoly_nonzero : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0 := by
     intro z hz
     have hbad :
         ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
           ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
-      simpa [hz, norm_sub_rev] using hdom R hR z
+      simpa [hz, norm_sub_rev] using hdom z
     exact (lt_irrefl _ hbad).elim
   let f : C(Circle, ℂˣ) := Polynomial.mapCircleUnits p R hpoly_nonzero
   have hclose :
@@ -1514,7 +1538,7 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
         ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ) - f z‖ <
           ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ)‖ := by
     intro z
-    simpa [f, norm_sub_rev] using hdom R hR z
+    simpa [f, norm_sub_rev] using hdom z
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]
@@ -1549,10 +1573,10 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
   have hnonzero : ∀ z : ℂ, p.eval z ≠ 0 := by
     intro z hz
     exact hroot ⟨z, hz⟩
-  obtain ⟨R0, hR0pos, hWN⟩ := eventually_windingNumber_eq_natDegree p hdeg
-  obtain ⟨f, hf, hwind⟩ := hWN R0 le_rfl
+  obtain ⟨R, hR⟩ := (eventually_windingNumber_eq_natDegree p hdeg).exists
+  obtain ⟨f, hf, hwind⟩ := hR
   let F : C(Metric.closedBall (0 : ℂ) 1, ℂˣ) :=
-    Polynomial.mapClosedUnitDiskUnits p R0 fun z => hnonzero ((R0 : ℂ) * z)
+    Polynomial.mapClosedUnitDiskUnits p R fun z => hnonzero ((R : ℂ) * z)
   have hboundary : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f z := by
     intro z
     apply Units.ext
@@ -1560,9 +1584,9 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
       Circle.coe_toClosedUnitDisk z
     calc
       ((F (Circle.toClosedUnitDisk z) : ℂˣ) : ℂ) =
-          p.eval ((R0 : ℂ) * (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ))) := by
+          p.eval ((R : ℂ) * (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ))) := by
         simp [F]
-      _ = p.eval ((R0 : ℂ) * z) := by rw [hz]
+      _ = p.eval ((R : ℂ) * z) := by rw [hz]
       _ = (f z : ℂ) := (hf z).symm
   have hzero : ContinuousMap.windingNumber f = 0 :=
     ContinuousMap.windingNumber_eq_zero_of_exists_extension hboundary

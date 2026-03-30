@@ -276,3 +276,60 @@ lake build CoveringSpacesProject.RootsComplexPolynomialsNew
 lake build CoveringSpacesProject.RootsComplexPolynomials
 lake build
 ```
+
+## 2026-03-30
+
+### Second-pass tightening of `RootsComplexPolynomialsNew`
+
+Goal: make the standalone `CoveringSpacesProject/RootsComplexPolynomialsNew.lean` read a little
+closer to mathlib style after the first review pass, without changing the overall mathematical
+content.
+
+Changes made:
+
+1. Removed the broad file-level `open Complex TopologicalSpace Set`.
+   The file still builds without them, so keeping those namespaces open globally was unnecessary.
+
+2. Added a tiny private helper pair in the `Path` section:
+   - `unitLog : ℂˣ → ℂ`
+   - `exp_unitLog : Complex.exp (unitLog u) = (u : ℂ)`
+
+   This lets the winding-number proofs reuse the same chosen logarithm cleanly instead of
+   reintroducing `let w0 := Complex.log ...` and its `exp_log` proof in several separate lemmas.
+
+3. Updated the four loop-winding lemmas that were repeating that boilerplate:
+   - `Path.windingNumber`
+   - `Path.windingNumber_eq_of_lift`
+   - `Path.windingNumber_eq_of_homotopy`
+   - `Path.windingNumber_refl`
+
+4. Tightened the wording of `Polynomial.leadingTerm_dominates_on_circle` so its prose matches its
+   actual threshold-style statement.
+
+5. Added a new filter-style corollary
+   `Polynomial.eventually_leadingTerm_dominates_on_circle`, which repackages the same large-radius
+   estimate as an `atTop` eventual statement.
+
+6. Changed `Polynomial.eventually_windingNumber_eq_natDegree` so its statement now genuinely
+   matches its name:
+   - old shape: `∃ R0, 0 < R0 ∧ ∀ R ≥ R0, ...`
+   - new shape: `∀ᶠ R in Filter.atTop, ...`
+
+   The proof now uses the new `eventually_leadingTerm_dominates_on_circle` corollary together with
+   eventual positivity of the radius.
+
+7. Simplified `Polynomial.exists_root_of_natDegree_pos` accordingly:
+   instead of extracting a threshold and immediately specializing it, the proof now obtains a
+   single large radius directly from the eventual theorem via `Eventually.exists`.
+
+8. Updated the blueprint metadata on `eventually_windingNumber_eq_natDegree` so its recorded
+   dependencies reflect the new proof path.
+
+### Verification
+
+Verified with:
+
+```sh
+lake build CoveringSpacesProject.RootsComplexPolynomialsNew
+lake build
+```
