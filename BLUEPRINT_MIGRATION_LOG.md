@@ -152,3 +152,62 @@ that packages the modern refactor into one place:
   `RootsComplexPolynomialsNew`.
 - It builds on its own and as part of the whole project.
 - The current standalone blueprint file is now feature-complete for this migration pass.
+
+## 2026-03-30
+
+### `RootsComplexPolynomialsNew.lean` vocabulary cleanup
+
+Goal: remove the public `Cstar` vocabulary from
+`CoveringSpacesProject/RootsComplexPolynomialsNew.lean` and keep `ℂˣ` as the single exposed
+language for nonzero complex values.
+
+Changes made:
+
+1. Removed the file-local `Cstar` notation and the accompanying blueprint block for that alias.
+
+2. Reworked the loop-lifting API so the public statements now use `ℂˣ` throughout:
+   - `Path.expLift`
+   - `Path.expLift_apply`
+   - `Path.expLift_zero`
+   - `Path.eq_expLift`
+   - `Path.eq_add_int_mul_two_pi_I_of_lifts`
+   - `Path.windingNumber`
+   - `Path.windingNumber_eq_of_lift`
+   - `Path.windingNumber_eq_of_homotopy`
+   - `Path.windingNumber_refl`
+
+3. Deleted the extra public bridge layer that converted back and forth between `ℂˣ` and the
+   nonzero-complex subtype:
+   - `ContinuousMap.toNonzeroSubtype`
+   - `ContinuousMap.fromNonzeroSubtype`
+   - `Path.toNonzeroSubtype`
+   - the subtype-valued extension theorem
+     `ContinuousMap.windingNumber_eq_zero_of_exists_extension'`
+
+4. Updated the circle-map layer to use the path-level `ℂˣ` winding number directly:
+   - `ContinuousMap.windingNumber`
+   - `ContinuousMap.windingNumber_const`
+   - `ContinuousMap.windingNumber_eq_of_homotopy`
+   - downstream `\uses{...}` annotations
+
+5. Updated the monomial winding-number proof to avoid the old subtype witness in the main proof
+   line and use `ℂˣ` data directly.
+
+6. Removed stale references to the deleted subtype bridge theorem from the final root-existence
+   theorem metadata.
+
+### Remaining internal bridge
+
+An internal bridge to the nonzero-complex subtype is still present, but only privately, in the
+path-lifting implementation. This remains necessary because Mathlib’s covering-map API for
+`Complex.exp` is stated over `{z : ℂ // z ≠ 0}` rather than `ℂˣ`, so the file still transports
+paths and homotopies to that subtype inside the proofs before applying
+`Complex.isCoveringMap_exp`.
+
+### Verification
+
+Verified with:
+
+```sh
+lake build CoveringSpacesProject.RootsComplexPolynomialsNew
+```

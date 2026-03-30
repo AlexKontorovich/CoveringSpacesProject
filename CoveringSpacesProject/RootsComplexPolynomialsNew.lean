@@ -22,16 +22,6 @@ namespace RootsComplexPolynomialsNew
 \section{Generic helper maps}
 %%-/
 
-/-%%
-\begin{definition}\label{CstarNew}\lean{RootsComplexPolynomialsNew.Cstar}\leanok
-We use the local notation `Cstar` to refer to the subtype of nonzero complex numbers.
-\begin{verbatim}
-local notation "Cstar" => {z : ℂ // z ≠ 0}
-\end{verbatim}
-\end{definition}
-%%-/
-local notation "Cstar" => {z : ℂ // z ≠ 0}
-
 namespace Metric
 
 /-%%
@@ -335,242 +325,45 @@ This is the corresponding defining property of a homotopy at time $1$.
 \end{proof}
 %%-/
 
+end ContinuousMap
+
 /-%%
 \section{Lifts and winding numbers of loops}
 %%-/
 
-/-%%
-\begin{definition}\label{complexUnitsHomeomorphNeZeroNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.complexUnitsHomeomorphNeZero}\uses{CstarNew}\leanok
-Internally, we identify $\C^\times$ (as the group of units in $\C$) with the subtype of nonzero complex numbers.
-\begin{verbatim}
-def complexUnitsHomeomorphNeZero :
-    ℂˣ ≃ₜ Cstar
-\end{verbatim}
-\end{definition}
-%%-/
-
 private noncomputable def complexUnitsHomeomorphNeZero :
-    ℂˣ ≃ₜ Cstar :=
+    ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
   unitsHomeomorphNeZero (G₀ := ℂ)
-
-/-%%
-\begin{proof}\leanok
-This is the standard homeomorphism between units in a field and the corresponding nonzero subtype.
-\end{proof}
-%%-/
-
-/-%%
-\begin{definition}\label{toNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.toNonzeroSubtype}\uses{complexUnitsHomeomorphNeZeroNew}\leanok
-A units-valued continuous map can be viewed as a continuous map to nonzero complex numbers.
-\begin{verbatim}
-noncomputable def toNonzeroSubtype
-    [TopologicalSpace α] (f : C(α, ℂˣ)) :
-    C(α, Cstar)
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def toNonzeroSubtype {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ)) :
-    C(α, Cstar) :=
-  (complexUnitsHomeomorphNeZero : C(ℂˣ, Cstar)).comp f
-
-/-%%
-\begin{proof}\leanok
-Compose the given map with the homeomorphism from $\C^\times$ to the nonzero-complex subtype.
-\end{proof}
-%%-/
-
-/-%%
-\begin{definition}\label{fromNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.fromNonzeroSubtype}\uses{complexUnitsHomeomorphNeZeroNew}\leanok
-A continuous map to nonzero complex numbers can be viewed as a units-valued continuous map.
-\begin{verbatim}
-noncomputable def fromNonzeroSubtype
-    [TopologicalSpace α] (f : C(α, Cstar)) :
-    C(α, ℂˣ)
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, Cstar)) : C(α, ℂˣ) :=
-  (complexUnitsHomeomorphNeZero.symm : C(Cstar, ℂˣ)).comp f
-
-/-%%
-\begin{proof}\leanok
-This is the inverse construction, using the inverse homeomorphism.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{coe_toNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.coe_toNonzeroSubtype_apply}\uses{toNonzeroSubtypeNew}\leanok
-After coercing to $\C$, the map obtained by passing from units to the nonzero subtype has the same
-values as the original map.
-\begin{verbatim}
-theorem coe_toNonzeroSubtype_apply
-    [TopologicalSpace α] (f : C(α, ℂˣ)) (x : α) :
-    (ContinuousMap.toNonzeroSubtype f x : ℂ) =
-    (f x : ℂ)
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_toNonzeroSubtype_apply {α : Type*} [TopologicalSpace α] (f : C(α, ℂˣ))
-    (x : α) : (ContinuousMap.toNonzeroSubtype f x : ℂ) = (f x : ℂ) := rfl
-
-/-%%
-\begin{proof}\leanok
-Both sides are definitionally the same underlying complex number.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{coe_fromNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.coe_fromNonzeroSubtype_apply}\uses{fromNonzeroSubtypeNew, complexUnitsHomeomorphNeZeroNew}\leanok
-After coercing to $\C$, the map obtained by passing from the nonzero subtype to units has the same
-values as the original map.
-\begin{verbatim}
-theorem coe_fromNonzeroSubtype_apply
-    [TopologicalSpace α] (f : C(α, Cstar)) (x : α)
-    :
-    ((ContinuousMap.fromNonzeroSubtype f x : ℂˣ) :
-    ℂ) = (f x : ℂ)
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_fromNonzeroSubtype_apply {α : Type*} [TopologicalSpace α]
-    (f : C(α, Cstar)) (x : α) :
-    ((ContinuousMap.fromNonzeroSubtype f x : ℂˣ) : ℂ) = (f x : ℂ) := by
-  have h :
-      complexUnitsHomeomorphNeZero (ContinuousMap.fromNonzeroSubtype f x) = f x := by
-    simp [ContinuousMap.fromNonzeroSubtype]
-  exact congrArg Subtype.val h
-
-/-%%
-\begin{proof}\leanok
-Applying the forward homeomorphism to the units-valued version recovers the original subtype-valued
-map, and coercing to $\C$ then gives the claim.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{toNonzeroSubtype_fromNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.toNonzeroSubtype_fromNonzeroSubtype}\uses{toNonzeroSubtypeNew, fromNonzeroSubtypeNew}\leanok
-Passing from the nonzero subtype to units and back again does not change a continuous map.
-\begin{verbatim}
-theorem toNonzeroSubtype_fromNonzeroSubtype
-    [TopologicalSpace α] (f : C(α, Cstar)) :
-    ContinuousMap.toNonzeroSubtype
-    (ContinuousMap.fromNonzeroSubtype f) = f
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem toNonzeroSubtype_fromNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, Cstar)) :
-    ContinuousMap.toNonzeroSubtype (ContinuousMap.fromNonzeroSubtype f) = f := by
-  ext x
-  simp [ContinuousMap.fromNonzeroSubtype, ContinuousMap.toNonzeroSubtype]
-
-/-%%
-\begin{proof}\leanok
-This is the left-inverse identity for the homeomorphism between units and the nonzero subtype.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{fromNonzeroSubtype_toNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.fromNonzeroSubtype_toNonzeroSubtype}\uses{toNonzeroSubtypeNew, fromNonzeroSubtypeNew}\leanok
-Passing from units to the nonzero subtype and back again does not change a continuous map.
-\begin{verbatim}
-theorem fromNonzeroSubtype_toNonzeroSubtype
-    [TopologicalSpace α] (f : C(α, ℂˣ)) :
-    ContinuousMap.fromNonzeroSubtype
-    (ContinuousMap.toNonzeroSubtype f) = f
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem fromNonzeroSubtype_toNonzeroSubtype {α : Type*} [TopologicalSpace α]
-    (f : C(α, ℂˣ)) :
-    ContinuousMap.fromNonzeroSubtype (ContinuousMap.toNonzeroSubtype f) = f := by
-  ext x
-  simp [ContinuousMap.fromNonzeroSubtype, ContinuousMap.toNonzeroSubtype]
-
-/-%%
-\begin{proof}\leanok
-This is the corresponding right-inverse identity.
-\end{proof}
-%%-/
-
-end ContinuousMap
 
 namespace Path
 
-open ContinuousMap
-
-/-%%
-\begin{definition}\label{pathToNonzeroSubtypeNew}\lean{RootsComplexPolynomialsNew.Path.toNonzeroSubtype}\uses{complexUnitsHomeomorphNeZeroNew}\leanok
-A units-valued path can be viewed as a path in the nonzero-complex subtype.
-\begin{verbatim}
-noncomputable def toNonzeroSubtype
-    {u v : ℂˣ} (γ : Path u v) :
-    Path (complexUnitsHomeomorphNeZero u)
-    (complexUnitsHomeomorphNeZero v)
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def toNonzeroSubtype {u v : ℂˣ} (γ : Path u v) :
+private noncomputable def toNonzeroPath {u v : ℂˣ} (γ : Path u v) :
     Path (complexUnitsHomeomorphNeZero u) (complexUnitsHomeomorphNeZero v) :=
-  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, Cstar)).continuous
-
-/-%%
-\begin{proof}\leanok
-Map the path through the same homeomorphism from units to nonzero complex numbers.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{path_coe_toNonzeroSubtype_applyNew}\lean{RootsComplexPolynomialsNew.Path.coe_toNonzeroSubtype_apply}\uses{pathToNonzeroSubtypeNew}\leanok
-After coercing to $\C$, the converted path has the same pointwise values as the original path.
-\begin{verbatim}
-theorem coe_toNonzeroSubtype_apply
-    {u v : ℂˣ} (γ : Path u v) (t : I) :
-    ((Path.toNonzeroSubtype γ t : Cstar) : ℂ) =
-    (γ t : ℂ)
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_toNonzeroSubtype_apply {u v : ℂˣ} (γ : Path u v) (t : I) :
-    ((Path.toNonzeroSubtype γ t : Cstar) : ℂ) = (γ t : ℂ) := rfl
-
-/-%%
-\begin{proof}\leanok
-This is immediate from the definition of the path map.
-\end{proof}
-%%-/
+  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
 
 /-%%
 \begin{definition}\label{expLiftNew}\lean{RootsComplexPolynomialsNew.Path.expLift}\leanok
-Given a path in $\C\setminus\{0\}$ and a chosen logarithm of its starting point, lift the path
-through the covering map $\exp\colon \C\to \C\setminus\{0\}$.
+Given a path in $\C^\times$ and a chosen logarithm of its starting point, lift the path through the
+exponential covering map.
 \begin{verbatim}
 noncomputable def expLift
-    {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) :
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) :
     C(I, ℂ)
 \end{verbatim}
 \end{definition}
 %%-/
 
-noncomputable def expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) : C(I, ℂ) :=
-  Complex.isCoveringMap_exp.liftPath γ.toContinuousMap w0 <| by
+noncomputable def expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) : C(I, ℂ) :=
+  Complex.isCoveringMap_exp.liftPath (toNonzeroPath γ).toContinuousMap w0 <| by
     apply Subtype.ext
     simpa using hw0.symm
 
 /-%%
 \begin{proof}\leanok
-This is the path-lifting theorem for the already-upstream covering map `Complex.exp`.
+Transport the path to the standard nonzero-complex subtype, where `Complex.exp` is already
+registered as a covering map in Mathlib, and apply path lifting there.
 \end{proof}
 %%-/
 
@@ -579,22 +372,22 @@ This is the path-lifting theorem for the already-upstream covering map `Complex.
 The lifted path projects back to the original path under the exponential map.
 \begin{verbatim}
 theorem expLift_apply
-    {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) (t : I) :
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) (t : I) :
     Complex.exp (Path.expLift γ w0 hw0 t) =
     (γ t : ℂ)
 \end{verbatim}
 \end{lemma}
 %%-/
 
-@[simp] theorem expLift_apply {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) (t : I) :
+@[simp] theorem expLift_apply {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) (t : I) :
     Complex.exp (Path.expLift γ w0 hw0 t) = (γ t : ℂ) := by
   have h :=
-    congrFun (Complex.isCoveringMap_exp.liftPath_lifts γ.toContinuousMap w0 <| by
+    congrFun (Complex.isCoveringMap_exp.liftPath_lifts ((toNonzeroPath γ).toContinuousMap) w0 <| by
       apply Subtype.ext
       simpa using hw0.symm) t
-  simpa using congrArg Subtype.val h
+  simpa [toNonzeroPath] using congrArg Subtype.val h
 
 /-%%
 \begin{proof}\leanok
@@ -608,18 +401,18 @@ codomain subtype.
 The lifted path starts at the prescribed basepoint.
 \begin{verbatim}
 theorem expLift_zero
-    {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) :
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) :
     Path.expLift γ w0 hw0 0 = w0
 \end{verbatim}
 \end{lemma}
 %%-/
 
-@[simp] theorem expLift_zero {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) :
+@[simp] theorem expLift_zero {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) :
     Path.expLift γ w0 hw0 0 = w0 := by
-  simpa [expLift] using Complex.isCoveringMap_exp.liftPath_zero (γ := γ.toContinuousMap)
-    (e := w0) (γ_0 := by
+  simpa [expLift] using Complex.isCoveringMap_exp.liftPath_zero
+    (γ := (toNonzeroPath γ).toContinuousMap) (e := w0) (γ_0 := by
       apply Subtype.ext
       simpa using hw0.symm)
 
@@ -634,8 +427,8 @@ This is the standard initial-value property of the lifted path.
 Any other lift of the same path with the same starting point agrees with the canonical lifted path.
 \begin{verbatim}
 theorem eq_expLift
-    {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ))
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ))
     (Γ : C(I, ℂ))
     (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ))
     (h0 : Γ 0 = w0) :
@@ -644,24 +437,25 @@ theorem eq_expLift
 \end{lemma}
 %%-/
 
-theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) (Γ : C(I, ℂ))
+theorem eq_expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : Complex.exp w0 = (u₀ : ℂ)) (Γ : C(I, ℂ))
     (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
     Γ = Path.expLift γ w0 hw0 := by
-  apply (Complex.isCoveringMap_exp.eq_liftPath_iff' (γ := γ.toContinuousMap) (e := w0)
+  apply (Complex.isCoveringMap_exp.eq_liftPath_iff' (γ := (toNonzeroPath γ).toContinuousMap)
+    (e := w0)
     (γ_0 := by
       apply Subtype.ext
       simpa using hw0.symm) (Γ := Γ)).2
   constructor
   · ext t
-    show Complex.exp (Γ t) = (γ t : ℂ)
-    exact hlift t
+    show Complex.exp (Γ t) = (((toNonzeroPath γ).toContinuousMap) t : ℂ)
+    simpa [toNonzeroPath] using hlift t
   · exact h0
 
 /-%%
 \begin{proof}\leanok
-This is uniqueness of lifts for the covering map $\exp$, specialized to paths in
-$\C\setminus\{0\}$.
+This is uniqueness of lifts for the covering map $\exp$, after transporting the path from
+$\C^\times$ to the standard nonzero-complex subtype.
 \end{proof}
 %%-/
 
@@ -694,7 +488,7 @@ This is the usual $2\pi i$-periodicity of the complex exponential map.
 Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
 \begin{verbatim}
 theorem eq_add_int_mul_two_pi_I_of_lifts
-    {z₀ z₁ : Cstar} (γ : Path z₀ z₁)
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
     (Γ₀ Γ₁ : C(I, ℂ))
     (hΓ₀ : ∀ t, Complex.exp (Γ₀ t) = (γ t : ℂ))
     (hΓ₁ : ∀ t, Complex.exp (Γ₁ t) = (γ t : ℂ)) :
@@ -704,17 +498,17 @@ theorem eq_add_int_mul_two_pi_I_of_lifts
 \end{lemma}
 %%-/
 
-private theorem eq_add_int_mul_two_pi_I_of_lifts {z₀ z₁ : Cstar} (γ : Path z₀ z₁)
+private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
     (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, Complex.exp (Γ₀ t) = (γ t : ℂ))
     (hΓ₁ : ∀ t, Complex.exp (Γ₁ t) = (γ t : ℂ)) :
     ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * Real.pi * Complex.I) := by
   have h0eq : Complex.exp (Γ₁ 0) = Complex.exp (Γ₀ 0) := by
     rw [hΓ₁ 0, hΓ₀ 0]
   obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 h0eq
-  have hΓ₁0 : Complex.exp (Γ₁ 0) = (z₀ : ℂ) := by
+  have hΓ₁0 : Complex.exp (Γ₁ 0) = (u₀ : ℂ) := by
     calc
       Complex.exp (Γ₁ 0) = (γ 0 : ℂ) := hΓ₁ 0
-      _ = (z₀ : ℂ) := by
+      _ = (u₀ : ℂ) := by
         simp [γ.source]
   let shiftedΓ₀ : C(I, ℂ) :=
     ⟨fun t => Γ₀ t + n * (2 * Real.pi * Complex.I), Γ₀.continuous.add continuous_const⟩
@@ -757,25 +551,25 @@ and uniqueness of lifts then shows the two lifts agree everywhere.
 
 /-%%
 \begin{definition}\label{pathWindingNumberNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber}\uses{expLiftNew}\leanok
-The winding number of a loop in $\C\setminus\{0\}$ is defined from the endpoint difference of a
+The winding number of a loop in $\C^\times$ is defined from the endpoint difference of a
 lift through the exponential covering map.
 \begin{verbatim}
 noncomputable def windingNumber
-    {z : Cstar} (γ : Path z z) :
+    {u : ℂˣ} (γ : Path u u) :
     ℤ
 \end{verbatim}
 \end{definition}
 %%-/
 
-noncomputable def windingNumber {z : Cstar} (γ : Path z z) : ℤ := by
-  let w0 : ℂ := Complex.log z
-  have hw0 : Complex.exp w0 = (z : ℂ) := by
-    simpa [w0] using Complex.exp_log z.property
+noncomputable def windingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
+  let w0 : ℂ := Complex.log (u : ℂ)
+  have hw0 : Complex.exp w0 = (u : ℂ) := by
+    simpa [w0] using Complex.exp_log u.ne_zero
   let Γ := Path.expLift γ w0 hw0
   have hper : Complex.exp (Γ 1) = Complex.exp (Γ 0) := by
     calc
       Complex.exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
-      _ = (z : ℂ) := by
+      _ = (u : ℂ) := by
         simp [γ.target]
       _ = (γ 0 : ℂ) := by
         simp [γ.source]
@@ -794,11 +588,11 @@ winding number.
 
 /-%%
 \begin{lemma}\label{pathWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_lift}\uses{pathWindingNumberNew, eq_add_int_mul_two_pi_I_of_liftsNew, expLiftNew, expLift_applyNew}\leanok
-If $\Gamma$ is any lift of a loop in $\C\setminus\{0\}$, then the endpoint quotient
+If $\Gamma$ is any lift of a loop in $\C^\times$, then the endpoint quotient
 $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_lift
-    {z : Cstar} (γ : Path z z) (Γ : C(I, ℂ))
+    {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
     (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
     (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) =
     Path.windingNumber γ
@@ -806,12 +600,12 @@ theorem windingNumber_eq_of_lift
 \end{lemma}
 %%-/
 
-theorem windingNumber_eq_of_lift {z : Cstar} (γ : Path z z)
+theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
     (Γ : C(I, ℂ)) (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
     (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber γ := by
-  let w0 : ℂ := Complex.log z
-  have hw0 : Complex.exp w0 = (z : ℂ) := by
-    simpa [w0] using Complex.exp_log z.property
+  let w0 : ℂ := Complex.log (u : ℂ)
+  have hw0 : Complex.exp w0 = (u : ℂ) := by
+    simpa [w0] using Complex.exp_log u.ne_zero
   let liftγ : C(I, ℂ) := Path.expLift γ w0 hw0
   have hliftγ : ∀ t, Complex.exp (liftγ t) = (γ t : ℂ) := fun t =>
     expLift_apply γ w0 hw0 t
@@ -823,7 +617,7 @@ theorem windingNumber_eq_of_lift {z : Cstar} (γ : Path z z)
     exact Classical.choose_spec ((Complex.exp_eq_exp_iff_exists_int).1 <| by
       calc
         Complex.exp ((Path.expLift γ w0 hw0) 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
-        _ = (z : ℂ) := by
+        _ = (u : ℂ) := by
           simp [γ.target]
         _ = (γ 0 : ℂ) := by
           simp [γ.source]
@@ -852,11 +646,11 @@ endpoint difference and hence the quotient by $2\pi i$ are unchanged.
 
 /-%%
 \begin{lemma}\label{pathWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_liftNew, eq_add_int_mul_two_pi_I_of_liftsNew, IsLoopHomotopyNew, expLiftNew, expLift_applyNew, expLift_zeroNew}\leanok
-Loops in $\C\setminus\{0\}$ that are freely homotopic through loops have the same winding number.
+Loops in $\C^\times$ that are freely homotopic through loops have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
-    {z z' : Cstar} (γ : Path z z)
-    (γ' : Path z' z') (H : C(I × I, Cstar))
+    {u u' : ℂˣ} (γ : Path u u)
+    (γ' : Path u' u') (H : C(I × I, ℂˣ))
     (hhom : ContinuousMap.IsLoopHomotopy H)
     (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
@@ -865,36 +659,40 @@ theorem windingNumber_eq_of_homotopy
 \end{lemma}
 %%-/
 
-theorem windingNumber_eq_of_homotopy {z z' : Cstar}
-    (γ : Path z z) (γ' : Path z' z') (H : C(I × I, Cstar))
+theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
+    (γ : Path u u) (γ' : Path u' u') (H : C(I × I, ℂˣ))
     (hhom : ContinuousMap.IsLoopHomotopy H) (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
     Path.windingNumber γ = Path.windingNumber γ' := by
-  let w0 : ℂ := Complex.log z
-  have hw0 : Complex.exp w0 = (z : ℂ) := by
-    simpa [w0] using Complex.exp_log z.property
+  let w0 : ℂ := Complex.log (u : ℂ)
+  have hw0 : Complex.exp w0 = (u : ℂ) := by
+    simpa [w0] using Complex.exp_log u.ne_zero
   let tildeγ : C(I, ℂ) := Path.expLift γ w0 hw0
   have htildeγ : ∀ t, Complex.exp (tildeγ t) = (γ t : ℂ) := fun t =>
     expLift_apply γ w0 hw0 t
-  have hH0 : ∀ t, H (0, t) = ⟨Complex.exp (tildeγ t), Complex.exp_ne_zero _⟩ := by
+  let H' : C(I × I, {z : ℂ // z ≠ 0}) :=
+    (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp H
+  have hH0 : ∀ t, H' (0, t) = ⟨Complex.exp (tildeγ t), Complex.exp_ne_zero _⟩ := by
     intro t
     apply Subtype.ext
     calc
-      (H (0, t) : ℂ) = (γ t : ℂ) := by
-        simpa using congrArg Subtype.val (hzero t)
+      (H' (0, t) : ℂ) = (H (0, t) : ℂ) := by
+        rfl
+      _ = (γ t : ℂ) := by
+        simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
       _ = Complex.exp (tildeγ t) := by
         symm
         exact htildeγ t
-  let tildeH : C(I × I, ℂ) := Complex.isCoveringMap_exp.liftHomotopy H tildeγ hH0
+  let tildeH : C(I × I, ℂ) := Complex.isCoveringMap_exp.liftHomotopy H' tildeγ hH0
   have htildeH_lifts : ∀ x, Complex.exp (tildeH x) = (H x : ℂ) := by
     intro x
-    exact congrArg Subtype.val <| congrFun
-      (Complex.isCoveringMap_exp.liftHomotopy_lifts H tildeγ hH0) x
+    simpa [H'] using congrArg Subtype.val <| congrFun
+      (Complex.isCoveringMap_exp.liftHomotopy_lifts H' tildeγ hH0) x
   have htildeH_zero : ∀ t, tildeH (0, t) = tildeγ t := by
     intro t
-    simpa using Complex.isCoveringMap_exp.liftHomotopy_zero (H := H) (f := tildeγ)
+    simpa using Complex.isCoveringMap_exp.liftHomotopy_zero (H := H') (f := tildeγ)
       (H_0 := hH0) t
-  let μ : Path z z' := {
+  let μ : Path u u' := {
     toFun := fun s => H (s, 0)
     continuous_toFun := H.continuous.comp (continuous_id.prodMk continuous_const)
     source' := by simpa using hzero 0
@@ -915,7 +713,7 @@ theorem windingNumber_eq_of_homotopy {z z' : Cstar}
         Complex.exp (μ1 s) = (H (s, 1) : ℂ) := by
           simpa [μ1] using htildeH_lifts (s, 1)
         _ = (H (s, 0) : ℂ) := by
-          simpa using congrArg Subtype.val (hhom s).symm
+          simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s).symm
         _ = (μ s : ℂ) := by rfl
     · simpa [μ1] using htildeH_zero 1
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
@@ -927,7 +725,7 @@ theorem windingNumber_eq_of_homotopy {z z' : Cstar}
       Complex.exp (tildeγ' t) = (H (1, t) : ℂ) := by
         simpa [tildeγ'] using htildeH_lifts (1, t)
       _ = (γ' t : ℂ) := by
-        simpa using congrArg Subtype.val (hone t)
+        simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
   have hwind :
       (tildeγ' 1 - tildeγ' 0) / (2 * Real.pi * Complex.I) =
         (tildeγ 1 - tildeγ 0) / (2 * Real.pi * Complex.I) := by
@@ -967,148 +765,25 @@ differences agree and hence their winding numbers agree.
 The constant loop has winding number zero.
 \begin{verbatim}
 theorem windingNumber_refl
-    (z : Cstar) :
-    Path.windingNumber (Path.refl z) = 0
+    (u : ℂˣ) :
+    Path.windingNumber (Path.refl u) = 0
 \end{verbatim}
 \end{lemma}
 %%-/
 
-@[simp] theorem windingNumber_refl (z : Cstar) :
-    Path.windingNumber (Path.refl z) = 0 := by
-  let Γ : C(I, ℂ) := ContinuousMap.const _ (Complex.log z)
-  have hlift : ∀ t, Complex.exp (Γ t) = ((Path.refl z) t : ℂ) := by
+@[simp] theorem windingNumber_refl (u : ℂˣ) :
+    Path.windingNumber (Path.refl u) = 0 := by
+  let Γ : C(I, ℂ) := ContinuousMap.const _ (Complex.log (u : ℂ))
+  have hlift : ∀ t, Complex.exp (Γ t) = ((Path.refl u) t : ℂ) := by
     intro t
-    simpa [Γ] using Complex.exp_log z.property
-  have hq : (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber (Path.refl z) :=
-    windingNumber_eq_of_lift (Path.refl z) Γ hlift
+    simpa [Γ] using Complex.exp_log u.ne_zero
+  have hq : (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber (Path.refl u) :=
+    windingNumber_eq_of_lift (Path.refl u) Γ hlift
   simpa [Γ] using hq.symm
 
 /-%%
 \begin{proof}\leanok
 The constant loop is lifted by a constant logarithm, whose endpoint difference is zero.
-\end{proof}
-%%-/
-
-/-%%
-\begin{definition}\label{unitsWindingNumberNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber}\uses{pathToNonzeroSubtypeNew, pathWindingNumberNew}\leanok
-The winding number of a loop in $\C^\times$ is defined by transporting the loop to
-$\C\setminus\{0\}$ and using the previous definition.
-\begin{verbatim}
-noncomputable def unitsWindingNumber
-    {u : ℂˣ} (γ : Path u u) :
-    ℤ
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def unitsWindingNumber {u : ℂˣ} (γ : Path u u) : ℤ :=
-  Path.windingNumber (Path.toNonzeroSubtype γ)
-
-/-%%
-\begin{proof}\leanok
-Use the homeomorphism between $\C^\times$ and the subtype of nonzero complex numbers.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{unitsWindingNumber_eq_of_liftNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_lift}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_liftNew, path_coe_toNonzeroSubtype_applyNew}\leanok
-Any exponential lift of a loop in $\C^\times$ computes its winding number by the same endpoint
-quotient formula.
-\begin{verbatim}
-theorem unitsWindingNumber_eq_of_lift
-    {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
-    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
-    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) =
-    Path.unitsWindingNumber γ
-\end{verbatim}
-\end{lemma}
-%%-/
-
-theorem unitsWindingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
-    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
-    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.unitsWindingNumber γ := by
-  simpa [unitsWindingNumber] using
-    windingNumber_eq_of_lift (Path.toNonzeroSubtype γ) Γ (by
-      intro t
-      simpa using hlift t)
-
-/-%%
-\begin{proof}\leanok
-After transporting the loop to the nonzero subtype, this is exactly the previous lifting formula.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{unitsWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_eq_of_homotopy}\uses{unitsWindingNumberNew, pathWindingNumber_eq_of_homotopyNew, toNonzeroSubtypeNew, pathToNonzeroSubtypeNew, IsLoopHomotopyNew, coe_toNonzeroSubtype_applyNew}\leanok
-Freely homotopic loops in $\C^\times$ have the same winding number.
-\begin{verbatim}
-theorem unitsWindingNumber_eq_of_homotopy
-    {u u' : ℂˣ} (γ : Path u u) (γ' : Path u' u')
-    (H : C(I × I, ℂˣ))
-    (hhom : ContinuousMap.IsLoopHomotopy H)
-    (hzero : ∀ t, H (0, t) = γ t)
-    (hone : ∀ t, H (1, t) = γ' t) :
-    Path.unitsWindingNumber γ =
-    Path.unitsWindingNumber γ'
-\end{verbatim}
-\end{lemma}
-%%-/
-
-theorem unitsWindingNumber_eq_of_homotopy {u u' : ℂˣ}
-    (γ : Path u u) (γ' : Path u' u') (H : C(I × I, ℂˣ))
-    (hhom : ContinuousMap.IsLoopHomotopy H) (hzero : ∀ t, H (0, t) = γ t)
-    (hone : ∀ t, H (1, t) = γ' t) :
-    Path.unitsWindingNumber γ = Path.unitsWindingNumber γ' := by
-  let H' : C(I × I, Cstar) := ContinuousMap.toNonzeroSubtype H
-  have hhom' : ContinuousMap.IsLoopHomotopy H' := by
-    intro s
-    apply Subtype.ext
-    simpa [H', ContinuousMap.toNonzeroSubtype] using
-      congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s)
-  have hzero' : ∀ t, H' (0, t) = Path.toNonzeroSubtype γ t := by
-    intro t
-    apply Subtype.ext
-    simpa [H', ContinuousMap.toNonzeroSubtype, Path.toNonzeroSubtype] using
-      congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
-  have hone' : ∀ t, H' (1, t) = Path.toNonzeroSubtype γ' t := by
-    intro t
-    apply Subtype.ext
-    simpa [H', ContinuousMap.toNonzeroSubtype, Path.toNonzeroSubtype] using
-      congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
-  simpa [unitsWindingNumber] using
-    windingNumber_eq_of_homotopy (Path.toNonzeroSubtype γ) (Path.toNonzeroSubtype γ') H' hhom' hzero' hone'
-
-/-%%
-\begin{proof}\leanok
-Transport the homotopy through the homeomorphism from $\C^\times$ to $\C\setminus\{0\}$ and apply
-homotopy invariance there.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{unitsWindingNumber_reflNew}\lean{RootsComplexPolynomialsNew.Path.unitsWindingNumber_refl}\uses{unitsWindingNumberNew, pathWindingNumber_reflNew, pathToNonzeroSubtypeNew}\leanok
-The constant loop in $\C^\times$ has winding number zero.
-\begin{verbatim}
-theorem unitsWindingNumber_refl
-    (u : ℂˣ) :
-    Path.unitsWindingNumber (Path.refl u) = 0
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem unitsWindingNumber_refl (u : ℂˣ) :
-    Path.unitsWindingNumber (Path.refl u) = 0 := by
-  have h :
-      Path.toNonzeroSubtype (Path.refl u) =
-        Path.refl (⟨(u : ℂ), u.ne_zero⟩ : Cstar) := by
-    ext t
-    rfl
-  rw [unitsWindingNumber, h]
-  exact windingNumber_refl (⟨(u : ℂ), u.ne_zero⟩ : Cstar)
-
-/-%%
-\begin{proof}\leanok
-After transporting to the nonzero subtype, this becomes the previous statement for constant loops.
 \end{proof}
 %%-/
 
@@ -1121,7 +796,7 @@ end Path
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{circleWindingNumberNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber}\uses{circleLoopNew, unitsWindingNumberNew}\leanok
+\begin{definition}\label{circleWindingNumberNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber}\uses{circleLoopNew, pathWindingNumberNew}\leanok
 The winding number of a continuous map from the circle to $\C^\times$ is the winding number of its
 associated loop.
 \begin{verbatim}
@@ -1133,7 +808,7 @@ noncomputable def windingNumber
 %%-/
 
 noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
-  Path.unitsWindingNumber (ContinuousMap.circleLoop f)
+  Path.windingNumber (ContinuousMap.circleLoop f)
 
 /-%%
 \begin{proof}\leanok
@@ -1143,7 +818,7 @@ taking the loop winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_constNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_const}\uses{circleWindingNumberNew, unitsWindingNumber_reflNew, circleLoopNew}\leanok
+\begin{lemma}\label{circleWindingNumber_constNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_const}\uses{circleWindingNumberNew, pathWindingNumber_reflNew, circleLoopNew}\leanok
 A constant map from the circle to $\C^\times$ has winding number zero.
 \begin{verbatim}
 theorem windingNumber_const
@@ -1156,12 +831,12 @@ theorem windingNumber_const
 
 @[simp] theorem windingNumber_const (c : ℂˣ) :
     windingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
-  change Path.unitsWindingNumber (ContinuousMap.circleLoop (ContinuousMap.const _ c : C(Circle, ℂˣ))) = 0
+  change Path.windingNumber (ContinuousMap.circleLoop (ContinuousMap.const _ c : C(Circle, ℂˣ))) = 0
   have hloop : ContinuousMap.circleLoop (ContinuousMap.const _ c : C(Circle, ℂˣ)) = Path.refl c := by
     ext t
     rfl
   rw [hloop]
-  exact Path.unitsWindingNumber_refl c
+  exact Path.windingNumber_refl c
 
 /-%%
 \begin{proof}\leanok
@@ -1170,7 +845,7 @@ The associated loop of a constant circle map is the constant loop, whose winding
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumberNew, unitsWindingNumber_eq_of_homotopyNew, circleLoopHomotopyNew, circleLoopHomotopy_applyNew, circleLoopHomotopy_isLoopHomotopyNew, circleLoopHomotopy_zero_leftNew, circleLoopHomotopy_one_leftNew}\leanok
+\begin{lemma}\label{circleWindingNumber_eq_of_homotopyNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumberNew, pathWindingNumber_eq_of_homotopyNew, circleLoopHomotopyNew, circleLoopHomotopy_applyNew, circleLoopHomotopy_isLoopHomotopyNew, circleLoopHomotopy_zero_leftNew, circleLoopHomotopy_one_leftNew}\leanok
 Homotopic circle maps into $\C^\times$ have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
@@ -1184,7 +859,7 @@ theorem windingNumber_eq_of_homotopy
 theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap.Homotopy f g) :
     windingNumber f = windingNumber g := by
   simpa [windingNumber] using
-    Path.unitsWindingNumber_eq_of_homotopy (ContinuousMap.circleLoop f) (ContinuousMap.circleLoop g) (circleLoopHomotopy H)
+    Path.windingNumber_eq_of_homotopy (ContinuousMap.circleLoop f) (ContinuousMap.circleLoop g) (circleLoopHomotopy H)
       (circleLoopHomotopy_isLoopHomotopy H) (circleLoopHomotopy_zero_left H)
       (circleLoopHomotopy_one_left H)
 
@@ -1371,41 +1046,6 @@ zero.
 \end{proof}
 %%-/
 
-/-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension'}\uses{circleWindingNumber_eq_zero_of_exists_extensionNew, toNonzeroSubtypeNew, fromNonzeroSubtypeNew, coe_fromNonzeroSubtype_applyNew, toNonzeroSubtype_fromNonzeroSubtypeNew, fromNonzeroSubtype_toNonzeroSubtypeNew}\leanok
-The same vanishing result holds for extensions valued in the nonzero-complex subtype, after
-transporting through the units/nonzero bridge.
-\begin{verbatim}
-theorem windingNumber_eq_zero_of_exists_extension'
-    {f : C(Circle, ℂˣ)}
-    {F : C(Metric.closedBall (0 : ℂ) 1,
-      {z : ℂ // z ≠ 0})}
-    (hF :
-      ∀ z : Circle,
-        F (Circle.toClosedUnitDisk z) =
-          ContinuousMap.toNonzeroSubtype f z) :
-    windingNumber f = 0
-\end{verbatim}
-\end{theorem}
-%%-/
-
-theorem windingNumber_eq_zero_of_exists_extension' {f : C(Circle, ℂˣ)}
-    {F : C(Metric.closedBall (0 : ℂ) 1, {z : ℂ // z ≠ 0})}
-    (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = ContinuousMap.toNonzeroSubtype f z) :
-    windingNumber f = 0 := by
-  let F' : C(Metric.closedBall (0 : ℂ) 1, ℂˣ) := ContinuousMap.fromNonzeroSubtype F
-  have hF' : ∀ z : Circle, F' (Circle.toClosedUnitDisk z) = f z := by
-    intro z
-    apply Units.ext
-    simpa [F'] using congrArg Subtype.val (hF z)
-  exact windingNumber_eq_zero_of_exists_extension hF'
-
-/-%%
-\begin{proof}\leanok
-Convert the subtype-valued extension into a units-valued extension and apply the previous theorem.
-\end{proof}
-%%-/
-
 end ContinuousMap
 
 /-%%
@@ -1506,7 +1146,7 @@ Unfold the specialized definition and simplify.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, coe_circleScaledMonomial_applyNew, circleWindingNumberNew, unitsWindingNumber_eq_of_liftNew, circleLoopNew, circleLoop_applyNew}\leanok
+\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, coe_circleScaledMonomial_applyNew, circleWindingNumberNew, pathWindingNumber_eq_of_liftNew, circleLoopNew, circleLoop_applyNew}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
 theorem circleScaledMonomial_windingNumber
@@ -1519,12 +1159,10 @@ theorem circleScaledMonomial_windingNumber
 
 theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
     ContinuousMap.windingNumber (circleScaledMonomial a c n) = (n : ℤ) := by
-  let c0 : {z : ℂ // z ≠ 0} := ⟨(a : ℂ) * (c : ℂ) ^ n, by
-    refine mul_ne_zero a.ne_zero ?_
-    exact pow_ne_zero n c.ne_zero⟩
-  let a0 : ℂ := Complex.log c0
+  let c0 : ℂˣ := a * c ^ n
+  let a0 : ℂ := Complex.log (c0 : ℂ)
   have ha0 : Complex.exp a0 = (c0 : ℂ) := by
-    simpa [a0] using Complex.exp_log c0.property
+    simpa [a0] using Complex.exp_log c0.ne_zero
   let tildeω : C(I, ℂ) := by
     refine ⟨fun t => a0 + (n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I, ?_⟩
     fun_prop
@@ -1563,7 +1201,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
           = (tildeω 1 - tildeω 0) / ((2 * Real.pi : ℂ) * Complex.I) := by
               symm
               simpa [ContinuousMap.windingNumber] using
-                Path.unitsWindingNumber_eq_of_lift (ContinuousMap.circleLoop (circleScaledMonomial a c n)) tildeω hlift
+                Path.windingNumber_eq_of_lift (ContinuousMap.circleLoop (circleScaledMonomial a c n)) tildeω hlift
       _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
             simp [tildeω]
       _ = (n : ℂ) := by
@@ -1881,7 +1519,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, coe_mapClosedUnitDiskUnits_applyNew, circleToClosedUnitDiskNew, coe_toClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew, circleWindingNumber_eq_zero_of_exists_extensionPrimeNew}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, coe_mapClosedUnitDiskUnits_applyNew, circleToClosedUnitDiskNew, coe_toClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew}\leanok
 Every nonconstant complex polynomial has a complex root.
 \begin{verbatim}
 theorem exists_root_of_natDegree_pos
