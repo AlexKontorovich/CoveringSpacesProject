@@ -1,9 +1,9 @@
 import Mathlib
 
 /-!
-# A blueprint-style presentation of the modern winding-number proof
+# A blueprint-style presentation of the winding-number proof
 
-This file repackages the modern refactor of the winding-number and polynomial-root argument into a
+This file repackages the refactor of the winding-number and polynomial-root argument into a
 single self-contained module. The exposition follows the style of
 `CoveringSpacesProject/RootsComplexPolynomials.lean`, while the formal development uses the newer
 Mathlib-facing abstractions based on `Path`, `I`, `ContinuousMap.Homotopy`, `Complex.exp`, and
@@ -14,7 +14,7 @@ Mathlib-facing abstractions based on `Path`, `I`, `ContinuousMap.Homotopy`, `Com
 From a mathlib-quality point of view, this standalone file is intentionally too broad. A likely
 upstream split would be:
 
-* `Metric.sphereToClosedBall` and `ContinuousMap.IsLoopHomotopy` in a topology/path-support layer;
+* `ContinuousMap.IsLoopHomotopy` in a topology/path-support layer;
 * `Circle.toClosedUnitDisk`, `ContinuousMap.circleLoop`, and `ContinuousMap.circleLoopHomotopy`
   near the existing circle API in `Mathlib/Analysis/SpecialFunctions/Complex/Circle.lean` and the
   path/homotopy API in `Mathlib/Topology/Homotopy/Path.lean`;
@@ -29,57 +29,6 @@ open scoped unitInterval
 noncomputable section
 
 namespace RootsComplexPolynomialsNew
-
-/-%%
-\section{Generic helper maps}
-%%-/
-
-namespace Metric
-
-/-%%
-\begin{definition}\label{sphereToClosedBallNew}\lean{RootsComplexPolynomialsNew.Metric.sphereToClosedBall}\leanok
-The canonical inclusion of a sphere into the corresponding closed ball.
-\begin{verbatim}
-def sphereToClosedBall [PseudoMetricSpace α]
-    (x : α) (r : ℝ) :
-    Metric.sphere x r → Metric.closedBall x r
-\end{verbatim}
-\end{definition}
-%%-/
-
-def sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ) :
-    Metric.sphere x r → Metric.closedBall x r :=
-  Set.inclusion Metric.sphere_subset_closedBall
-
-/-%%
-\begin{proof}\leanok
-This is just the inclusion map induced by the elementary containment
-$\operatorname{sphere}(x,r)\subseteq \operatorname{closedBall}(x,r)$.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{coe_sphereToClosedBallNew}\lean{RootsComplexPolynomialsNew.Metric.coe_sphereToClosedBall}\uses{sphereToClosedBallNew}\leanok
-After forgetting the subtype, the sphere-to-ball inclusion is the identity on points.
-\begin{verbatim}
-theorem coe_sphereToClosedBall
-    [PseudoMetricSpace α]
-    (x : α) (r : ℝ) (y : Metric.sphere x r) :
-    sphereToClosedBall x r y = y
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_sphereToClosedBall {α : Type*} [PseudoMetricSpace α] (x : α) (r : ℝ)
-    (y : Metric.sphere x r) : ((sphereToClosedBall x r y : Metric.closedBall x r) : α) = y := rfl
-
-/-%%
-\begin{proof}\leanok
-This follows immediately from the fact that the inclusion map does not change the underlying point.
-\end{proof}
-%%-/
-
-end Metric
 
 /-%%
 \section{Homotopies through loops}
@@ -117,7 +66,7 @@ end ContinuousMap
 namespace Circle
 
 /-%%
-\begin{definition}\label{circleToClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.toClosedUnitDisk}\uses{sphereToClosedBallNew}\leanok
+\begin{definition}\label{circleToClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.toClosedUnitDisk}\leanok
 The canonical inclusion of the unit circle into the closed unit disk.
 \begin{verbatim}
 abbrev toClosedUnitDisk :
@@ -127,16 +76,16 @@ abbrev toClosedUnitDisk :
 %%-/
 
 abbrev toClosedUnitDisk : Circle → Metric.closedBall (0 : ℂ) 1 :=
-  Metric.sphereToClosedBall (0 : ℂ) 1
+  Set.inclusion Metric.sphere_subset_closedBall
 
 /-%%
 \begin{proof}\leanok
-This is the general sphere-to-closed-ball inclusion specialized to the unit circle in $\C$.
+This is the direct inclusion of the unit circle into the closed unit disk in $\C$.
 \end{proof}
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\uses{circleToClosedUnitDiskNew, coe_sphereToClosedBallNew}\leanok
+\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\uses{circleToClosedUnitDiskNew}\leanok
 After forgetting the subtype, the inclusion of the circle into the closed disk does not change the
 underlying complex number.
 \begin{verbatim}
@@ -1024,7 +973,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
   have hJ0 : ∀ z : Circle, J (0, z) = Circle.toClosedUnitDisk z := by
     intro z
     apply Subtype.ext
-    simp [J, Jfun, Circle.toClosedUnitDisk]
+    simp [J, Jfun]
   have hJ1 : ∀ z : Circle, J (1, z) = 0 := by
     intro z
     apply Subtype.ext

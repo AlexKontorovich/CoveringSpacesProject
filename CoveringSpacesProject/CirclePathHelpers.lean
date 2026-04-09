@@ -1,6 +1,5 @@
 import Mathlib
 import «CoveringSpacesProject».LoopHomotopy
-import «CoveringSpacesProject».MetricSphereClosedBall
 
 open Complex TopologicalSpace
 
@@ -12,10 +11,7 @@ namespace Circle
 
 /-- The canonical inclusion of the circle into the closed unit disk. -/
 abbrev toClosedUnitDisk : Circle → Metric.closedBall (0 : ℂ) 1 :=
-  Metric.sphereToClosedBall (0 : ℂ) 1
-
-@[simp] theorem coe_toClosedUnitDisk (z : Circle) :
-    ((toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ) = z := rfl
+  Set.inclusion Metric.sphere_subset_closedBall
 
 end Circle
 
