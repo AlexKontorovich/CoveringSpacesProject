@@ -161,9 +161,6 @@ noncomputable def circleScaledMonomial (a c : ℂˣ) (n : ℕ) : C(Circle, ℂˣ
       exact isUnit_iff_ne_zero.mpr <|
         mul_ne_zero a.ne_zero (pow_ne_zero n <| mul_ne_zero c.ne_zero (Circle.coe_ne_zero z))
 
-@[simp] theorem coe_circleScaledMonomial_apply (a c : ℂˣ) (n : ℕ) (z : Circle) :
-    ((circleScaledMonomial a c n z : ℂˣ) : ℂ) = a * (((c : ℂ) * z) ^ n) := rfl
-
 /-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/
 noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : C(Circle, ℂˣ) :=
   circleScaledMonomial a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
@@ -211,7 +208,9 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
             rw [mul_pow]
             ring
       _ = (((circleScaledMonomial a c n).circleLoop t : ℂˣ) : ℂ) := by
-            simp [coe_circleScaledMonomial_apply]
+            change (a : ℂ) * (((c : ℂ) * Circle.exp (2 * Real.pi * (t : ℝ))) ^ n) =
+              ((circleScaledMonomial a c n (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ)
+            rfl
   have hwind : ((circleScaledMonomial a c n).windingNumber : ℂ) = n := by
     calc
       ((circleScaledMonomial a c n).windingNumber : ℂ)

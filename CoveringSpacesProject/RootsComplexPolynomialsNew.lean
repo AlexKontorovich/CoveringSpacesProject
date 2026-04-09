@@ -1039,28 +1039,6 @@ the circle are nonzero.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_circleScaledMonomial_applyNew}\lean{RootsComplexPolynomialsNew.coe_circleScaledMonomial_apply}\uses{circleScaledMonomialNew}\leanok
-After coercing to $\C$, the scaled monomial has the expected pointwise formula
-$a\,(cz)^n$.
-\begin{verbatim}
-theorem coe_circleScaledMonomial_apply
-    (a c : ℂˣ) (n : ℕ) (z : Circle) :
-    ((circleScaledMonomial a c n z : ℂˣ) : ℂ) =
-    a * (((c : ℂ) * z) ^ n)
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_circleScaledMonomial_apply (a c : ℂˣ) (n : ℕ) (z : Circle) :
-    ((circleScaledMonomial a c n z : ℂˣ) : ℂ) = a * (((c : ℂ) * z) ^ n) := rfl
-
-/-%%
-\begin{proof}\leanok
-This is immediate from the definition.
-\end{proof}
-%%-/
-
-/-%%
 \begin{definition}\label{circleMonomialNew}\lean{RootsComplexPolynomialsNew.circleMonomial}\uses{circleScaledMonomialNew}\leanok
 For $R>0$, the map $z\mapsto a\,(Rz)^n$ is obtained by specializing the previous construction to
 the nonzero scalar $R$.
@@ -1105,7 +1083,7 @@ Unfold the specialized definition and simplify.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, coe_circleScaledMonomial_applyNew, circleWindingNumberNew, pathWindingNumber_eq_of_liftNew, circleLoopNew, circleLoop_applyNew}\leanok
+\begin{theorem}\label{circleScaledMonomial_windingNumberNew}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomialNew, circleWindingNumberNew, pathWindingNumber_eq_of_liftNew, circleLoopNew, circleLoop_applyNew}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
 theorem circleScaledMonomial_windingNumber
@@ -1153,7 +1131,9 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
             rw [mul_pow]
             ring
       _ = (((ContinuousMap.circleLoop (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
-            simp [coe_circleScaledMonomial_apply]
+            change (a : ℂ) * (((c : ℂ) * Circle.exp (2 * Real.pi * (t : ℝ))) ^ n) =
+              ((circleScaledMonomial a c n (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ)
+            rfl
   have hwind : (((ContinuousMap.windingNumber (circleScaledMonomial a c n) : ℤ) : ℂ)) = n := by
     calc
       (((ContinuousMap.windingNumber (circleScaledMonomial a c n) : ℤ) : ℂ))
