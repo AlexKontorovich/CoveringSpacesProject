@@ -163,10 +163,6 @@ noncomputable def circleScaledMonomial (a c : ℂˣ) (n : ℕ) : C(Circle, ℂˣ
       exact isUnit_iff_ne_zero.mpr <|
         mul_ne_zero a.ne_zero (pow_ne_zero n <| mul_ne_zero c.ne_zero (Circle.coe_ne_zero z))
 
-/-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/
-noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : C(Circle, ℂˣ) :=
-  circleScaledMonomial a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
-
 /-- The winding number of `z ↦ a * (cz)^n` on the unit circle is `n`. -/
 theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
     (circleScaledMonomial a c n).windingNumber = (n : ℤ) := by
@@ -221,12 +217,6 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
               exact_mod_cast Real.pi_ne_zero
             field_simp [tildeω, hpi, I_ne_zero]
   exact_mod_cast hwind
-
-/-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/
-theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
-    (circleMonomial a n R hR).windingNumber = (n : ℤ) := by
-  simpa [circleMonomial] using
-    circleScaledMonomial_windingNumber a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
 
 namespace Polynomial
 
@@ -326,6 +316,7 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
   have hlead : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp
   let a0 : ℂˣ := Units.mk0 p.leadingCoeff hlead
   have hRpos : 0 < R := lt_of_lt_of_le hR0pos hR
+  let cR : ℂˣ := Units.mk0 (R : ℂ) (by exact_mod_cast hRpos.ne')
   have hpoly_nonzero : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0 := by
     intro z hz
     have hbad :
@@ -338,20 +329,21 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
       (f := ⟨fun z => p.eval ((R : ℂ) * z),
         p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
       fun z => isUnit_iff_ne_zero.mpr (hpoly_nonzero z)
+  let g : C(Circle, ℂˣ) := circleScaledMonomial a0 cR p.natDegree
   have hclose :
       ∀ z : Circle,
-        ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ) - f z‖ <
-          ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ)‖ := by
+        ‖(g z : ℂ) - f z‖ < ‖(g z : ℂ)‖ := by
     intro z
-    simpa [circleMonomial, circleScaledMonomial, f, norm_sub_rev] using hdom R hR z
+    simpa [g, cR, circleScaledMonomial, f, norm_sub_rev] using hdom R hR z
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]
   · calc
-      f.windingNumber = (circleMonomial a0 p.natDegree R hRpos).windingNumber := by
+      f.windingNumber = g.windingNumber := by
         symm
         exact ContinuousMap.windingNumber_eq_of_norm_sub_lt hclose
-      _ = (p.natDegree : ℤ) := circleMonomial_windingNumber a0 p.natDegree R hRpos
+      _ = (p.natDegree : ℤ) := by
+        simpa [g] using circleScaledMonomial_windingNumber a0 cR p.natDegree
 
 theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∃ z : ℂ, p.IsRoot z := by

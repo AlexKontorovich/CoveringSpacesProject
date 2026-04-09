@@ -990,27 +990,6 @@ the circle are nonzero.
 %%-/
 
 /-%%
-\begin{definition}\label{circleMonomial}\lean{RootsComplexPolynomialsNew.circleMonomial}\uses{circleScaledMonomial}\leanok
-For $R>0$, the map $z\mapsto a\,(Rz)^n$ is obtained by specializing the previous construction to
-the nonzero scalar $R$.
-\begin{verbatim}
-noncomputable def circleMonomial
-    (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
-    C(Circle, ℂˣ)
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : C(Circle, ℂˣ) :=
-  circleScaledMonomial a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
-
-/-%%
-\begin{proof}\leanok
-This is just the scaled monomial with $c=R\in \C^\times$.
-\end{proof}
-%%-/
-
-/-%%
 \begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, circleLoop}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
@@ -1082,29 +1061,6 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
 Choose a logarithm of the nonzero constant $a c^n$. Then
 $t\mapsto \log(ac^n)+n(2\pi t)i$ is a lift of the associated loop, and its endpoint difference is
 exactly $2\pi n i$.
-\end{proof}
-%%-/
-
-/-%%
-\begin{theorem}\label{circleMonomial_windingNumber}\lean{RootsComplexPolynomialsNew.circleMonomial_windingNumber}\uses{circleMonomial, circleScaledMonomial_windingNumber}\leanok
-For $R>0$, the winding number of the map $z\mapsto a\,(Rz)^n$ on the unit circle is $n$.
-\begin{verbatim}
-theorem circleMonomial_windingNumber
-    (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
-    ContinuousMap.windingNumber (circleMonomial a
-    n R hR) = (n : ℤ)
-\end{verbatim}
-\end{theorem}
-%%-/
-
-theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) :
-    ContinuousMap.windingNumber (circleMonomial a n R hR) = (n : ℤ) := by
-  simpa [circleMonomial] using
-    circleScaledMonomial_windingNumber a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
-
-/-%%
-\begin{proof}\leanok
-This is the previous theorem applied to the special case $c=R\in \C^\times$.
 \end{proof}
 %%-/
 
@@ -1250,7 +1206,7 @@ This is the previous threshold statement rewritten in the standard `atTop` langu
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleMonomial_windingNumber}\leanok
+\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleScaledMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleScaledMonomial_windingNumber}\leanok
 For all sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of
 radius $R$ has winding number equal to the degree of the polynomial.
 \begin{verbatim}
@@ -1276,6 +1232,7 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
     simp [hp0] at hdeg
   have hlead : p.leadingCoeff ≠ 0 := Polynomial.leadingCoeff_ne_zero.mpr hp
   let a0 : ℂˣ := Units.mk0 p.leadingCoeff hlead
+  let cR : ℂˣ := Units.mk0 (R : ℂ) (by exact_mod_cast hRpos.ne')
   have hpoly_nonzero : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0 := by
     intro z hz
     have hbad :
@@ -1288,20 +1245,21 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
       (f := ⟨fun z => p.eval ((R : ℂ) * z),
         p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
       fun z => isUnit_iff_ne_zero.mpr (hpoly_nonzero z)
+  let g : C(Circle, ℂˣ) := circleScaledMonomial a0 cR p.natDegree
   have hclose :
       ∀ z : Circle,
-        ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ) - f z‖ <
-          ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ)‖ := by
+        ‖(g z : ℂ) - f z‖ < ‖(g z : ℂ)‖ := by
     intro z
-    simpa [circleMonomial, circleScaledMonomial, f, norm_sub_rev] using hdom z
+    simpa [g, cR, circleScaledMonomial, f, norm_sub_rev] using hdom z
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]
   · calc
-      ContinuousMap.windingNumber f = ContinuousMap.windingNumber (circleMonomial a0 p.natDegree R hRpos) := by
+      ContinuousMap.windingNumber f = ContinuousMap.windingNumber g := by
         symm
         exact ContinuousMap.windingNumber_eq_of_norm_sub_lt hclose
-      _ = (p.natDegree : ℤ) := circleMonomial_windingNumber a0 p.natDegree R hRpos
+      _ = (p.natDegree : ℤ) := by
+        simpa [g] using circleScaledMonomial_windingNumber a0 cR p.natDegree
 
 /-%%
 \begin{proof}\leanok
