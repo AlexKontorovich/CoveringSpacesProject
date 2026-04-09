@@ -4,9 +4,11 @@ import «CoveringSpacesProject».ComplexPathWinding
 
 open Complex TopologicalSpace
 
-open scoped unitInterval
+open scoped Real unitInterval
 
 noncomputable section
+
+local notation "𝓲" => (Complex.I : ℂ)
 
 namespace ContinuousMap
 
@@ -175,33 +177,31 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
   let c0 : {z : ℂ // z ≠ 0} := ⟨(a : ℂ) * (c : ℂ) ^ n, by
     refine mul_ne_zero a.ne_zero ?_
     exact pow_ne_zero n c.ne_zero⟩
-  let a0 : ℂ := Complex.log c0
-  have ha0 : Complex.exp a0 = (c0 : ℂ) := by
-    simpa [a0] using Complex.exp_log c0.property
+  let a0 : ℂ := log c0
+  have ha0 : exp a0 = (c0 : ℂ) := by
+    simpa [a0] using exp_log c0.property
   let tildeω : C(I, ℂ) := by
-    refine ⟨fun t => a0 + (n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I, ?_⟩
+    refine ⟨fun t => a0 + (n : ℂ) * ((2 * π) * (t : ℂ)) * 𝓲, ?_⟩
     fun_prop
   have hlift :
       ∀ t,
-        Complex.exp (tildeω t) = (((circleScaledMonomial a c n).circleLoop t : ℂˣ) : ℂ) := by
+        exp (tildeω t) = (((circleScaledMonomial a c n).circleLoop t : ℂˣ) : ℂ) := by
     intro t
     calc
-      Complex.exp (tildeω t)
-          = Complex.exp a0 *
-              Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
-              simp [tildeω, Complex.exp_add]
-      _ = ((a : ℂ) * (c : ℂ) ^ n) *
-            Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
+      exp (tildeω t)
+          = exp a0 * exp (((n : ℂ) * ((2 * π) * (t : ℂ))) * 𝓲) := by
+              simp [tildeω, exp_add]
+      _ = ((a : ℂ) * (c : ℂ) ^ n) * exp (((n : ℂ) * ((2 * π) * (t : ℂ))) * 𝓲) := by
             simpa [c0] using
               congrArg
-                (fun z : ℂ => z * Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I))
+                (fun z : ℂ => z * exp (((n : ℂ) * ((2 * π) * (t : ℂ))) * 𝓲))
                 ha0
       _ = ((a : ℂ) * (c : ℂ) ^ n) *
-            Complex.exp ((n : ℂ) * (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) := by
+            exp ((n : ℂ) * (((2 * π) * (t : ℂ)) * 𝓲)) := by
             ring_nf
       _ = ((a : ℂ) * (c : ℂ) ^ n) *
-            (Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) ^ n := by
-            rw [Complex.exp_nat_mul]
+            (exp (((2 * π) * (t : ℂ)) * 𝓲)) ^ n := by
+            rw [exp_nat_mul]
       _ = ((a : ℂ) * (c : ℂ) ^ n) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) ^ n := by
             simp [Circle.coe_exp]
       _ = (a : ℂ) * (((c : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
@@ -214,16 +214,16 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
   have hwind : ((circleScaledMonomial a c n).windingNumber : ℂ) = n := by
     calc
       ((circleScaledMonomial a c n).windingNumber : ℂ)
-          = (tildeω 1 - tildeω 0) / ((2 * Real.pi : ℂ) * Complex.I) := by
+          = (tildeω 1 - tildeω 0) / ((2 * π) * 𝓲) := by
               symm
               simpa [ContinuousMap.windingNumber] using
                 (circleScaledMonomial a c n).circleLoop.unitsWindingNumber_eq_of_lift tildeω hlift
-      _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
+      _ = ((n : ℂ) * (2 * π) * 𝓲) / ((2 * π) * 𝓲) := by
             simp [tildeω]
       _ = (n : ℂ) := by
-            have hpi : (Real.pi : ℂ) ≠ 0 := by
+            have hpi : (π : ℂ) ≠ 0 := by
               exact_mod_cast Real.pi_ne_zero
-            field_simp [tildeω, hpi, Complex.I_ne_zero]
+            field_simp [tildeω, hpi, I_ne_zero]
   exact_mod_cast hwind
 
 /-- The monomial map `z ↦ a * (Rz)^n` on the unit circle, valued in `ℂˣ`. -/

@@ -6,7 +6,7 @@ import Mathlib
 This file repackages the refactor of the winding-number and polynomial-root argument into a
 single self-contained module. The exposition follows the style of
 `CoveringSpacesProject/RootsComplexPolynomials.lean`, while the formal development uses the newer
-Mathlib-facing abstractions based on `Path`, `I`, `ContinuousMap.Homotopy`, `Complex.exp`, and
+Mathlib-facing abstractions based on `Path`, `I`, `ContinuousMap.Homotopy`, `exp`, and
 `ℂˣ`.
 
 ## Upstreaming note
@@ -24,11 +24,15 @@ upstream split would be:
   than reusable core library material.
 -/
 
-open scoped unitInterval
+open scoped Real unitInterval
+
+open Complex
 
 noncomputable section
 
 namespace RootsComplexPolynomialsNew
+
+local notation "𝓲" => (Complex.I : ℂ)
 
 /-%%
 \section{Homotopies through loops}
@@ -317,10 +321,10 @@ private noncomputable def toNonzeroPath {u v : ℂˣ} (γ : Path u v) :
   γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
 
 private noncomputable def unitLog (u : ℂˣ) : ℂ :=
-  Complex.log (u : ℂ)
+  log (u : ℂ)
 
-@[simp] private theorem exp_unitLog (u : ℂˣ) : Complex.exp (unitLog u) = (u : ℂ) := by
-  simpa [unitLog] using Complex.exp_log u.ne_zero
+@[simp] private theorem exp_unitLog (u : ℂˣ) : exp (unitLog u) = (u : ℂ) := by
+  simpa [unitLog] using exp_log u.ne_zero
 
 /-%%
 \begin{definition}\label{expLift}\lean{RootsComplexPolynomialsNew.Path.expLift}\leanok
@@ -329,21 +333,21 @@ exponential covering map.
 \begin{verbatim}
 noncomputable def expLift
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) :
+    (hw0 : exp w0 = (u₀ : ℂ)) :
     C(I, ℂ)
 \end{verbatim}
 \end{definition}
 %%-/
 
 noncomputable def expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) : C(I, ℂ) :=
-  Complex.isCoveringMap_exp.liftPath (toNonzeroPath γ).toContinuousMap w0 <| by
+    (hw0 : exp w0 = u₀) : C(I, ℂ) :=
+  isCoveringMap_exp.liftPath (toNonzeroPath γ).toContinuousMap w0 <| by
     apply Subtype.ext
     simpa using hw0.symm
 
 /-%%
 \begin{proof}\leanok
-Transport the path to the standard nonzero-complex subtype, where `Complex.exp` is already
+Transport the path to the standard nonzero-complex subtype, where `exp` is already
 registered as a covering map in Mathlib, and apply path lifting there.
 \end{proof}
 %%-/
@@ -354,18 +358,18 @@ The lifted path projects back to the original path under the exponential map.
 \begin{verbatim}
 theorem expLift_apply
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) (t : I) :
-    Complex.exp (Path.expLift γ w0 hw0 t) =
+    (hw0 : exp w0 = (u₀ : ℂ)) (t : I) :
+    exp (Path.expLift γ w0 hw0 t) =
     (γ t : ℂ)
 \end{verbatim}
 \end{lemma}
 %%-/
 
 @[simp] theorem expLift_apply {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) (t : I) :
-    Complex.exp (Path.expLift γ w0 hw0 t) = (γ t : ℂ) := by
+    (hw0 : exp w0 = (u₀ : ℂ)) (t : I) :
+    exp (Path.expLift γ w0 hw0 t) = (γ t : ℂ) := by
   have h :=
-    congrFun (Complex.isCoveringMap_exp.liftPath_lifts ((toNonzeroPath γ).toContinuousMap) w0 <| by
+    congrFun (isCoveringMap_exp.liftPath_lifts ((toNonzeroPath γ).toContinuousMap) w0 <| by
       apply Subtype.ext
       simpa using hw0.symm) t
   simpa [toNonzeroPath] using congrArg Subtype.val h
@@ -383,9 +387,9 @@ Any other lift of the same path with the same starting point agrees with the can
 \begin{verbatim}
 theorem eq_expLift
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ))
+    (hw0 : exp w0 = (u₀ : ℂ))
     (Γ : C(I, ℂ))
-    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ))
+    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ))
     (h0 : Γ 0 = w0) :
     Γ = Path.expLift γ w0 hw0
 \end{verbatim}
@@ -393,17 +397,17 @@ theorem eq_expLift
 %%-/
 
 theorem eq_expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) (Γ : C(I, ℂ))
-    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
+    (hw0 : exp w0 = (u₀ : ℂ)) (Γ : C(I, ℂ))
+    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
     Γ = Path.expLift γ w0 hw0 := by
-  apply (Complex.isCoveringMap_exp.eq_liftPath_iff' (γ := (toNonzeroPath γ).toContinuousMap)
+  apply (isCoveringMap_exp.eq_liftPath_iff' (γ := (toNonzeroPath γ).toContinuousMap)
     (e := w0)
     (γ_0 := by
       apply Subtype.ext
       simpa using hw0.symm) (Γ := Γ)).2
   constructor
   · ext t
-    show Complex.exp (Γ t) = (((toNonzeroPath γ).toContinuousMap) t : ℂ)
+    show exp (Γ t) = (((toNonzeroPath γ).toContinuousMap) t : ℂ)
     simpa [toNonzeroPath] using hlift t
   · exact h0
 
@@ -420,15 +424,15 @@ Adding an integral multiple of $2\pi i$ does not change the exponential.
 \begin{verbatim}
 theorem exp_add_int_mul_two_pi_I_eq
     (z : ℂ) (n : ℤ) :
-    Complex.exp (z + n * (2 * Real.pi *
-    Complex.I)) = Complex.exp z
+    exp (z + n * (2 * Real.pi *
+    I)) = exp z
 \end{verbatim}
 \end{lemma}
 %%-/
 
 private theorem exp_add_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
-    Complex.exp (z + n * (2 * Real.pi * Complex.I)) = Complex.exp z := by
-  apply (Complex.exp_eq_exp_iff_exists_int).2
+    exp (z + n * (2 * π * 𝓲)) = exp z := by
+  apply (exp_eq_exp_iff_exists_int).2
   refine ⟨n, ?_⟩
   simp
 
@@ -445,37 +449,37 @@ Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
 theorem eq_add_int_mul_two_pi_I_of_lifts
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
     (Γ₀ Γ₁ : C(I, ℂ))
-    (hΓ₀ : ∀ t, Complex.exp (Γ₀ t) = (γ t : ℂ))
-    (hΓ₁ : ∀ t, Complex.exp (Γ₁ t) = (γ t : ℂ)) :
+    (hΓ₀ : ∀ t, exp (Γ₀ t) = (γ t : ℂ))
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = (γ t : ℂ)) :
     ∃ n : ℤ, ∀ t, Γ₁ t =
-    Γ₀ t + n * (2 * Real.pi * Complex.I)
+    Γ₀ t + n * (2 * π * 𝓲)
 \end{verbatim}
 \end{lemma}
 %%-/
 
 private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
-    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, Complex.exp (Γ₀ t) = (γ t : ℂ))
-    (hΓ₁ : ∀ t, Complex.exp (Γ₁ t) = (γ t : ℂ)) :
-    ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * Real.pi * Complex.I) := by
-  have h0eq : Complex.exp (Γ₁ 0) = Complex.exp (Γ₀ 0) := by
+    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = (γ t : ℂ))
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = (γ t : ℂ)) :
+    ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * π * 𝓲) := by
+  have h0eq : exp (Γ₁ 0) = exp (Γ₀ 0) := by
     rw [hΓ₁ 0, hΓ₀ 0]
-  obtain ⟨n, hn⟩ := (Complex.exp_eq_exp_iff_exists_int).1 h0eq
-  have hΓ₁0 : Complex.exp (Γ₁ 0) = (u₀ : ℂ) := by
+  obtain ⟨n, hn⟩ := (exp_eq_exp_iff_exists_int).1 h0eq
+  have hΓ₁0 : exp (Γ₁ 0) = (u₀ : ℂ) := by
     calc
-      Complex.exp (Γ₁ 0) = (γ 0 : ℂ) := hΓ₁ 0
+      exp (Γ₁ 0) = (γ 0 : ℂ) := hΓ₁ 0
       _ = (u₀ : ℂ) := by
         simp [γ.source]
   let shiftedΓ₀ : C(I, ℂ) :=
-    ⟨fun t => Γ₀ t + n * (2 * Real.pi * Complex.I), Γ₀.continuous.add continuous_const⟩
-  have hshiftedΓ₀ : ∀ t, Complex.exp (shiftedΓ₀ t) = (γ t : ℂ) := by
+    ⟨fun t => Γ₀ t + n * (2 * π * 𝓲), Γ₀.continuous.add continuous_const⟩
+  have hshiftedΓ₀ : ∀ t, exp (shiftedΓ₀ t) = (γ t : ℂ) := by
     intro t
     calc
-      Complex.exp (shiftedΓ₀ t) = Complex.exp (Γ₀ t) := by
+      exp (shiftedΓ₀ t) = exp (Γ₀ t) := by
         exact exp_add_int_mul_two_pi_I_eq _ _
       _ = (γ t : ℂ) := hΓ₀ t
   have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
     calc
-      shiftedΓ₀ 0 = Γ₀ 0 + n * (2 * Real.pi * Complex.I) := by
+      shiftedΓ₀ 0 = Γ₀ 0 + n * (2 * π * 𝓲) := by
         rfl
       _ = Γ₁ 0 := by
         simpa using hn.symm
@@ -493,7 +497,7 @@ private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path 
     simpa using congrFun (congrArg DFunLike.coe huniq) t
   calc
     Γ₁ t = shiftedΓ₀ t := ht.symm
-    _ = Γ₀ t + n * (2 * Real.pi * Complex.I) := by
+    _ = Γ₀ t + n * (2 * π * 𝓲) := by
       rfl
 
 /-%%
@@ -518,17 +522,17 @@ noncomputable def windingNumber
 
 noncomputable def windingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
   let Γ := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have hper : Complex.exp (Γ 1) = Complex.exp (Γ 0) := by
+  have hper : exp (Γ 1) = exp (Γ 0) := by
     calc
-      Complex.exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ (unitLog u) (exp_unitLog u) 1
+      exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ (unitLog u) (exp_unitLog u) 1
       _ = (u : ℂ) := by
         simp [γ.target]
       _ = (γ 0 : ℂ) := by
         simp [γ.source]
-      _ = Complex.exp (Γ 0) := by
+      _ = exp (Γ 0) := by
         symm
         exact expLift_apply γ (unitLog u) (exp_unitLog u) 0
-  exact Classical.choose ((Complex.exp_eq_exp_iff_exists_int).1 hper)
+  exact Classical.choose ((exp_eq_exp_iff_exists_int).1 hper)
 
 /-%%
 \begin{proof}\leanok
@@ -545,46 +549,46 @@ $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_lift
     {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
-    (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
-    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) =
+    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) :
+    (Γ 1 - Γ 0) / (2 * π * 𝓲) =
     Path.windingNumber γ
 \end{verbatim}
 \end{lemma}
 %%-/
 
 theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
-    (Γ : C(I, ℂ)) (hlift : ∀ t, Complex.exp (Γ t) = (γ t : ℂ)) :
-    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber γ := by
+    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) :
+    (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.windingNumber γ := by
   let liftγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have hliftγ : ∀ t, Complex.exp (liftγ t) = (γ t : ℂ) := fun t =>
+  have hliftγ : ∀ t, exp (liftγ t) = (γ t : ℂ) := fun t =>
     expLift_apply γ (unitLog u) (exp_unitLog u) t
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
   have hbase_eq :
-      liftγ 1 = liftγ 0 + Path.windingNumber γ * (2 * Real.pi * Complex.I) := by
+      liftγ 1 = liftγ 0 + Path.windingNumber γ * (2 * π * 𝓲) := by
     unfold windingNumber
     dsimp [liftγ]
-    exact Classical.choose_spec ((Complex.exp_eq_exp_iff_exists_int).1 <| by
+    exact Classical.choose_spec ((exp_eq_exp_iff_exists_int).1 <| by
       calc
-        Complex.exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = (γ 1 : ℂ) := by
+        exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = (γ 1 : ℂ) := by
           exact expLift_apply γ (unitLog u) (exp_unitLog u) 1
         _ = (u : ℂ) := by
           simp [γ.target]
         _ = (γ 0 : ℂ) := by
           simp [γ.source]
-        _ = Complex.exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 0) := by
+        _ = exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 0) := by
           symm
           exact expLift_apply γ (unitLog u) (exp_unitLog u) 0)
   have hbase :
-      (liftγ 1 - liftγ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber γ := by
+      (liftγ 1 - liftγ 0) / (2 * π * 𝓲) = Path.windingNumber γ := by
     rw [hbase_eq]
     ring_nf
-    field_simp [Complex.two_pi_I_ne_zero]
+    field_simp [two_pi_I_ne_zero]
   calc
-    (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I)
-        = ((liftγ 1 + n * (2 * Real.pi * Complex.I)) -
-            (liftγ 0 + n * (2 * Real.pi * Complex.I))) / (2 * Real.pi * Complex.I) := by
+    (Γ 1 - Γ 0) / (2 * π * 𝓲)
+        = ((liftγ 1 + n * (2 * π * 𝓲)) -
+            (liftγ 0 + n * (2 * π * 𝓲))) / (2 * π * 𝓲) := by
             rw [hshift_eq 1, hshift_eq 0]
-    _ = (liftγ 1 - liftγ 0) / (2 * Real.pi * Complex.I) := by ring
+    _ = (liftγ 1 - liftγ 0) / (2 * π * 𝓲) := by ring
     _ = Path.windingNumber γ := hbase
 
 /-%%
@@ -615,11 +619,11 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
     (hone : ∀ t, H (1, t) = γ' t) :
     Path.windingNumber γ = Path.windingNumber γ' := by
   let tildeγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have htildeγ : ∀ t, Complex.exp (tildeγ t) = (γ t : ℂ) := fun t =>
+  have htildeγ : ∀ t, exp (tildeγ t) = (γ t : ℂ) := fun t =>
     expLift_apply γ (unitLog u) (exp_unitLog u) t
   let H' : C(I × I, {z : ℂ // z ≠ 0}) :=
     (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp H
-  have hH0 : ∀ t, H' (0, t) = ⟨Complex.exp (tildeγ t), Complex.exp_ne_zero _⟩ := by
+  have hH0 : ∀ t, H' (0, t) = ⟨exp (tildeγ t), exp_ne_zero _⟩ := by
     intro t
     apply Subtype.ext
     calc
@@ -627,17 +631,17 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
         rfl
       _ = (γ t : ℂ) := by
         simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
-      _ = Complex.exp (tildeγ t) := by
+      _ = exp (tildeγ t) := by
         symm
         exact htildeγ t
-  let tildeH : C(I × I, ℂ) := Complex.isCoveringMap_exp.liftHomotopy H' tildeγ hH0
-  have htildeH_lifts : ∀ x, Complex.exp (tildeH x) = (H x : ℂ) := by
+  let tildeH : C(I × I, ℂ) := isCoveringMap_exp.liftHomotopy H' tildeγ hH0
+  have htildeH_lifts : ∀ x, exp (tildeH x) = (H x : ℂ) := by
     intro x
     simpa [H'] using congrArg Subtype.val <| congrFun
-      (Complex.isCoveringMap_exp.liftHomotopy_lifts H' tildeγ hH0) x
+      (isCoveringMap_exp.liftHomotopy_lifts H' tildeγ hH0) x
   have htildeH_zero : ∀ t, tildeH (0, t) = tildeγ t := by
     intro t
-    simpa using Complex.isCoveringMap_exp.liftHomotopy_zero (H := H') (f := tildeγ)
+    simpa using isCoveringMap_exp.liftHomotopy_zero (H := H') (f := tildeγ)
       (H_0 := hH0) t
   let μ : Path u u' := {
     toFun := fun s => H (s, 0)
@@ -648,16 +652,16 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
     ⟨fun s => tildeH (s, 0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
   let μ1 : C(I, ℂ) :=
     ⟨fun s => tildeH (s, 1), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  have hμ0 : (∀ s, Complex.exp (μ0 s) = (μ s : ℂ)) ∧ μ0 0 = tildeγ 0 := by
+  have hμ0 : (∀ s, exp (μ0 s) = (μ s : ℂ)) ∧ μ0 0 = tildeγ 0 := by
     constructor
     · intro s
       simpa [μ, μ0] using htildeH_lifts (s, 0)
     · simpa [μ0] using htildeH_zero 0
-  have hμ1 : (∀ s, Complex.exp (μ1 s) = (μ s : ℂ)) ∧ μ1 0 = tildeγ 1 := by
+  have hμ1 : (∀ s, exp (μ1 s) = (μ s : ℂ)) ∧ μ1 0 = tildeγ 1 := by
     constructor
     · intro s
       calc
-        Complex.exp (μ1 s) = (H (s, 1) : ℂ) := by
+        exp (μ1 s) = (H (s, 1) : ℂ) := by
           simpa [μ1] using htildeH_lifts (s, 1)
         _ = (H (s, 0) : ℂ) := by
           simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s).symm
@@ -666,16 +670,16 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
   let tildeγ' : C(I, ℂ) :=
     ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
-  have htildeγ' : ∀ t, Complex.exp (tildeγ' t) = (γ' t : ℂ) := by
+  have htildeγ' : ∀ t, exp (tildeγ' t) = (γ' t : ℂ) := by
     intro t
     calc
-      Complex.exp (tildeγ' t) = (H (1, t) : ℂ) := by
+      exp (tildeγ' t) = (H (1, t) : ℂ) := by
         simpa [tildeγ'] using htildeH_lifts (1, t)
       _ = (γ' t : ℂ) := by
         simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
   have hwind :
-      (tildeγ' 1 - tildeγ' 0) / (2 * Real.pi * Complex.I) =
-        (tildeγ 1 - tildeγ 0) / (2 * Real.pi * Complex.I) := by
+      (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) =
+        (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
     have hdiff : tildeγ' 1 - tildeγ' 0 = tildeγ 1 - tildeγ 0 := by
       calc
         tildeγ' 1 - tildeγ' 0 = μ1 1 - μ0 1 := by rfl
@@ -689,10 +693,10 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
       ((Path.windingNumber γ : ℤ) : ℂ) = ((Path.windingNumber γ' : ℤ) : ℂ) := by
     calc
       ((Path.windingNumber γ : ℤ) : ℂ)
-          = (tildeγ 1 - tildeγ 0) / (2 * Real.pi * Complex.I) := by
+          = (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
               symm
               exact windingNumber_eq_of_lift γ tildeγ htildeγ
-      _ = (tildeγ' 1 - tildeγ' 0) / (2 * Real.pi * Complex.I) := by
+      _ = (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) := by
             symm
             exact hwind
       _ = ((Path.windingNumber γ' : ℤ) : ℂ) := by
@@ -721,10 +725,10 @@ theorem windingNumber_refl
 @[simp] theorem windingNumber_refl (u : ℂˣ) :
     Path.windingNumber (Path.refl u) = 0 := by
   let Γ : C(I, ℂ) := ContinuousMap.const _ (unitLog u)
-  have hlift : ∀ t, Complex.exp (Γ t) = ((Path.refl u) t : ℂ) := by
+  have hlift : ∀ t, exp (Γ t) = ((Path.refl u) t : ℂ) := by
     intro t
     simp [Γ]
-  have hq : (Γ 1 - Γ 0) / (2 * Real.pi * Complex.I) = Path.windingNumber (Path.refl u) :=
+  have hq : (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.windingNumber (Path.refl u) :=
     windingNumber_eq_of_lift (Path.refl u) Γ hlift
   simpa [Γ] using hq.symm
 
@@ -1085,34 +1089,34 @@ theorem circleScaledMonomial_windingNumber
 theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
     ContinuousMap.windingNumber (circleScaledMonomial a c n) = (n : ℤ) := by
   let c0 : ℂˣ := a * c ^ n
-  let a0 : ℂ := Complex.log (c0 : ℂ)
-  have ha0 : Complex.exp a0 = (c0 : ℂ) := by
-    simpa [a0] using Complex.exp_log c0.ne_zero
+  let a0 : ℂ := log (c0 : ℂ)
+  have ha0 : exp a0 = (c0 : ℂ) := by
+    simpa [a0] using exp_log c0.ne_zero
   let tildeω : C(I, ℂ) := by
-    refine ⟨fun t => a0 + (n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I, ?_⟩
+    refine ⟨fun t => a0 + (n : ℂ) * ((2 * π) * (t : ℂ)) * 𝓲, ?_⟩
     fun_prop
   have hlift :
       ∀ t,
-        Complex.exp (tildeω t) =
+        exp (tildeω t) =
           (((ContinuousMap.circleLoop (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
     intro t
     calc
-      Complex.exp (tildeω t)
-          = Complex.exp a0 *
-              Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
-              simp [tildeω, Complex.exp_add]
+      exp (tildeω t)
+          = exp a0 *
+              exp (((n : ℂ) * ((2 * π) * (t : ℂ))) * 𝓲) := by
+              simp [tildeω, exp_add]
       _ = ((a : ℂ) * (c : ℂ) ^ n) *
-            Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I) := by
+            exp (((n : ℂ) * ((2 * π) * (t : ℂ))) * 𝓲) := by
             simpa [c0] using
               congrArg
-                (fun z : ℂ => z * Complex.exp (((n : ℂ) * ((2 * Real.pi : ℂ) * (t : ℂ))) * Complex.I))
+                (fun z : ℂ => z * exp (((n : ℂ) * ((2 * π) * (t : ℂ))) * 𝓲))
                 ha0
       _ = ((a : ℂ) * (c : ℂ) ^ n) *
-            Complex.exp ((n : ℂ) * (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) := by
+            exp ((n : ℂ) * (((2 * π) * (t : ℂ)) * 𝓲)) := by
             ring_nf
       _ = ((a : ℂ) * (c : ℂ) ^ n) *
-            (Complex.exp (((2 * Real.pi : ℂ) * (t : ℂ)) * Complex.I)) ^ n := by
-            rw [Complex.exp_nat_mul]
+            (exp (((2 * π) * (t : ℂ)) * 𝓲)) ^ n := by
+            rw [exp_nat_mul]
       _ = ((a : ℂ) * (c : ℂ) ^ n) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ) ^ n := by
             simp [Circle.coe_exp]
       _ = (a : ℂ) * (((c : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
@@ -1125,16 +1129,16 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
   have hwind : (((ContinuousMap.windingNumber (circleScaledMonomial a c n) : ℤ) : ℂ)) = n := by
     calc
       (((ContinuousMap.windingNumber (circleScaledMonomial a c n) : ℤ) : ℂ))
-          = (tildeω 1 - tildeω 0) / ((2 * Real.pi : ℂ) * Complex.I) := by
+          = (tildeω 1 - tildeω 0) / ((2 * π) * 𝓲) := by
               symm
               simpa [ContinuousMap.windingNumber] using
                 Path.windingNumber_eq_of_lift (ContinuousMap.circleLoop (circleScaledMonomial a c n)) tildeω hlift
-      _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
+      _ = ((n : ℂ) * (2 * π) * 𝓲) / ((2 * π) * 𝓲) := by
             simp [tildeω]
       _ = (n : ℂ) := by
-            have hpi : (Real.pi : ℂ) ≠ 0 := by
+            have hpi : (π : ℂ) ≠ 0 := by
               exact_mod_cast Real.pi_ne_zero
-            field_simp [tildeω, hpi, Complex.I_ne_zero]
+            field_simp [tildeω, hpi, I_ne_zero]
   exact_mod_cast hwind
 
 /-%%
