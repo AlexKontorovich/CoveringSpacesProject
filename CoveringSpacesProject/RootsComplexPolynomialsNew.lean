@@ -378,31 +378,7 @@ $\C^\times$ to the standard nonzero-complex subtype.
 %%-/
 
 /-%%
-\begin{lemma}\label{exp_add_int_mul_two_pi_I_eq}\lean{RootsComplexPolynomialsNew.Path.exp_add_int_mul_two_pi_I_eq}\leanok
-Adding an integral multiple of $2\pi i$ does not change the exponential.
-\begin{verbatim}
-theorem exp_add_int_mul_two_pi_I_eq
-    (z : ℂ) (n : ℤ) :
-    exp (z + n * (2 * Real.pi *
-    I)) = exp z
-\end{verbatim}
-\end{lemma}
-%%-/
-
-private theorem exp_add_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
-    exp (z + n * (2 * π * 𝓲)) = exp z := by
-  apply (exp_eq_exp_iff_exists_int).2
-  refine ⟨n, ?_⟩
-  simp
-
-/-%%
-\begin{proof}\leanok
-This is the usual $2\pi i$-periodicity of the complex exponential map.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_lifts}\lean{RootsComplexPolynomialsNew.Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLift, exp_add_int_mul_two_pi_I_eq}\leanok
+\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_lifts}\lean{RootsComplexPolynomialsNew.Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLift}\leanok
 Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
 \begin{verbatim}
 theorem eq_add_int_mul_two_pi_I_of_lifts
@@ -434,7 +410,9 @@ private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path 
     intro t
     calc
       exp (shiftedΓ₀ t) = exp (Γ₀ t) := by
-        exact exp_add_int_mul_two_pi_I_eq _ _
+        apply (exp_eq_exp_iff_exists_int).2
+        refine ⟨n, ?_⟩
+        simp [shiftedΓ₀]
       _ = (γ t : ℂ) := hΓ₀ t
   have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
     calc

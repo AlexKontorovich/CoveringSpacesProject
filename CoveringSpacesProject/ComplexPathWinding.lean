@@ -103,12 +103,6 @@ theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     exact hlift t
   · exact h0
 
-private theorem exp_add_int_mul_two_pi_I_eq (z : ℂ) (n : ℤ) :
-    exp (z + n * (2 * π * 𝓲)) = exp z := by
-  apply (exp_eq_exp_iff_exists_int).2
-  refine ⟨n, ?_⟩
-  simp
-
 private theorem eq_add_int_mul_two_pi_I_of_lifts {z₀ z₁ : Cstar} (γ : Path z₀ z₁)
     (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = (γ t : ℂ))
     (hΓ₁ : ∀ t, exp (Γ₁ t) = (γ t : ℂ)) :
@@ -127,7 +121,9 @@ private theorem eq_add_int_mul_two_pi_I_of_lifts {z₀ z₁ : Cstar} (γ : Path 
     intro t
     calc
       exp (shiftedΓ₀ t) = exp (Γ₀ t) := by
-        exact exp_add_int_mul_two_pi_I_eq _ _
+        apply (exp_eq_exp_iff_exists_int).2
+        refine ⟨n, ?_⟩
+        simp [shiftedΓ₀]
       _ = (γ t : ℂ) := hΓ₀ t
   have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
     calc
