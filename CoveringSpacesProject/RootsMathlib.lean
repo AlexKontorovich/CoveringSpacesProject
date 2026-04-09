@@ -234,30 +234,6 @@ theorem circleMonomial_windingNumber (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R
 
 namespace Polynomial
 
-/-- The circle map `z ↦ p(Rz)` valued in `ℂˣ`, assuming it avoids zero on the circle. -/
-noncomputable def mapCircleUnits (p : Polynomial ℂ) (R : ℝ)
-    (hR : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0) : C(Circle, ℂˣ) :=
-  ContinuousMap.unitsOfForallIsUnit
-    (f := ⟨fun z => p.eval ((R : ℂ) * z), p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
-    fun z => isUnit_iff_ne_zero.mpr (hR z)
-
-/-- The disk map `z ↦ p(Rz)` valued in `ℂˣ`, assuming it avoids zero on the closed unit disk. -/
-noncomputable def mapClosedUnitDiskUnits (p : Polynomial ℂ) (R : ℝ)
-    (hR : ∀ z : Metric.closedBall (0 : ℂ) 1, p.eval ((R : ℂ) * z) ≠ 0) :
-    C(Metric.closedBall (0 : ℂ) 1, ℂˣ) :=
-  ContinuousMap.unitsOfForallIsUnit
-    (f := ⟨fun z => p.eval ((R : ℂ) * z), p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
-    fun z => isUnit_iff_ne_zero.mpr (hR z)
-
-@[simp] theorem coe_mapCircleUnits_apply (p : Polynomial ℂ) (R : ℝ)
-    (hR : ∀ z : Circle, p.eval ((R : ℂ) * z) ≠ 0) (z : Circle) :
-    ((p.mapCircleUnits R hR z : ℂˣ) : ℂ) = p.eval ((R : ℂ) * z) := rfl
-
-@[simp] theorem coe_mapClosedUnitDiskUnits_apply (p : Polynomial ℂ) (R : ℝ)
-    (hR : ∀ z : Metric.closedBall (0 : ℂ) 1, p.eval ((R : ℂ) * z) ≠ 0)
-    (z : Metric.closedBall (0 : ℂ) 1) :
-    ((p.mapClosedUnitDiskUnits R hR z : ℂˣ) : ℂ) = p.eval ((R : ℂ) * z) := rfl
-
 theorem leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R → ∀ z : Circle,
       ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
@@ -361,7 +337,11 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
           ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
       simpa [hz, norm_sub_rev] using hdom R hR z
     exact (lt_irrefl _ hbad).elim
-  let f : C(Circle, ℂˣ) := p.mapCircleUnits R hpoly_nonzero
+  let f : C(Circle, ℂˣ) :=
+    ContinuousMap.unitsOfForallIsUnit
+      (f := ⟨fun z => p.eval ((R : ℂ) * z),
+        p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
+      fun z => isUnit_iff_ne_zero.mpr (hpoly_nonzero z)
   have hclose :
       ∀ z : Circle,
         ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ) - f z‖ <
@@ -370,7 +350,7 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
     simpa [f, norm_sub_rev] using hdom R hR z
   refine ⟨f, ?_, ?_⟩
   · intro z
-    rfl
+    simp [f]
   · calc
       f.windingNumber = (circleMonomial a0 p.natDegree R hRpos).windingNumber := by
         symm
@@ -386,7 +366,10 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
   obtain ⟨R0, hR0pos, hWN⟩ := eventually_windingNumber_eq_natDegree p hdeg
   obtain ⟨f, hf, hwind⟩ := hWN R0 le_rfl
   let F : C(Metric.closedBall (0 : ℂ) 1, ℂˣ) :=
-    p.mapClosedUnitDiskUnits R0 fun z => hnonzero ((R0 : ℂ) * z)
+    ContinuousMap.unitsOfForallIsUnit
+      (f := ⟨fun z => p.eval ((R0 : ℂ) * z),
+        p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
+      fun z => isUnit_iff_ne_zero.mpr (hnonzero ((R0 : ℂ) * z))
   have hboundary : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f z := by
     intro z
     apply Units.ext
