@@ -84,27 +84,6 @@ This is the direct inclusion of the unit circle into the closed unit disk in $\C
 \end{proof}
 %%-/
 
-/-%%
-\begin{lemma}\label{coe_toClosedUnitDiskNew}\lean{RootsComplexPolynomialsNew.Circle.coe_toClosedUnitDisk}\uses{circleToClosedUnitDiskNew}\leanok
-After forgetting the subtype, the inclusion of the circle into the closed disk does not change the
-underlying complex number.
-\begin{verbatim}
-theorem coe_toClosedUnitDisk (z : Circle) :
-    ((toClosedUnitDisk z :
-      Metric.closedBall (0 : ℂ) 1) : ℂ) = z
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_toClosedUnitDisk (z : Circle) :
-    ((toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ) = z := rfl
-
-/-%%
-\begin{proof}\leanok
-The inclusion map is literally the identity on the underlying point.
-\end{proof}
-%%-/
-
 end Circle
 
 namespace ContinuousMap
@@ -1486,7 +1465,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, coe_mapClosedUnitDiskUnits_applyNew, circleToClosedUnitDiskNew, coe_toClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_posNew}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegreeNew, mapClosedUnitDiskUnitsNew, coe_mapClosedUnitDiskUnits_applyNew, circleToClosedUnitDiskNew, circleWindingNumber_eq_zero_of_exists_extensionNew}\leanok
 Every nonconstant complex polynomial has a complex root.
 \begin{verbatim}
 theorem exists_root_of_natDegree_pos
@@ -1509,8 +1488,7 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
   have hboundary : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f z := by
     intro z
     apply Units.ext
-    have hz : (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ)) = z :=
-      Circle.coe_toClosedUnitDisk z
+    have hz : (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ)) = z := rfl
     calc
       ((F (Circle.toClosedUnitDisk z) : ℂˣ) : ℂ) =
           p.eval ((R : ℂ) * (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ))) := by

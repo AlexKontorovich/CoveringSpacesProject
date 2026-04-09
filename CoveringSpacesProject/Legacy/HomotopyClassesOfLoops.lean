@@ -1,4 +1,4 @@
-import CoveringSpacesProject.ExpCovering
+import «CoveringSpacesProject».Legacy.ExpCovering
 
 /-%%
 \section{Homotopy Classes of Loops and maps of $S^1$ in $\C^*$}
