@@ -7,10 +7,25 @@ open scoped unitInterval
 
 noncomputable section
 
+/-- The closed unit disk in `ℂ`. -/
+abbrev Disk : Type := Submonoid.unitClosedBall ℂ
+
+namespace Disk
+
+instance instZero : Zero Disk := inferInstanceAs <| Zero (Metric.closedBall (0 : ℂ) 1)
+
+@[simp, norm_cast] theorem coe_zero : ((0 : Disk) : ℂ) = 0 :=
+  Metric.unitClosedBall.coe_zero
+
+@[simp, norm_cast] theorem coe_eq_zero {z : Disk} : (z : ℂ) = 0 ↔ z = 0 :=
+  Metric.unitClosedBall.coe_eq_zero
+
+end Disk
+
 namespace Circle
 
 /-- The canonical inclusion of the circle into the closed unit disk. -/
-abbrev toClosedUnitDisk : Circle → Metric.closedBall (0 : ℂ) 1 :=
+abbrev toDisk : Circle → Disk :=
   Set.inclusion Metric.sphere_subset_closedBall
 
 end Circle

@@ -15,7 +15,7 @@ From a mathlib-quality point of view, this standalone file is intentionally too 
 upstream split would be:
 
 * `ContinuousMap.IsLoopHomotopy` in a topology/path-support layer;
-* `Circle.toClosedUnitDisk`, `ContinuousMap.circleLoop`, and `ContinuousMap.circleLoopHomotopy`
+* `Disk`, `Circle.toDisk`, `ContinuousMap.circleLoop`, and `ContinuousMap.circleLoopHomotopy`
   near the existing circle API in `Mathlib/Analysis/SpecialFunctions/Complex/Circle.lean` and the
   path/homotopy API in `Mathlib/Topology/Homotopy/Path.lean`;
 * `Path.expLift` and the `Path.windingNumber` API in or next to
@@ -60,22 +60,57 @@ This is the direct formalization of the condition that every slice $t\mapsto H(s
 end ContinuousMap
 
 /-%%
+\section{The closed unit disk}
+%%-/
+
+/-%%
+\begin{definition}\label{Disk}\lean{RootsComplexPolynomialsNew.Disk}\leanok
+The closed unit disk in the complex plane.
+\begin{verbatim}
+abbrev Disk : Type := Submonoid.unitClosedBall ℂ
+\end{verbatim}
+\end{definition}
+%%-/
+
+/-- The closed unit disk in `ℂ`. -/
+abbrev Disk : Type := Submonoid.unitClosedBall ℂ
+
+namespace Disk
+
+instance instZero : Zero Disk := inferInstanceAs <| Zero (Metric.closedBall (0 : ℂ) 1)
+
+@[simp, norm_cast] theorem coe_zero : ((0 : Disk) : ℂ) = 0 :=
+  Metric.unitClosedBall.coe_zero
+
+@[simp, norm_cast] theorem coe_eq_zero {z : Disk} : (z : ℂ) = 0 ↔ z = 0 :=
+  Metric.unitClosedBall.coe_eq_zero
+
+end Disk
+
+/-%%
+\begin{proof}\leanok
+This is the closed unit ball packaged as a bundled subtype, parallel to Mathlib's definition of the
+unit circle.
+\end{proof}
+%%-/
+
+/-%%
 \section{Circle-valued helper constructions}
 %%-/
 
 namespace Circle
 
 /-%%
-\begin{definition}\label{circleToClosedUnitDisk}\lean{RootsComplexPolynomialsNew.Circle.toClosedUnitDisk}\leanok
+\begin{definition}\label{circleToDisk}\lean{RootsComplexPolynomialsNew.Circle.toDisk}\leanok
 The canonical inclusion of the unit circle into the closed unit disk.
 \begin{verbatim}
-abbrev toClosedUnitDisk :
-    Circle → Metric.closedBall (0 : ℂ) 1
+abbrev toDisk :
+    Circle → Disk
 \end{verbatim}
 \end{definition}
 %%-/
 
-abbrev toClosedUnitDisk : Circle → Metric.closedBall (0 : ℂ) 1 :=
+abbrev toDisk : Circle → Disk :=
   Set.inclusion Metric.sphere_subset_closedBall
 
 /-%%
@@ -879,28 +914,28 @@ number.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension}\uses{circleToClosedUnitDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension}\uses{circleToDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
 If a map from the unit circle to $\C^\times$ extends to the closed unit disk through maps into
 $\C^\times$, then its winding number is zero.
 \begin{verbatim}
 theorem windingNumber_eq_zero_of_exists_extension
     {f : C(Circle, ℂˣ)}
-    {F : C(Metric.closedBall (0 : ℂ) 1, ℂˣ)}
+    {F : C(Disk, ℂˣ)}
     (hF :
       ∀ z : Circle,
-        F (Circle.toClosedUnitDisk z) = f z) :
+        F (Circle.toDisk z) = f z) :
     windingNumber f = 0
 \end{verbatim}
 \end{theorem}
 %%-/
 
 theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
-    {F : C(Metric.closedBall (0 : ℂ) 1, ℂˣ)}
-    (hF : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f z) :
+    {F : C(Disk, ℂˣ)}
+    (hF : ∀ z : Circle, F (Circle.toDisk z) = f z) :
     windingNumber f = 0 := by
   let Jfun : I × Circle → ℂ := fun x =>
     (((1 - (x.1 : ℝ)) : ℂ) * (x.2 : ℂ))
-  have hJfun_mem : ∀ x : I × Circle, Jfun x ∈ Metric.closedBall (0 : ℂ) 1 := by
+  have hJfun_mem : ∀ x : I × Circle, Jfun x ∈ (Submonoid.unitClosedBall ℂ : Set ℂ) := by
     intro x
     have hs0 : 0 ≤ (x.1 : ℝ) := x.1.2.1
     have hs1 : (x.1 : ℝ) ≤ 1 := x.1.2.2
@@ -919,11 +954,11 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
         rw [abs_of_nonneg hnonneg]
       _ ≤ 1 := by
         linarith
-    simpa [Metric.mem_closedBall] using hnorm
-  let J : C(I × Circle, Metric.closedBall (0 : ℂ) 1) :=
+    simpa [Submonoid.unitClosedBall, Metric.mem_closedBall] using hnorm
+  let J : C(I × Circle, Disk) :=
     ⟨fun x => ⟨Jfun x, hJfun_mem x⟩, Continuous.subtype_mk (by fun_prop) hJfun_mem⟩
   let H : C(I × Circle, ℂˣ) := F.comp J
-  have hJ0 : ∀ z : Circle, J (0, z) = Circle.toClosedUnitDisk z := by
+  have hJ0 : ∀ z : Circle, J (0, z) = Circle.toDisk z := by
     intro z
     apply Subtype.ext
     simp [J, Jfun]
@@ -937,7 +972,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
         intro z
         calc
           H (0, z) = F (J (0, z)) := rfl
-          _ = F (Circle.toClosedUnitDisk z) := by rw [hJ0 z]
+          _ = F (Circle.toDisk z) := by rw [hJ0 z]
           _ = f z := hF z
       map_one_left := by
         intro z
@@ -1337,7 +1372,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegree, circleToClosedUnitDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegree, circleToDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
 Every nonconstant complex polynomial has a complex root.
 \begin{verbatim}
 theorem exists_root_of_natDegree_pos
@@ -1355,18 +1390,18 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
     exact hroot ⟨z, hz⟩
   obtain ⟨R, hR⟩ := (eventually_windingNumber_eq_natDegree p hdeg).exists
   obtain ⟨f, hf, hwind⟩ := hR
-  let F : C(Metric.closedBall (0 : ℂ) 1, ℂˣ) :=
+  let F : C(Disk, ℂˣ) :=
     ContinuousMap.unitsOfForallIsUnit
       (f := ⟨fun z => p.eval ((R : ℂ) * z),
         p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
       fun z => isUnit_iff_ne_zero.mpr (hnonzero ((R : ℂ) * z))
-  have hboundary : ∀ z : Circle, F (Circle.toClosedUnitDisk z) = f z := by
+  have hboundary : ∀ z : Circle, F (Circle.toDisk z) = f z := by
     intro z
     apply Units.ext
-    have hz : (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ)) = z := rfl
+    have hz : (((Circle.toDisk z : Disk) : ℂ)) = z := rfl
     calc
-      ((F (Circle.toClosedUnitDisk z) : ℂˣ) : ℂ) =
-          p.eval ((R : ℂ) * (((Circle.toClosedUnitDisk z : Metric.closedBall (0 : ℂ) 1) : ℂ))) := by
+      ((F (Circle.toDisk z) : ℂˣ) : ℂ) =
+          p.eval ((R : ℂ) * (((Circle.toDisk z : Disk) : ℂ))) := by
         simp [F]
       _ = p.eval ((R : ℂ) * z) := by rw [hz]
       _ = (f z : ℂ) := (hf z).symm
