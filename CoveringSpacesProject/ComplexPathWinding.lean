@@ -87,14 +87,6 @@ noncomputable def expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
       simpa using hw0.symm) t
   simpa using congrArg Subtype.val h
 
-@[simp] theorem expLift_zero {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (z₀ : ℂ)) :
-    γ.expLift w0 hw0 0 = w0 := by
-  simpa [expLift] using Complex.isCoveringMap_exp.liftPath_zero (γ := γ.toContinuousMap)
-    (e := w0) (γ_0 := by
-      apply Subtype.ext
-      simpa using hw0.symm)
-
 /-- Uniqueness of path lifts through `Complex.exp`. -/
 theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
     (hw0 : Complex.exp w0 = (z₀ : ℂ)) (Γ : C(I, ℂ))

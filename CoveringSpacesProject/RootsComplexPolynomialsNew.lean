@@ -343,32 +343,6 @@ codomain subtype.
 %%-/
 
 /-%%
-\begin{lemma}\label{expLift_zero}\lean{RootsComplexPolynomialsNew.Path.expLift_zero}\uses{expLift}\leanok
-The lifted path starts at the prescribed basepoint.
-\begin{verbatim}
-theorem expLift_zero
-    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) :
-    Path.expLift γ w0 hw0 0 = w0
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem expLift_zero {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : Complex.exp w0 = (u₀ : ℂ)) :
-    Path.expLift γ w0 hw0 0 = w0 := by
-  simpa [expLift] using Complex.isCoveringMap_exp.liftPath_zero
-    (γ := (toNonzeroPath γ).toContinuousMap) (e := w0) (γ_0 := by
-      apply Subtype.ext
-      simpa using hw0.symm)
-
-/-%%
-\begin{proof}\leanok
-This is the standard initial-value property of the lifted path.
-\end{proof}
-%%-/
-
-/-%%
 \begin{lemma}\label{eq_expLift}\lean{RootsComplexPolynomialsNew.Path.eq_expLift}\uses{expLift}\leanok
 Any other lift of the same path with the same starting point agrees with the canonical lifted path.
 \begin{verbatim}
@@ -586,7 +560,7 @@ endpoint difference and hence the quotient by $2\pi i$ are unchanged.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply, expLift_zero}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
 Loops in $\C^\times$ that are freely homotopic through loops have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
