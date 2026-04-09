@@ -177,14 +177,14 @@ standard circle parametrization.
 \begin{verbatim}
 def circleLoopHomotopy
     [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) :
+    (H : f.Homotopy g) :
     C(I × I, X)
 \end{verbatim}
 \end{definition}
 %%-/
 
 def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) : C(I × I, X) :=
+    (H : f.Homotopy g) : C(I × I, X) :=
   ⟨fun x => H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))),
     H.continuous_toFun.comp
       (continuous_fst.prodMk
@@ -203,7 +203,7 @@ $\widehat H(s,t)=H(s,\exp(2\pi i t))$.
 \begin{verbatim}
 theorem circleLoopHomotopy_apply
     [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) (x : I × I) :
+    (H : f.Homotopy g) (x : I × I) :
     circleLoopHomotopy H x =
     H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ)))
 \end{verbatim}
@@ -211,7 +211,7 @@ theorem circleLoopHomotopy_apply
 %%-/
 
 @[simp] theorem circleLoopHomotopy_apply {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) (x : I × I) :
+    (H : f.Homotopy g) (x : I × I) :
     circleLoopHomotopy H x = H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))) := rfl
 
 /-%%
@@ -226,7 +226,7 @@ The induced homotopy of associated loops is a homotopy through loops.
 \begin{verbatim}
 theorem circleLoopHomotopy_isLoopHomotopy
     [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) :
+    (H : f.Homotopy g) :
     ContinuousMap.IsLoopHomotopy
     (circleLoopHomotopy H)
 \end{verbatim}
@@ -234,7 +234,7 @@ theorem circleLoopHomotopy_isLoopHomotopy
 %%-/
 
 theorem circleLoopHomotopy_isLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
+    (H : f.Homotopy g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
   intro s
   change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
     H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
@@ -254,7 +254,7 @@ loop of the initial map.
 \begin{verbatim}
 theorem circleLoopHomotopy_zero_left
     [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) (t : I) :
+    (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (0, t) =
     (ContinuousMap.circleLoop f) t
 \end{verbatim}
@@ -262,7 +262,7 @@ theorem circleLoopHomotopy_zero_left
 %%-/
 
 @[simp] theorem circleLoopHomotopy_zero_left {X : Type*} [TopologicalSpace X]
-    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
+    {f g : C(Circle, X)} (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (0, t) = (ContinuousMap.circleLoop f) t := by
   change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
   exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
@@ -281,7 +281,7 @@ loop of the terminal map.
 \begin{verbatim}
 theorem circleLoopHomotopy_one_left
     [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) (t : I) :
+    (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (1, t) =
     (ContinuousMap.circleLoop g) t
 \end{verbatim}
@@ -289,7 +289,7 @@ theorem circleLoopHomotopy_one_left
 %%-/
 
 @[simp] theorem circleLoopHomotopy_one_left {X : Type*} [TopologicalSpace X]
-    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
+    {f g : C(Circle, X)} (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (1, t) = (ContinuousMap.circleLoop g) t := by
   change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
   exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))
@@ -797,18 +797,18 @@ Homotopic circle maps into $\C^\times$ have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
     {f g : C(Circle, ℂˣ)}
-    (H : ContinuousMap.Homotopy f g) :
+    (H : f.Homotopy g) :
     windingNumber f = windingNumber g
 \end{verbatim}
 \end{lemma}
 %%-/
 
-theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap.Homotopy f g) :
+theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : f.Homotopy g) :
     windingNumber f = windingNumber g := by
   simpa [windingNumber] using
-    Path.windingNumber_eq_of_homotopy (ContinuousMap.circleLoop f) (ContinuousMap.circleLoop g) (circleLoopHomotopy H)
-      (circleLoopHomotopy_isLoopHomotopy H) (circleLoopHomotopy_zero_left H)
-      (circleLoopHomotopy_one_left H)
+    Path.windingNumber_eq_of_homotopy (ContinuousMap.circleLoop f) (ContinuousMap.circleLoop g)
+      (circleLoopHomotopy H) (circleLoopHomotopy_isLoopHomotopy H)
+      (circleLoopHomotopy_zero_left H) (circleLoopHomotopy_one_left H)
 
 /-%%
 \begin{proof}\leanok
@@ -829,7 +829,7 @@ theorem exists_homotopy_of_norm_sub_lt
     (hclose :
       ∀ z : α, ‖(f z : 𝕜) - g z‖ <
         ‖(f z : 𝕜)‖) :
-    Nonempty (ContinuousMap.Homotopy f g)
+    Nonempty (f.Homotopy g)
 \end{verbatim}
 \end{lemma}
 %%-/
@@ -837,7 +837,7 @@ theorem exists_homotopy_of_norm_sub_lt
 theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α]
     {𝕜 : Type*} [RCLike 𝕜] {f g : C(α, 𝕜ˣ)}
     (hclose : ∀ z : α, ‖(f z : 𝕜) - g z‖ < ‖(f z : 𝕜)‖) :
-    Nonempty (ContinuousMap.Homotopy f g) := by
+    Nonempty (f.Homotopy g) := by
   let Hbase : C(I × α, 𝕜) :=
     ⟨fun x =>
       (((1 - (x.1 : ℝ)) : 𝕜) * (f x.2 : 𝕜)) + (((x.1 : ℝ) : 𝕜) * (g x.2 : 𝕜)), by
@@ -966,7 +966,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     intro z
     apply Subtype.ext
     simp [J, Jfun]
-  let hHom : ContinuousMap.Homotopy f (ContinuousMap.const _ (F 0)) :=
+  let hHom : f.Homotopy (ContinuousMap.const _ (F 0)) :=
     { toContinuousMap := H
       map_zero_left := by
         intro z

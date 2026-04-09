@@ -44,31 +44,31 @@ def circleLoop {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) 
 
 /-- Precompose a homotopy of circle maps with the standard loop `t ↦ Circle.exp (2πt)`. -/
 def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) : C(I × I, X) :=
+    (H : f.Homotopy g) : C(I × I, X) :=
   ⟨fun x => H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))),
     H.continuous_toFun.comp
       (continuous_fst.prodMk
         (Circle.exp.continuous.comp <| by fun_prop))⟩
 
 @[simp] theorem circleLoopHomotopy_apply {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) (x : I × I) :
+    (H : f.Homotopy g) (x : I × I) :
     circleLoopHomotopy H x = H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))) := rfl
 
 theorem circleLoopHomotopy_isLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : ContinuousMap.Homotopy f g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
+    (H : f.Homotopy g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
   intro s
   change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
     H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
   simp [Circle.exp_two_pi]
 
 @[simp] theorem circleLoopHomotopy_zero_left {X : Type*} [TopologicalSpace X]
-    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
+    {f g : C(Circle, X)} (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (0, t) = f.circleLoop t := by
   change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
   exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
 
 @[simp] theorem circleLoopHomotopy_one_left {X : Type*} [TopologicalSpace X]
-    {f g : C(Circle, X)} (H : ContinuousMap.Homotopy f g) (t : I) :
+    {f g : C(Circle, X)} (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (1, t) = g.circleLoop t := by
   change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
   exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))

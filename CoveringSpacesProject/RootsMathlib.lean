@@ -15,7 +15,7 @@ noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
   f.circleLoop.unitsWindingNumber
 
 @[simp] theorem windingNumber_const (c : ℂˣ) :
-    windingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
+    (ContinuousMap.const _ c : C(Circle, ℂˣ)).windingNumber = 0 := by
   change (ContinuousMap.const _ c : C(Circle, ℂˣ)).circleLoop.unitsWindingNumber = 0
   have hloop : (ContinuousMap.const _ c : C(Circle, ℂˣ)).circleLoop = Path.refl c := by
     ext t
@@ -23,17 +23,17 @@ noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
   rw [hloop]
   exact Path.unitsWindingNumber_refl c
 
-theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : ContinuousMap.Homotopy f g) :
-    windingNumber f = windingNumber g := by
+theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : f.Homotopy g) :
+    f.windingNumber = g.windingNumber := by
   simpa [windingNumber] using
-    Path.unitsWindingNumber_eq_of_homotopy f.circleLoop g.circleLoop (circleLoopHomotopy H)
+    f.circleLoop.unitsWindingNumber_eq_of_homotopy g.circleLoop (circleLoopHomotopy H)
       (circleLoopHomotopy_isLoopHomotopy H) (circleLoopHomotopy_zero_left H)
       (circleLoopHomotopy_one_left H)
 
 theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α]
     {𝕜 : Type*} [RCLike 𝕜] {f g : C(α, 𝕜ˣ)}
     (hclose : ∀ z : α, ‖(f z : 𝕜) - g z‖ < ‖(f z : 𝕜)‖) :
-    Nonempty (ContinuousMap.Homotopy f g) := by
+    Nonempty (f.Homotopy g) := by
   let Hbase : C(I × α, 𝕜) :=
     ⟨fun x =>
       (((1 - (x.1 : ℝ)) : 𝕜) * (f x.2 : 𝕜)) + (((x.1 : ℝ) : 𝕜) * (g x.2 : 𝕜)), by
@@ -77,14 +77,14 @@ theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α]
 
 theorem windingNumber_eq_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
     (hclose : ∀ z : Circle, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
-    windingNumber f = windingNumber g := by
+    f.windingNumber = g.windingNumber := by
   obtain ⟨H⟩ := exists_homotopy_of_norm_sub_lt hclose
   exact windingNumber_eq_of_homotopy H
 
 theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     {F : C(Disk, ℂˣ)}
     (hF : ∀ z : Circle, F (Circle.toDisk z) = f z) :
-    windingNumber f = 0 := by
+    f.windingNumber = 0 := by
   let Jfun : I × Circle → ℂ := fun x =>
     (((1 - (x.1 : ℝ)) : ℂ) * (x.2 : ℂ))
   have hJfun_mem : ∀ x : I × Circle, Jfun x ∈ (Submonoid.unitClosedBall ℂ : Set ℂ) := by
@@ -120,7 +120,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     apply Subtype.ext
     change Jfun (1, z) = (0 : ℂ)
     simp [Jfun]
-  let hHom : ContinuousMap.Homotopy f (ContinuousMap.const _ (F 0)) :=
+  let hHom : f.Homotopy (ContinuousMap.const _ (F 0)) :=
     { toContinuousMap := H
       map_zero_left := by
         intro z
@@ -135,14 +135,14 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
           _ = F 0 := by rw [hJ1 z]
           _ = ContinuousMap.const _ (F 0) z := rfl }
   calc
-    windingNumber f = windingNumber (ContinuousMap.const _ (F 0)) := by
+    f.windingNumber = (ContinuousMap.const _ (F 0) : C(Circle, ℂˣ)).windingNumber := by
       exact windingNumber_eq_of_homotopy hHom
     _ = 0 := windingNumber_const (F 0)
 
 theorem windingNumber_eq_zero_of_exists_extension' {f : C(Circle, ℂˣ)}
     {F : C(Disk, {z : ℂ // z ≠ 0})}
     (hF : ∀ z : Circle, F (Circle.toDisk z) = f.toNonzeroSubtype z) :
-    windingNumber f = 0 := by
+    f.windingNumber = 0 := by
   let F' : C(Disk, ℂˣ) := F.fromNonzeroSubtype
   have hF' : ∀ z : Circle, F' (Circle.toDisk z) = f z := by
     intro z
@@ -217,7 +217,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
           = (tildeω 1 - tildeω 0) / ((2 * Real.pi : ℂ) * Complex.I) := by
               symm
               simpa [ContinuousMap.windingNumber] using
-                Path.unitsWindingNumber_eq_of_lift (circleScaledMonomial a c n).circleLoop tildeω hlift
+                (circleScaledMonomial a c n).circleLoop.unitsWindingNumber_eq_of_lift tildeω hlift
       _ = ((n : ℂ) * (2 * Real.pi : ℂ) * Complex.I) / ((2 * Real.pi : ℂ) * Complex.I) := by
             simp [tildeω]
       _ = (n : ℂ) := by
