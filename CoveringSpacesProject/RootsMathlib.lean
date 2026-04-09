@@ -85,7 +85,7 @@ theorem windingNumber_eq_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
 
 theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     {F : C(Disk, ℂˣ)}
-    (hF : ∀ z : Circle, F (Circle.toDisk z) = f z) :
+    (hF : ∀ z : Circle, F z = f z) :
     f.windingNumber = 0 := by
   let Jfun : I × Circle → ℂ := fun x =>
     (((1 - (x.1 : ℝ)) : ℂ) * (x.2 : ℂ))
@@ -112,7 +112,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
   let J : C(I × Circle, Disk) :=
     ⟨fun x => ⟨Jfun x, hJfun_mem x⟩, Continuous.subtype_mk (by fun_prop) hJfun_mem⟩
   let H : C(I × Circle, ℂˣ) := F.comp J
-  have hJ0 : ∀ z : Circle, J (0, z) = Circle.toDisk z := by
+  have hJ0 : ∀ z : Circle, J (0, z) = z := by
     intro z
     apply Subtype.ext
     change Jfun (0, z) = (z : ℂ)
@@ -128,7 +128,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
         intro z
         calc
           H (0, z) = F (J (0, z)) := rfl
-          _ = F (Circle.toDisk z) := by rw [hJ0 z]
+          _ = F z := by rw [hJ0 z]
           _ = f z := hF z
       map_one_left := by
         intro z
@@ -143,10 +143,10 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
 
 theorem windingNumber_eq_zero_of_exists_extension' {f : C(Circle, ℂˣ)}
     {F : C(Disk, {z : ℂ // z ≠ 0})}
-    (hF : ∀ z : Circle, F (Circle.toDisk z) = f.toNonzeroSubtype z) :
+    (hF : ∀ z : Circle, F z = f.toNonzeroSubtype z) :
     f.windingNumber = 0 := by
   let F' : C(Disk, ℂˣ) := F.fromNonzeroSubtype
-  have hF' : ∀ z : Circle, F' (Circle.toDisk z) = f z := by
+  have hF' : ∀ z : Circle, F' z = f z := by
     intro z
     apply Units.ext
     simpa [F'] using congrArg Subtype.val (hF z)
@@ -370,13 +370,13 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
       (f := ⟨fun z => p.eval ((R0 : ℂ) * z),
         p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
       fun z => isUnit_iff_ne_zero.mpr (hnonzero ((R0 : ℂ) * z))
-  have hboundary : ∀ z : Circle, F (Circle.toDisk z) = f z := by
+  have hboundary : ∀ z : Circle, F z = f z := by
     intro z
     apply Units.ext
-    have hz : (((Circle.toDisk z : Disk) : ℂ)) = z := rfl
+    have hz : (((z : Disk) : ℂ)) = z := rfl
     calc
-      ((F (Circle.toDisk z) : ℂˣ) : ℂ) =
-          p.eval ((R0 : ℂ) * (((Circle.toDisk z : Disk) : ℂ))) := by
+      ((F z : ℂˣ) : ℂ) =
+          p.eval ((R0 : ℂ) * (((z : Disk) : ℂ))) := by
         simp [F]
       _ = p.eval ((R0 : ℂ) * z) := by rw [hz]
       _ = (f z : ℂ) := (hf z).symm

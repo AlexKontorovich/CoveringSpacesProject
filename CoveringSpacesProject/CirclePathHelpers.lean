@@ -28,6 +28,11 @@ namespace Circle
 abbrev toDisk : Circle → Disk :=
   Set.inclusion Metric.sphere_subset_closedBall
 
+instance : Coe Circle Disk where
+  coe := toDisk
+
+@[simp] theorem coe_toDisk (z : Circle) : ((z : Disk) : ℂ) = z := rfl
+
 end Circle
 
 namespace ContinuousMap
@@ -39,9 +44,6 @@ def circleLoop {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) 
   source' := by simp
   target' := by simp [Circle.exp_two_pi]
 
-@[simp] theorem circleLoop_apply {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) (t : I) :
-    f.circleLoop t = f (Circle.exp (2 * Real.pi * (t : ℝ))) := rfl
-
 /-- Precompose a homotopy of circle maps with the standard loop `t ↦ Circle.exp (2πt)`. -/
 def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
     (H : f.Homotopy g) : C(I × I, X) :=
@@ -49,10 +51,6 @@ def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
     H.continuous_toFun.comp
       (continuous_fst.prodMk
         (Circle.exp.continuous.comp <| by fun_prop))⟩
-
-@[simp] theorem circleLoopHomotopy_apply {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : f.Homotopy g) (x : I × I) :
-    circleLoopHomotopy H x = H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))) := rfl
 
 theorem circleLoopHomotopy_isLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
     (H : f.Homotopy g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by

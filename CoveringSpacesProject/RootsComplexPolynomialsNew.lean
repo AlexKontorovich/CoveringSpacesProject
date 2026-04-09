@@ -117,6 +117,11 @@ abbrev toDisk :
 abbrev toDisk : Circle → Disk :=
   Set.inclusion Metric.sphere_subset_closedBall
 
+instance : Coe Circle Disk where
+  coe := toDisk
+
+@[simp] theorem coe_toDisk (z : Circle) : ((z : Disk) : ℂ) = z := rfl
+
 /-%%
 \begin{proof}\leanok
 This is the direct inclusion of the unit circle into the closed unit disk in $\C$.
@@ -153,28 +158,6 @@ takes both $0$ and $1$ to the point $1\in S^1$.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoop_apply}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoop_apply}\uses{circleLoop}\leanok
-The associated loop evaluates at $t\in I$ as $\psi(\exp(2\pi i t))$.
-\begin{verbatim}
-theorem circleLoop_apply
-    [TopologicalSpace X] (f : C(Circle, X))
-    (t : I) :
-    (ContinuousMap.circleLoop f) t =
-    f (Circle.exp (2 * Real.pi * (t : ℝ)))
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem circleLoop_apply {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) (t : I) :
-    (ContinuousMap.circleLoop f) t = f (Circle.exp (2 * Real.pi * (t : ℝ))) := rfl
-
-/-%%
-\begin{proof}\leanok
-This is just the defining formula for the associated loop.
-\end{proof}
-%%-/
-
-/-%%
 \begin{definition}\label{circleLoopHomotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy}\uses{circleLoop}\leanok
 A homotopy of circle maps induces a homotopy of the associated loops by precomposing with the
 standard circle parametrization.
@@ -197,30 +180,6 @@ def circleLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
 /-%%
 \begin{proof}\leanok
 This is obtained by composing the given homotopy with the standard map from $I$ to the circle.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{circleLoopHomotopy_apply}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_apply}\uses{circleLoopHomotopy}\leanok
-The induced homotopy evaluates by the expected formula
-$\widehat H(s,t)=H(s,\exp(2\pi i t))$.
-\begin{verbatim}
-theorem circleLoopHomotopy_apply
-    [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : f.Homotopy g) (x : I × I) :
-    circleLoopHomotopy H x =
-    H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ)))
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem circleLoopHomotopy_apply {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : f.Homotopy g) (x : I × I) :
-    circleLoopHomotopy H x = H (x.1, Circle.exp (2 * Real.pi * (x.2 : ℝ))) := rfl
-
-/-%%
-\begin{proof}\leanok
-This is immediate from the definition of the induced homotopy.
 \end{proof}
 %%-/
 
@@ -796,7 +755,7 @@ The associated loop of a constant circle map is the constant loop, whose winding
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_eq_of_homotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumber, pathWindingNumber_eq_of_homotopy, circleLoopHomotopy, circleLoopHomotopy_apply, circleLoopHomotopy_isLoopHomotopy, circleLoopHomotopy_zero_left, circleLoopHomotopy_one_left}\leanok
+\begin{lemma}\label{circleWindingNumber_eq_of_homotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumber, pathWindingNumber_eq_of_homotopy, circleLoopHomotopy, circleLoopHomotopy_isLoopHomotopy, circleLoopHomotopy_zero_left, circleLoopHomotopy_one_left}\leanok
 Homotopic circle maps into $\C^\times$ have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
@@ -927,7 +886,7 @@ theorem windingNumber_eq_zero_of_exists_extension
     {F : C(Disk, ℂˣ)}
     (hF :
       ∀ z : Circle,
-        F (Circle.toDisk z) = f z) :
+        F z = f z) :
     windingNumber f = 0
 \end{verbatim}
 \end{theorem}
@@ -935,7 +894,7 @@ theorem windingNumber_eq_zero_of_exists_extension
 
 theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     {F : C(Disk, ℂˣ)}
-    (hF : ∀ z : Circle, F (Circle.toDisk z) = f z) :
+    (hF : ∀ z : Circle, F z = f z) :
     windingNumber f = 0 := by
   let Jfun : I × Circle → ℂ := fun x =>
     (((1 - (x.1 : ℝ)) : ℂ) * (x.2 : ℂ))
@@ -962,7 +921,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
   let J : C(I × Circle, Disk) :=
     ⟨fun x => ⟨Jfun x, hJfun_mem x⟩, Continuous.subtype_mk (by fun_prop) hJfun_mem⟩
   let H : C(I × Circle, ℂˣ) := F.comp J
-  have hJ0 : ∀ z : Circle, J (0, z) = Circle.toDisk z := by
+  have hJ0 : ∀ z : Circle, J (0, z) = z := by
     intro z
     apply Subtype.ext
     simp [J, Jfun]
@@ -976,7 +935,7 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
         intro z
         calc
           H (0, z) = F (J (0, z)) := rfl
-          _ = F (Circle.toDisk z) := by rw [hJ0 z]
+          _ = F z := by rw [hJ0 z]
           _ = f z := hF z
       map_one_left := by
         intro z
@@ -1075,7 +1034,7 @@ Unfold the specialized definition and simplify.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, circleLoop, circleLoop_apply}\leanok
+\begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, circleLoop}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
 theorem circleScaledMonomial_windingNumber
@@ -1399,13 +1358,13 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
       (f := ⟨fun z => p.eval ((R : ℂ) * z),
         p.continuous.comp (continuous_const.mul continuous_subtype_val)⟩)
       fun z => isUnit_iff_ne_zero.mpr (hnonzero ((R : ℂ) * z))
-  have hboundary : ∀ z : Circle, F (Circle.toDisk z) = f z := by
+  have hboundary : ∀ z : Circle, F z = f z := by
     intro z
     apply Units.ext
-    have hz : (((Circle.toDisk z : Disk) : ℂ)) = z := rfl
+    have hz : (((z : Disk) : ℂ)) = z := rfl
     calc
-      ((F (Circle.toDisk z) : ℂˣ) : ℂ) =
-          p.eval ((R : ℂ) * (((Circle.toDisk z : Disk) : ℂ))) := by
+      ((F z : ℂˣ) : ℂ) =
+          p.eval ((R : ℂ) * (((z : Disk) : ℂ))) := by
         simp [F]
       _ = p.eval ((R : ℂ) * z) := by rw [hz]
       _ = (f z : ℂ) := (hf z).symm
