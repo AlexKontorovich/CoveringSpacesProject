@@ -282,7 +282,7 @@ private noncomputable def toNonzeroPath {u v : ℂˣ} (γ : Path u v) :
 private noncomputable def unitLog (u : ℂˣ) : ℂ :=
   log (u : ℂ)
 
-@[simp] private theorem exp_unitLog (u : ℂˣ) : exp (unitLog u) = (u : ℂ) := by
+@[simp] private theorem exp_unitLog (u : ℂˣ) : exp (unitLog u) = u := by
   simpa [unitLog] using exp_log u.ne_zero
 
 /-%%
@@ -292,7 +292,7 @@ exponential covering map.
 \begin{verbatim}
 noncomputable def expLift
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = (u₀ : ℂ)) :
+    (hw0 : exp w0 = u₀) :
     C(I, ℂ)
 \end{verbatim}
 \end{definition}
@@ -317,16 +317,16 @@ The lifted path projects back to the original path under the exponential map.
 \begin{verbatim}
 theorem expLift_apply
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = (u₀ : ℂ)) (t : I) :
+    (hw0 : exp w0 = u₀) (t : I) :
     exp (Path.expLift γ w0 hw0 t) =
-    (γ t : ℂ)
+    γ t
 \end{verbatim}
 \end{lemma}
 %%-/
 
 @[simp] theorem expLift_apply {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = (u₀ : ℂ)) (t : I) :
-    exp (Path.expLift γ w0 hw0 t) = (γ t : ℂ) := by
+    (hw0 : exp w0 = u₀) (t : I) :
+    exp (Path.expLift γ w0 hw0 t) = γ t := by
   have h :=
     congrFun (isCoveringMap_exp.liftPath_lifts ((toNonzeroPath γ).toContinuousMap) w0 <| by
       apply Subtype.ext
@@ -346,9 +346,9 @@ Any other lift of the same path with the same starting point agrees with the can
 \begin{verbatim}
 theorem eq_expLift
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = (u₀ : ℂ))
+    (hw0 : exp w0 = u₀)
     (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ))
+    (hlift : ∀ t, exp (Γ t) = γ t)
     (h0 : Γ 0 = w0) :
     Γ = Path.expLift γ w0 hw0
 \end{verbatim}
@@ -356,8 +356,8 @@ theorem eq_expLift
 %%-/
 
 theorem eq_expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = (u₀ : ℂ)) (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
+    (hw0 : exp w0 = u₀) (Γ : C(I, ℂ))
+    (hlift : ∀ t, exp (Γ t) = γ t) (h0 : Γ 0 = w0) :
     Γ = Path.expLift γ w0 hw0 := by
   apply (isCoveringMap_exp.eq_liftPath_iff' (γ := (toNonzeroPath γ).toContinuousMap)
     (e := w0)
@@ -384,8 +384,8 @@ Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
 theorem eq_add_int_mul_two_pi_I_of_lifts
     {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
     (Γ₀ Γ₁ : C(I, ℂ))
-    (hΓ₀ : ∀ t, exp (Γ₀ t) = (γ t : ℂ))
-    (hΓ₁ : ∀ t, exp (Γ₁ t) = (γ t : ℂ)) :
+    (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
     ∃ n : ℤ, ∀ t, Γ₁ t =
     Γ₀ t + n * (2 * π * 𝓲)
 \end{verbatim}
@@ -393,27 +393,27 @@ theorem eq_add_int_mul_two_pi_I_of_lifts
 %%-/
 
 private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
-    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = (γ t : ℂ))
-    (hΓ₁ : ∀ t, exp (Γ₁ t) = (γ t : ℂ)) :
+    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
     ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * π * 𝓲) := by
   have h0eq : exp (Γ₁ 0) = exp (Γ₀ 0) := by
     rw [hΓ₁ 0, hΓ₀ 0]
   obtain ⟨n, hn⟩ := (exp_eq_exp_iff_exists_int).1 h0eq
-  have hΓ₁0 : exp (Γ₁ 0) = (u₀ : ℂ) := by
+  have hΓ₁0 : exp (Γ₁ 0) = u₀ := by
     calc
-      exp (Γ₁ 0) = (γ 0 : ℂ) := hΓ₁ 0
-      _ = (u₀ : ℂ) := by
+      exp (Γ₁ 0) = γ 0 := hΓ₁ 0
+      _ = u₀ := by
         simp [γ.source]
   let shiftedΓ₀ : C(I, ℂ) :=
     ⟨fun t => Γ₀ t + n * (2 * π * 𝓲), Γ₀.continuous.add continuous_const⟩
-  have hshiftedΓ₀ : ∀ t, exp (shiftedΓ₀ t) = (γ t : ℂ) := by
+  have hshiftedΓ₀ : ∀ t, exp (shiftedΓ₀ t) = γ t := by
     intro t
     calc
       exp (shiftedΓ₀ t) = exp (Γ₀ t) := by
         apply (exp_eq_exp_iff_exists_int).2
         refine ⟨n, ?_⟩
         simp [shiftedΓ₀]
-      _ = (γ t : ℂ) := hΓ₀ t
+      _ = γ t := hΓ₀ t
   have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
     calc
       shiftedΓ₀ 0 = Γ₀ 0 + n * (2 * π * 𝓲) := by
@@ -461,10 +461,10 @@ noncomputable def windingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
   let Γ := Path.expLift γ (unitLog u) (exp_unitLog u)
   have hper : exp (Γ 1) = exp (Γ 0) := by
     calc
-      exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ (unitLog u) (exp_unitLog u) 1
-      _ = (u : ℂ) := by
+      exp (Γ 1) = γ 1 := expLift_apply γ (unitLog u) (exp_unitLog u) 1
+      _ = u := by
         simp [γ.target]
-      _ = (γ 0 : ℂ) := by
+      _ = γ 0 := by
         simp [γ.source]
       _ = exp (Γ 0) := by
         symm
@@ -486,7 +486,7 @@ $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_lift
     {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) :
+    (hlift : ∀ t, exp (Γ t) = γ t) :
     (Γ 1 - Γ 0) / (2 * π * 𝓲) =
     Path.windingNumber γ
 \end{verbatim}
@@ -494,10 +494,10 @@ theorem windingNumber_eq_of_lift
 %%-/
 
 theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
-    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) :
+    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = γ t) :
     (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.windingNumber γ := by
   let liftγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have hliftγ : ∀ t, exp (liftγ t) = (γ t : ℂ) := fun t =>
+  have hliftγ : ∀ t, exp (liftγ t) = γ t := fun t =>
     expLift_apply γ (unitLog u) (exp_unitLog u) t
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
   have hbase_eq :
@@ -506,11 +506,11 @@ theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
     dsimp [liftγ]
     exact Classical.choose_spec ((exp_eq_exp_iff_exists_int).1 <| by
       calc
-        exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = (γ 1 : ℂ) := by
+        exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = γ 1 := by
           exact expLift_apply γ (unitLog u) (exp_unitLog u) 1
-        _ = (u : ℂ) := by
+        _ = u := by
           simp [γ.target]
-        _ = (γ 0 : ℂ) := by
+        _ = γ 0 := by
           simp [γ.source]
         _ = exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 0) := by
           symm
@@ -556,7 +556,7 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
     (hone : ∀ t, H (1, t) = γ' t) :
     Path.windingNumber γ = Path.windingNumber γ' := by
   let tildeγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have htildeγ : ∀ t, exp (tildeγ t) = (γ t : ℂ) := fun t =>
+  have htildeγ : ∀ t, exp (tildeγ t) = γ t := fun t =>
     expLift_apply γ (unitLog u) (exp_unitLog u) t
   let H' : C(I × I, {z : ℂ // z ≠ 0}) :=
     (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp H
@@ -566,13 +566,13 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
     calc
       (H' (0, t) : ℂ) = (H (0, t) : ℂ) := by
         rfl
-      _ = (γ t : ℂ) := by
+      _ = γ t := by
         simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
       _ = exp (tildeγ t) := by
         symm
         exact htildeγ t
   let tildeH : C(I × I, ℂ) := isCoveringMap_exp.liftHomotopy H' tildeγ hH0
-  have htildeH_lifts : ∀ x, exp (tildeH x) = (H x : ℂ) := by
+  have htildeH_lifts : ∀ x, exp (tildeH x) = H x := by
     intro x
     simpa [H'] using congrArg Subtype.val <| congrFun
       (isCoveringMap_exp.liftHomotopy_lifts H' tildeγ hH0) x
@@ -589,12 +589,12 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
     ⟨fun s => tildeH (s, 0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
   let μ1 : C(I, ℂ) :=
     ⟨fun s => tildeH (s, 1), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  have hμ0 : (∀ s, exp (μ0 s) = (μ s : ℂ)) ∧ μ0 0 = tildeγ 0 := by
+  have hμ0 : (∀ s, exp (μ0 s) = μ s) ∧ μ0 0 = tildeγ 0 := by
     constructor
     · intro s
       simpa [μ, μ0] using htildeH_lifts (s, 0)
     · simpa [μ0] using htildeH_zero 0
-  have hμ1 : (∀ s, exp (μ1 s) = (μ s : ℂ)) ∧ μ1 0 = tildeγ 1 := by
+  have hμ1 : (∀ s, exp (μ1 s) = μ s) ∧ μ1 0 = tildeγ 1 := by
     constructor
     · intro s
       calc
@@ -602,17 +602,17 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
           simpa [μ1] using htildeH_lifts (s, 1)
         _ = (H (s, 0) : ℂ) := by
           simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s).symm
-        _ = (μ s : ℂ) := by rfl
+        _ = μ s := by rfl
     · simpa [μ1] using htildeH_zero 1
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
   let tildeγ' : C(I, ℂ) :=
     ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
-  have htildeγ' : ∀ t, exp (tildeγ' t) = (γ' t : ℂ) := by
+  have htildeγ' : ∀ t, exp (tildeγ' t) = γ' t := by
     intro t
     calc
       exp (tildeγ' t) = (H (1, t) : ℂ) := by
         simpa [tildeγ'] using htildeH_lifts (1, t)
-      _ = (γ' t : ℂ) := by
+      _ = γ' t := by
         simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
   have hwind :
       (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) =
@@ -983,7 +983,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
     ContinuousMap.windingNumber (circleScaledMonomial a c n) = (n : ℤ) := by
   let c0 : ℂˣ := a * c ^ n
   let a0 : ℂ := log (c0 : ℂ)
-  have ha0 : exp a0 = (c0 : ℂ) := by
+  have ha0 : exp a0 = c0 := by
     simpa [a0] using exp_log c0.ne_zero
   let tildeω : C(I, ℂ) := by
     refine ⟨fun t => a0 + (n : ℂ) * ((2 * π) * (t : ℂ)) * 𝓲, ?_⟩
@@ -1191,7 +1191,7 @@ radius $R$ has winding number equal to the degree of the polynomial.
 theorem eventually_windingNumber_eq_natDegree
     (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop,
-      ∃ f : C(Circle, ℂˣ), (∀ z, (f z : ℂ) = p.eval
+      ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval
       ((R : ℂ) * z)) ∧ ContinuousMap.windingNumber f
       = (p.natDegree : ℤ)
 \end{verbatim}
@@ -1200,7 +1200,7 @@ theorem eventually_windingNumber_eq_natDegree
 
 theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop,
-      ∃ f : C(Circle, ℂˣ), (∀ z, (f z : ℂ) = p.eval ((R : ℂ) * z)) ∧
+      ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval ((R : ℂ) * z)) ∧
         ContinuousMap.windingNumber f = (p.natDegree : ℤ) := by
   filter_upwards [Filter.eventually_gt_atTop (0 : ℝ),
       eventually_leadingTerm_dominates_on_circle p hdeg]
@@ -1276,11 +1276,11 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
     apply Units.ext
     have hz : (((z : Disk) : ℂ)) = z := rfl
     calc
-      ((F z : ℂˣ) : ℂ) =
+      F z =
           p.eval ((R : ℂ) * (((z : Disk) : ℂ))) := by
         simp [F]
       _ = p.eval ((R : ℂ) * z) := by rw [hz]
-      _ = (f z : ℂ) := (hf z).symm
+      _ = f z := (hf z).symm
   have hzero : ContinuousMap.windingNumber f = 0 :=
     ContinuousMap.windingNumber_eq_zero_of_exists_extension hboundary
   have hdeg_ne : (p.natDegree : ℤ) ≠ 0 := by

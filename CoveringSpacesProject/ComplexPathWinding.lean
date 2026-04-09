@@ -74,14 +74,14 @@ noncomputable def toNonzeroSubtype {u v : ℂˣ} (γ : Path u v) :
 
 /-- Lift a path in `ℂ \ {0}` through `exp` with a prescribed starting point. -/
 noncomputable def expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : exp w0 = (z₀ : ℂ)) : C(I, ℂ) :=
+    (hw0 : exp w0 = z₀) : C(I, ℂ) :=
   isCoveringMap_exp.liftPath γ.toContinuousMap w0 <| by
     apply Subtype.ext
     simpa using hw0.symm
 
 @[simp] theorem expLift_apply {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : exp w0 = (z₀ : ℂ)) (t : I) :
-    exp (γ.expLift w0 hw0 t) = (γ t : ℂ) := by
+    (hw0 : exp w0 = z₀) (t : I) :
+    exp (γ.expLift w0 hw0 t) = γ t := by
   have h :=
     congrFun (isCoveringMap_exp.liftPath_lifts γ.toContinuousMap w0 <| by
       apply Subtype.ext
@@ -90,8 +90,8 @@ noncomputable def expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
 
 /-- Uniqueness of path lifts through `exp`. -/
 theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
-    (hw0 : exp w0 = (z₀ : ℂ)) (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) (h0 : Γ 0 = w0) :
+    (hw0 : exp w0 = z₀) (Γ : C(I, ℂ))
+    (hlift : ∀ t, exp (Γ t) = γ t) (h0 : Γ 0 = w0) :
     Γ = γ.expLift w0 hw0 := by
   apply (isCoveringMap_exp.eq_liftPath_iff' (γ := γ.toContinuousMap) (e := w0)
     (γ_0 := by
@@ -99,32 +99,32 @@ theorem eq_expLift {z₀ z₁ : Cstar} (γ : Path z₀ z₁) (w0 : ℂ)
       simpa using hw0.symm) (Γ := Γ)).2
   constructor
   · ext t
-    show exp (Γ t) = (γ t : ℂ)
+    show exp (Γ t) = γ t
     exact hlift t
   · exact h0
 
 private theorem eq_add_int_mul_two_pi_I_of_lifts {z₀ z₁ : Cstar} (γ : Path z₀ z₁)
-    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = (γ t : ℂ))
-    (hΓ₁ : ∀ t, exp (Γ₁ t) = (γ t : ℂ)) :
+    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
     ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * π * 𝓲) := by
   have h0eq : exp (Γ₁ 0) = exp (Γ₀ 0) := by
     rw [hΓ₁ 0, hΓ₀ 0]
   obtain ⟨n, hn⟩ := (exp_eq_exp_iff_exists_int).1 h0eq
-  have hΓ₁0 : exp (Γ₁ 0) = (z₀ : ℂ) := by
+  have hΓ₁0 : exp (Γ₁ 0) = z₀ := by
     calc
-      exp (Γ₁ 0) = (γ 0 : ℂ) := hΓ₁ 0
-      _ = (z₀ : ℂ) := by
+      exp (Γ₁ 0) = γ 0 := hΓ₁ 0
+      _ = z₀ := by
         simp [γ.source]
   let shiftedΓ₀ : C(I, ℂ) :=
     ⟨fun t => Γ₀ t + n * (2 * π * 𝓲), Γ₀.continuous.add continuous_const⟩
-  have hshiftedΓ₀ : ∀ t, exp (shiftedΓ₀ t) = (γ t : ℂ) := by
+  have hshiftedΓ₀ : ∀ t, exp (shiftedΓ₀ t) = γ t := by
     intro t
     calc
       exp (shiftedΓ₀ t) = exp (Γ₀ t) := by
         apply (exp_eq_exp_iff_exists_int).2
         refine ⟨n, ?_⟩
         simp [shiftedΓ₀]
-      _ = (γ t : ℂ) := hΓ₀ t
+      _ = γ t := hΓ₀ t
   have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
     calc
       shiftedΓ₀ 0 = Γ₀ 0 + n * (2 * π * 𝓲) := by
@@ -151,15 +151,15 @@ private theorem eq_add_int_mul_two_pi_I_of_lifts {z₀ z₁ : Cstar} (γ : Path 
 /-- The winding number of a loop in `ℂ \ {0}`, defined via lifts through `exp`. -/
 noncomputable def windingNumber {z : Cstar} (γ : Path z z) : ℤ := by
   let w0 : ℂ := log z
-  have hw0 : exp w0 = (z : ℂ) := by
+  have hw0 : exp w0 = z := by
     simpa [w0] using exp_log z.property
   let Γ := γ.expLift w0 hw0
   have hper : exp (Γ 1) = exp (Γ 0) := by
     calc
-      exp (Γ 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
-      _ = (z : ℂ) := by
+      exp (Γ 1) = γ 1 := expLift_apply γ w0 hw0 1
+      _ = z := by
         simp [γ.target]
-      _ = (γ 0 : ℂ) := by
+      _ = γ 0 := by
         simp [γ.source]
       _ = exp (Γ 0) := by
         symm
@@ -167,13 +167,13 @@ noncomputable def windingNumber {z : Cstar} (γ : Path z z) : ℤ := by
   exact Classical.choose ((exp_eq_exp_iff_exists_int).1 hper)
 
 theorem windingNumber_eq_of_lift {z : Cstar} (γ : Path z z)
-    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) :
+    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = γ t) :
     (Γ 1 - Γ 0) / (2 * π * 𝓲) = γ.windingNumber := by
   let w0 : ℂ := log z
-  have hw0 : exp w0 = (z : ℂ) := by
+  have hw0 : exp w0 = z := by
     simpa [w0] using exp_log z.property
   let liftγ : C(I, ℂ) := γ.expLift w0 hw0
-  have hliftγ : ∀ t, exp (liftγ t) = (γ t : ℂ) := fun t =>
+  have hliftγ : ∀ t, exp (liftγ t) = γ t := fun t =>
     expLift_apply γ w0 hw0 t
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
   have hbase_eq :
@@ -182,10 +182,10 @@ theorem windingNumber_eq_of_lift {z : Cstar} (γ : Path z z)
     dsimp [liftγ]
     exact Classical.choose_spec ((exp_eq_exp_iff_exists_int).1 <| by
       calc
-        exp ((γ.expLift w0 hw0) 1) = (γ 1 : ℂ) := expLift_apply γ w0 hw0 1
-        _ = (z : ℂ) := by
+        exp ((γ.expLift w0 hw0) 1) = γ 1 := expLift_apply γ w0 hw0 1
+        _ = z := by
           simp [γ.target]
-        _ = (γ 0 : ℂ) := by
+        _ = γ 0 := by
           simp [γ.source]
         _ = exp ((γ.expLift w0 hw0) 0) := by
           symm
@@ -209,22 +209,22 @@ theorem windingNumber_eq_of_homotopy {z z' : Cstar}
     (hone : ∀ t, H (1, t) = γ' t) :
     γ.windingNumber = γ'.windingNumber := by
   let w0 : ℂ := log z
-  have hw0 : exp w0 = (z : ℂ) := by
+  have hw0 : exp w0 = z := by
     simpa [w0] using exp_log z.property
   let tildeγ : C(I, ℂ) := γ.expLift w0 hw0
-  have htildeγ : ∀ t, exp (tildeγ t) = (γ t : ℂ) := fun t =>
+  have htildeγ : ∀ t, exp (tildeγ t) = γ t := fun t =>
     expLift_apply γ w0 hw0 t
   have hH0 : ∀ t, H (0, t) = ⟨exp (tildeγ t), exp_ne_zero _⟩ := by
     intro t
     apply Subtype.ext
     calc
-      (H (0, t) : ℂ) = (γ t : ℂ) := by
+      (H (0, t) : ℂ) = γ t := by
         simpa using congrArg Subtype.val (hzero t)
       _ = exp (tildeγ t) := by
         symm
         exact htildeγ t
   let tildeH : C(I × I, ℂ) := isCoveringMap_exp.liftHomotopy H tildeγ hH0
-  have htildeH_lifts : ∀ x, exp (tildeH x) = (H x : ℂ) := by
+  have htildeH_lifts : ∀ x, exp (tildeH x) = H x := by
     intro x
     exact congrArg Subtype.val <| congrFun
       (isCoveringMap_exp.liftHomotopy_lifts H tildeγ hH0) x
@@ -241,12 +241,12 @@ theorem windingNumber_eq_of_homotopy {z z' : Cstar}
     ⟨fun s => tildeH (s, 0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
   let μ1 : C(I, ℂ) :=
     ⟨fun s => tildeH (s, 1), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  have hμ0 : (∀ s, exp (μ0 s) = (μ s : ℂ)) ∧ μ0 0 = tildeγ 0 := by
+  have hμ0 : (∀ s, exp (μ0 s) = μ s) ∧ μ0 0 = tildeγ 0 := by
     constructor
     · intro s
       simpa [μ, μ0] using htildeH_lifts (s, 0)
     · simpa [μ0] using htildeH_zero 0
-  have hμ1 : (∀ s, exp (μ1 s) = (μ s : ℂ)) ∧ μ1 0 = tildeγ 1 := by
+  have hμ1 : (∀ s, exp (μ1 s) = μ s) ∧ μ1 0 = tildeγ 1 := by
     constructor
     · intro s
       calc
@@ -254,17 +254,17 @@ theorem windingNumber_eq_of_homotopy {z z' : Cstar}
           simpa [μ1] using htildeH_lifts (s, 1)
         _ = (H (s, 0) : ℂ) := by
           simpa using congrArg Subtype.val (hhom s).symm
-        _ = (μ s : ℂ) := by rfl
+        _ = μ s := by rfl
     · simpa [μ1] using htildeH_zero 1
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
   let tildeγ' : C(I, ℂ) :=
     ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
-  have htildeγ' : ∀ t, exp (tildeγ' t) = (γ' t : ℂ) := by
+  have htildeγ' : ∀ t, exp (tildeγ' t) = γ' t := by
     intro t
     calc
       exp (tildeγ' t) = (H (1, t) : ℂ) := by
         simpa [tildeγ'] using htildeH_lifts (1, t)
-      _ = (γ' t : ℂ) := by
+      _ = γ' t := by
         simpa using congrArg Subtype.val (hone t)
   have hwind :
       (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) =
@@ -307,7 +307,7 @@ noncomputable def unitsWindingNumber {u : ℂˣ} (γ : Path u u) : ℤ :=
   γ.toNonzeroSubtype.windingNumber
 
 theorem unitsWindingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = (γ t : ℂ)) :
+    (hlift : ∀ t, exp (Γ t) = γ t) :
     (Γ 1 - Γ 0) / (2 * π * 𝓲) = γ.unitsWindingNumber := by
   simpa [unitsWindingNumber] using
     windingNumber_eq_of_lift γ.toNonzeroSubtype Γ (by

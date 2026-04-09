@@ -115,12 +115,12 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
   have hJ0 : ∀ z : Circle, J (0, z) = z := by
     intro z
     apply Subtype.ext
-    change Jfun (0, z) = (z : ℂ)
+    change Jfun (0, z) = z
     simp [Jfun]
   have hJ1 : ∀ z : Circle, J (1, z) = 0 := by
     intro z
     apply Subtype.ext
-    change Jfun (1, z) = (0 : ℂ)
+    change Jfun (1, z) = 0
     simp [Jfun]
   let hHom : f.Homotopy (ContinuousMap.const _ (F 0)) :=
     { toContinuousMap := H
@@ -170,7 +170,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
     refine mul_ne_zero a.ne_zero ?_
     exact pow_ne_zero n c.ne_zero⟩
   let a0 : ℂ := log c0
-  have ha0 : exp a0 = (c0 : ℂ) := by
+  have ha0 : exp a0 = c0 := by
     simpa [a0] using exp_log c0.property
   let tildeω : C(I, ℂ) := by
     refine ⟨fun t => a0 + (n : ℂ) * ((2 * π) * (t : ℂ)) * 𝓲, ?_⟩
@@ -305,7 +305,7 @@ theorem leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDe
 
 theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R →
-      ∃ f : C(Circle, ℂˣ), (∀ z, (f z : ℂ) = p.eval ((R : ℂ) * z)) ∧
+      ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval ((R : ℂ) * z)) ∧
         f.windingNumber = (p.natDegree : ℤ) := by
   obtain ⟨R0, hR0pos, hdom⟩ := leadingTerm_dominates_on_circle p hdeg
   refine ⟨R0, hR0pos, ?_⟩
@@ -363,11 +363,11 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
     apply Units.ext
     have hz : (((z : Disk) : ℂ)) = z := rfl
     calc
-      ((F z : ℂˣ) : ℂ) =
+      F z =
           p.eval ((R0 : ℂ) * (((z : Disk) : ℂ))) := by
         simp [F]
       _ = p.eval ((R0 : ℂ) * z) := by rw [hz]
-      _ = (f z : ℂ) := (hf z).symm
+      _ = f z := (hf z).symm
   have hzero : f.windingNumber = 0 :=
     ContinuousMap.windingNumber_eq_zero_of_exists_extension hboundary
   have hdeg_ne : (p.natDegree : ℤ) ≠ 0 := by
