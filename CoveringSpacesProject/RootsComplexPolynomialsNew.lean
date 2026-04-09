@@ -1011,29 +1011,6 @@ This is just the scaled monomial with $c=R\in \C^\times$.
 %%-/
 
 /-%%
-\begin{lemma}\label{coe_circleMonomial_apply}\lean{RootsComplexPolynomialsNew.coe_circleMonomial_apply}\uses{circleMonomial, circleScaledMonomial}\leanok
-After coercing to $\C$, the circle monomial evaluates as $a\,(Rz)^n$.
-\begin{verbatim}
-theorem coe_circleMonomial_apply
-    (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R)
-    (z : Circle) :
-    ((circleMonomial a n R hR z : ℂˣ) : ℂ) =
-    a * (((R : ℂ) * z) ^ n)
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_circleMonomial_apply (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) (z : Circle) :
-    ((circleMonomial a n R hR z : ℂˣ) : ℂ) = a * (((R : ℂ) * z) ^ n) := by
-  simp [circleMonomial, circleScaledMonomial]
-
-/-%%
-\begin{proof}\leanok
-Unfold the specialized definition and simplify.
-\end{proof}
-%%-/
-
-/-%%
 \begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, circleLoop}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
@@ -1273,7 +1250,7 @@ This is the previous threshold statement rewritten in the standard `atTop` langu
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleMonomial, coe_circleMonomial_apply, circleWindingNumber_eq_of_norm_sub_lt, circleMonomial_windingNumber}\leanok
+\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleMonomial_windingNumber}\leanok
 For all sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of
 radius $R$ has winding number equal to the degree of the polynomial.
 \begin{verbatim}
@@ -1316,7 +1293,7 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
         ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ) - f z‖ <
           ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ)‖ := by
     intro z
-    simpa [f, norm_sub_rev] using hdom z
+    simpa [circleMonomial, circleScaledMonomial, f, norm_sub_rev] using hdom z
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]

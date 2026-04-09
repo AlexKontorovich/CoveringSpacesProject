@@ -167,10 +167,6 @@ noncomputable def circleScaledMonomial (a c : ℂˣ) (n : ℕ) : C(Circle, ℂˣ
 noncomputable def circleMonomial (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) : C(Circle, ℂˣ) :=
   circleScaledMonomial a (Units.mk0 (R : ℂ) (by exact_mod_cast hR.ne')) n
 
-@[simp] theorem coe_circleMonomial_apply (a : ℂˣ) (n : ℕ) (R : ℝ) (hR : 0 < R) (z : Circle) :
-    ((circleMonomial a n R hR z : ℂˣ) : ℂ) = a * (((R : ℂ) * z) ^ n) := by
-  simp [circleMonomial, circleScaledMonomial]
-
 /-- The winding number of `z ↦ a * (cz)^n` on the unit circle is `n`. -/
 theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
     (circleScaledMonomial a c n).windingNumber = (n : ℤ) := by
@@ -347,7 +343,7 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
         ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ) - f z‖ <
           ‖(circleMonomial a0 p.natDegree R hRpos z : ℂ)‖ := by
     intro z
-    simpa [f, norm_sub_rev] using hdom R hR z
+    simpa [circleMonomial, circleScaledMonomial, f, norm_sub_rev] using hdom R hR z
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]
