@@ -15,7 +15,7 @@ From a mathlib-quality point of view, this standalone file is intentionally too 
 upstream split would be:
 
 * `ContinuousMap.IsLoopHomotopy` in a topology/path-support layer;
-* `Disk`, `Circle.toDisk`, `ContinuousMap.circleLoop`, and `ContinuousMap.circleLoopHomotopy`
+* `Disk`, `Circle.toDisk`, `ContinuousMap.coe_toPath`, and `ContinuousMap.circleLoopHomotopy`
   near the existing circle API in `Mathlib/Analysis/SpecialFunctions/Complex/Circle.lean` and the
   path/homotopy API in `Mathlib/Topology/Homotopy/Path.lean`;
 * `Path.expLift` and the `Path.windingNumber` API in or next to
@@ -30,8 +30,6 @@ open Complex
 
 noncomputable section
 
-namespace RootsComplexPolynomialsNew
-
 local notation "𝓲" => (Complex.I : ℂ)
 
 /-%%
@@ -41,7 +39,7 @@ local notation "𝓲" => (Complex.I : ℂ)
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{IsLoopHomotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.IsLoopHomotopy}\leanok
+\begin{definition}\label{IsLoopHomotopy}\lean{ContinuousMap.IsLoopHomotopy}\leanok
 A homotopy $H\colon I\times I\to X$ is a homotopy through loops if each horizontal slice has the
 same initial and terminal point.
 \begin{verbatim}
@@ -68,10 +66,14 @@ end ContinuousMap
 %%-/
 
 /-%%
-\begin{definition}\label{Disk}\lean{RootsComplexPolynomialsNew.Disk}\leanok
+\begin{definition}\label{Disk}\lean{Disk}\leanok
 The closed unit disk in the complex plane.
 \begin{verbatim}
 abbrev Disk : Type := Submonoid.unitClosedBall ℂ
+\end{verbatim}
+This mimics the Mathlib definition of Circle:
+\begin{verbatim}
+def Circle : Type := Submonoid.unitSphere ℂ
 \end{verbatim}
 \end{definition}
 %%-/
@@ -92,24 +94,22 @@ instance instZero : Zero Disk := inferInstanceAs <| Zero (Metric.closedBall (0 :
 end Disk
 
 /-%%
-\begin{proof}\leanok
-This is the closed unit ball packaged as a bundled subtype, parallel to Mathlib's definition of the
-unit circle.
-\end{proof}
-%%-/
-
-/-%%
 \section{Circle-valued helper constructions}
 %%-/
 
 namespace Circle
 
 /-%%
-\begin{definition}\label{circleToDisk}\lean{RootsComplexPolynomialsNew.Circle.toDisk}\leanok
+\begin{definition}\label{circleToDisk}\lean{Circle.toDisk}\leanok
 The canonical inclusion of the unit circle into the closed unit disk.
 \begin{verbatim}
 abbrev toDisk :
     Circle → Disk
+\end{verbatim}
+We make it an instance, so it can be deduced automatically via
+\begin{verbatim}
+instance : Coe Circle Disk where
+  coe := toDisk
 \end{verbatim}
 \end{definition}
 %%-/
@@ -119,6 +119,14 @@ abbrev toDisk : Circle → Disk :=
 
 instance : Coe Circle Disk where
   coe := toDisk
+
+/-%%
+\begin{lemma}\label{coe_toDisk}\lean{Circle.coe_toDisk}\leanok
+Helper Lemma tagged for simp:
+\begin{verbatim}
+theorem coe_toDisk (z : Circle) : ((z : Disk) : ℂ) = z := rfl
+\end{lemma}
+%%-/
 
 @[simp] theorem coe_toDisk (z : Circle) : ((z : Disk) : ℂ) = z := rfl
 
@@ -133,18 +141,18 @@ end Circle
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{circleLoop}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoop}\leanok
-Given a continuous map $\psi\colon S^1\to X$, its associated loop is obtained by precomposing with
+\begin{definition}\label{coe_toPath}\lean{ContinuousMap.coe_toPath}\leanok
+Given a continuous map $\psi\colon S^1\to X$, we coerce it to a Path, by precomposing with
 the standard parametrization $t\mapsto \exp(2\pi i t)$ of the circle on $I$.
 \begin{verbatim}
-def circleLoop
+def coe_toPath
     [TopologicalSpace X] (f : C(Circle, X)) :
     Path (f 1) (f 1)
 \end{verbatim}
 \end{definition}
 %%-/
 
-def circleLoop {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) (f 1) where
+def coe_toPath {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) (f 1) where
   toFun t := f (Circle.exp (2 * Real.pi * (t : ℝ)))
   continuous_toFun := f.continuous.comp <| Circle.exp.continuous.comp <| by fun_prop
   source' := by simp
@@ -158,7 +166,7 @@ takes both $0$ and $1$ to the point $1\in S^1$.
 %%-/
 
 /-%%
-\begin{definition}\label{circleLoopHomotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy}\uses{circleLoop}\leanok
+\begin{definition}\label{circleLoopHomotopy}\lean{ContinuousMap.circleLoopHomotopy}\uses{circleLoop}\leanok
 A homotopy of circle maps induces a homotopy of the associated loops by precomposing with the
 standard circle parametrization.
 \begin{verbatim}
@@ -184,20 +192,19 @@ This is obtained by composing the given homotopy with the standard map from $I$ 
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_isLoopHomotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_isLoopHomotopy}\uses{circleLoopHomotopy, IsLoopHomotopy}\leanok
+\begin{lemma}\label{circleLoopHomotopy_isLoopHomotopy}\lean{ContinuousMap.circleLoopHomotopy_isLoopHomotopy}\uses{circleLoopHomotopy, IsLoopHomotopy}\leanok
 The induced homotopy of associated loops is a homotopy through loops.
 \begin{verbatim}
 theorem circleLoopHomotopy_isLoopHomotopy
     [TopologicalSpace X] {f g : C(Circle, X)}
     (H : f.Homotopy g) :
-    ContinuousMap.IsLoopHomotopy
-    (circleLoopHomotopy H)
+    (circleLoopHomotopy H).IsLoopHomotopy
 \end{verbatim}
 \end{lemma}
 %%-/
 
 theorem circleLoopHomotopy_isLoopHomotopy {X : Type*} [TopologicalSpace X] {f g : C(Circle, X)}
-    (H : f.Homotopy g) : ContinuousMap.IsLoopHomotopy (circleLoopHomotopy H) := by
+    (H : f.Homotopy g) : (circleLoopHomotopy H).IsLoopHomotopy := by
   intro s
   change H (s, Circle.exp (2 * Real.pi * (0 : ℝ))) =
     H (s, Circle.exp (2 * Real.pi * (1 : ℝ)))
@@ -211,7 +218,7 @@ $\exp(0)=\exp(2\pi i)=1$.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_zero_left}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_zero_left}\uses{circleLoopHomotopy, circleLoop}\leanok
+\begin{lemma}\label{circleLoopHomotopy_zero_left}\lean{ContinuousMap.circleLoopHomotopy_zero_left}\uses{circleLoopHomotopy, coe_toPath}\leanok
 At the left endpoint of the homotopy parameter, the induced loop homotopy recovers the associated
 loop of the initial map.
 \begin{verbatim}
@@ -219,14 +226,14 @@ theorem circleLoopHomotopy_zero_left
     [TopologicalSpace X] {f g : C(Circle, X)}
     (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (0, t) =
-    (ContinuousMap.circleLoop f) t
+    (f.coe_toPath) t
 \end{verbatim}
 \end{lemma}
 %%-/
 
 @[simp] theorem circleLoopHomotopy_zero_left {X : Type*} [TopologicalSpace X]
     {f g : C(Circle, X)} (H : f.Homotopy g) (t : I) :
-    circleLoopHomotopy H (0, t) = (ContinuousMap.circleLoop f) t := by
+    circleLoopHomotopy H (0, t) = (f.coe_toPath) t := by
   change H (0, Circle.exp (2 * Real.pi * (t : ℝ))) = f (Circle.exp (2 * Real.pi * (t : ℝ)))
   exact H.map_zero_left (Circle.exp (2 * Real.pi * (t : ℝ)))
 
@@ -238,7 +245,7 @@ parametrization.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleLoopHomotopy_one_left}\lean{RootsComplexPolynomialsNew.ContinuousMap.circleLoopHomotopy_one_left}\uses{circleLoopHomotopy, circleLoop}\leanok
+\begin{lemma}\label{circleLoopHomotopy_one_left}\lean{ContinuousMap.circleLoopHomotopy_one_left}\uses{circleLoopHomotopy, coe_toPath}\leanok
 At the right endpoint of the homotopy parameter, the induced loop homotopy recovers the associated
 loop of the terminal map.
 \begin{verbatim}
@@ -246,14 +253,14 @@ theorem circleLoopHomotopy_one_left
     [TopologicalSpace X] {f g : C(Circle, X)}
     (H : f.Homotopy g) (t : I) :
     circleLoopHomotopy H (1, t) =
-    (ContinuousMap.circleLoop g) t
+    (g.coe_toPath) t
 \end{verbatim}
 \end{lemma}
 %%-/
 
 @[simp] theorem circleLoopHomotopy_one_left {X : Type*} [TopologicalSpace X]
     {f g : C(Circle, X)} (H : f.Homotopy g) (t : I) :
-    circleLoopHomotopy H (1, t) = (ContinuousMap.circleLoop g) t := by
+    circleLoopHomotopy H (1, t) = (g.coe_toPath) t := by
   change H (1, Circle.exp (2 * Real.pi * (t : ℝ))) = g (Circle.exp (2 * Real.pi * (t : ℝ)))
   exact H.map_one_left (Circle.exp (2 * Real.pi * (t : ℝ)))
 
@@ -286,7 +293,7 @@ private noncomputable def unitLog (u : ℂˣ) : ℂ :=
   simpa [unitLog] using exp_log u.ne_zero
 
 /-%%
-\begin{definition}\label{expLift}\lean{RootsComplexPolynomialsNew.Path.expLift}\leanok
+\begin{definition}\label{expLift}\lean{Path.expLift}\leanok
 Given a path in $\C^\times$ and a chosen logarithm of its starting point, lift the path through the
 exponential covering map.
 \begin{verbatim}
@@ -312,7 +319,7 @@ registered as a covering map in Mathlib, and apply path lifting there.
 %%-/
 
 /-%%
-\begin{lemma}\label{expLift_apply}\lean{RootsComplexPolynomialsNew.Path.expLift_apply}\uses{expLift}\leanok
+\begin{lemma}\label{expLift_apply}\lean{Path.expLift_apply}\uses{expLift}\leanok
 The lifted path projects back to the original path under the exponential map.
 \begin{verbatim}
 theorem expLift_apply
@@ -341,7 +348,7 @@ codomain subtype.
 %%-/
 
 /-%%
-\begin{lemma}\label{eq_expLift}\lean{RootsComplexPolynomialsNew.Path.eq_expLift}\uses{expLift}\leanok
+\begin{lemma}\label{eq_expLift}\lean{Path.eq_expLift}\uses{expLift}\leanok
 Any other lift of the same path with the same starting point agrees with the canonical lifted path.
 \begin{verbatim}
 theorem eq_expLift
@@ -378,7 +385,7 @@ $\C^\times$ to the standard nonzero-complex subtype.
 %%-/
 
 /-%%
-\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_lifts}\lean{RootsComplexPolynomialsNew.Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLift}\leanok
+\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_lifts}\lean{Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLift}\leanok
 Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
 \begin{verbatim}
 theorem eq_add_int_mul_two_pi_I_of_lifts
@@ -399,43 +406,21 @@ private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path 
   have h0eq : exp (Γ₁ 0) = exp (Γ₀ 0) := by
     rw [hΓ₁ 0, hΓ₀ 0]
   obtain ⟨n, hn⟩ := (exp_eq_exp_iff_exists_int).1 h0eq
-  have hΓ₁0 : exp (Γ₁ 0) = u₀ := by
-    calc
-      exp (Γ₁ 0) = γ 0 := hΓ₁ 0
-      _ = u₀ := by
-        simp [γ.source]
+  refine ⟨n, fun t ↦ ?_⟩
+  have hΓ₁0 : exp (Γ₁ 0) = u₀ := by simpa using hΓ₁ 0
   let shiftedΓ₀ : C(I, ℂ) :=
     ⟨fun t => Γ₀ t + n * (2 * π * 𝓲), Γ₀.continuous.add continuous_const⟩
-  have hshiftedΓ₀ : ∀ t, exp (shiftedΓ₀ t) = γ t := by
-    intro t
-    calc
-      exp (shiftedΓ₀ t) = exp (Γ₀ t) := by
-        apply (exp_eq_exp_iff_exists_int).2
-        refine ⟨n, ?_⟩
-        simp [shiftedΓ₀]
-      _ = γ t := hΓ₀ t
-  have hshiftedΓ₀_zero : shiftedΓ₀ 0 = Γ₁ 0 := by
-    calc
-      shiftedΓ₀ 0 = Γ₀ 0 + n * (2 * π * 𝓲) := by
-        rfl
-      _ = Γ₁ 0 := by
-        simpa using hn.symm
-  have hshifted_eq : shiftedΓ₀ = Path.expLift γ (Γ₁ 0) hΓ₁0 :=
-    eq_expLift γ (Γ₁ 0) hΓ₁0 shiftedΓ₀ hshiftedΓ₀ hshiftedΓ₀_zero
+  have hshifted_eq : shiftedΓ₀ = Path.expLift γ (Γ₁ 0) hΓ₁0 := by
+    apply eq_expLift
+    · intro t
+      rw [← hΓ₀ t]
+      apply exp_eq_exp_iff_exists_int.2
+      refine ⟨n, by simp [shiftedΓ₀]⟩
+    · rw [hn]; rfl
   have hΓ₁_eq : Γ₁ = Path.expLift γ (Γ₁ 0) hΓ₁0 :=
     eq_expLift γ (Γ₁ 0) hΓ₁0 Γ₁ hΓ₁ rfl
-  have huniq : shiftedΓ₀ = Γ₁ := by
-    calc
-      shiftedΓ₀ = Path.expLift γ (Γ₁ 0) hΓ₁0 := hshifted_eq
-      _ = Γ₁ := hΓ₁_eq.symm
-  refine ⟨n, ?_⟩
-  intro t
-  have ht : shiftedΓ₀ t = Γ₁ t := by
-    simpa using congrFun (congrArg DFunLike.coe huniq) t
-  calc
-    Γ₁ t = shiftedΓ₀ t := ht.symm
-    _ = Γ₀ t + n * (2 * π * 𝓲) := by
-      rfl
+  rw [hΓ₁_eq, ← hshifted_eq]
+  rfl
 
 /-%%
 \begin{proof}\leanok
@@ -446,7 +431,7 @@ and uniqueness of lifts then shows the two lifts agree everywhere.
 %%-/
 
 /-%%
-\begin{definition}\label{pathWindingNumber}\lean{RootsComplexPolynomialsNew.Path.windingNumber}\uses{expLift}\leanok
+\begin{definition}\label{pathWindingNumber}\lean{Path.windingNumber}\uses{expLift}\leanok
 The winding number of a loop in $\C^\times$ is defined from the endpoint difference of a
 lift through the exponential covering map.
 \begin{verbatim}
@@ -480,7 +465,7 @@ winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_lift}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_lift}\uses{pathWindingNumber, eq_add_int_mul_two_pi_I_of_lifts, expLift, expLift_apply}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_lift}\lean{Path.windingNumber_eq_of_lift}\uses{pathWindingNumber, eq_add_int_mul_two_pi_I_of_lifts, expLift, expLift_apply}\leanok
 If $\Gamma$ is any lift of a loop in $\C^\times$, then the endpoint quotient
 $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \begin{verbatim}
@@ -536,7 +521,7 @@ endpoint difference and hence the quotient by $2\pi i$ are unchanged.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{RootsComplexPolynomialsNew.Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
 Loops in $\C^\times$ that are freely homotopic through loops have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
@@ -649,7 +634,7 @@ differences agree and hence their winding numbers agree.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_refl}\lean{RootsComplexPolynomialsNew.Path.windingNumber_refl}\uses{pathWindingNumber_eq_of_lift}\leanok
+\begin{lemma}\label{pathWindingNumber_refl}\lean{Path.windingNumber_refl}\uses{pathWindingNumber_eq_of_lift}\leanok
 The constant loop has winding number zero.
 \begin{verbatim}
 theorem windingNumber_refl
@@ -684,7 +669,7 @@ end Path
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{circleWindingNumber}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber}\uses{circleLoop, pathWindingNumber}\leanok
+\begin{definition}\label{circleWindingNumber}\lean{ContinuousMap.windingNumber}\uses{coe_toPath, pathWindingNumber}\leanok
 The winding number of a continuous map from the circle to $\C^\times$ is the winding number of its
 associated loop.
 \begin{verbatim}
@@ -696,7 +681,7 @@ noncomputable def windingNumber
 %%-/
 
 noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
-  Path.windingNumber (ContinuousMap.circleLoop f)
+  Path.windingNumber (ContinuousMap.coe_toPath f)
 
 /-%%
 \begin{proof}\leanok
@@ -706,7 +691,7 @@ taking the loop winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_const}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_const}\uses{circleWindingNumber, pathWindingNumber_refl, circleLoop}\leanok
+\begin{lemma}\label{circleWindingNumber_const}\lean{ContinuousMap.windingNumber_const}\uses{circleWindingNumber, pathWindingNumber_refl, coe_toPath}\leanok
 A constant map from the circle to $\C^\times$ has winding number zero.
 \begin{verbatim}
 theorem windingNumber_const
@@ -719,8 +704,8 @@ theorem windingNumber_const
 
 @[simp] theorem windingNumber_const (c : ℂˣ) :
     windingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
-  change Path.windingNumber (ContinuousMap.circleLoop (ContinuousMap.const _ c : C(Circle, ℂˣ))) = 0
-  have hloop : ContinuousMap.circleLoop (ContinuousMap.const _ c : C(Circle, ℂˣ)) = Path.refl c := by
+  change Path.windingNumber (ContinuousMap.coe_toPath (ContinuousMap.const _ c : C(Circle, ℂˣ))) = 0
+  have hloop : ContinuousMap.coe_toPath (ContinuousMap.const _ c : C(Circle, ℂˣ)) = Path.refl c := by
     ext t
     rfl
   rw [hloop]
@@ -733,7 +718,7 @@ The associated loop of a constant circle map is the constant loop, whose winding
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_eq_of_homotopy}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumber, pathWindingNumber_eq_of_homotopy, circleLoopHomotopy, circleLoopHomotopy_isLoopHomotopy, circleLoopHomotopy_zero_left, circleLoopHomotopy_one_left}\leanok
+\begin{lemma}\label{circleWindingNumber_eq_of_homotopy}\lean{ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumber, pathWindingNumber_eq_of_homotopy, circleLoopHomotopy, circleLoopHomotopy_isLoopHomotopy, circleLoopHomotopy_zero_left, circleLoopHomotopy_one_left}\leanok
 Homotopic circle maps into $\C^\times$ have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_homotopy
@@ -747,7 +732,7 @@ theorem windingNumber_eq_of_homotopy
 theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : f.Homotopy g) :
     windingNumber f = windingNumber g := by
   simpa [windingNumber] using
-    Path.windingNumber_eq_of_homotopy (ContinuousMap.circleLoop f) (ContinuousMap.circleLoop g)
+    Path.windingNumber_eq_of_homotopy (ContinuousMap.coe_toPath f) (ContinuousMap.coe_toPath g)
       (circleLoopHomotopy H) (circleLoopHomotopy_isLoopHomotopy H)
       (circleLoopHomotopy_zero_left H) (circleLoopHomotopy_one_left H)
 
@@ -759,7 +744,7 @@ between the associated loops, then apply homotopy invariance for loop winding nu
 %%-/
 
 /-%%
-\begin{lemma}\label{exists_homotopy_of_norm_sub_lt}\lean{RootsComplexPolynomialsNew.ContinuousMap.exists_homotopy_of_norm_sub_lt}\leanok
+\begin{lemma}\label{exists_homotopy_of_norm_sub_lt}\lean{ContinuousMap.exists_homotopy_of_norm_sub_lt}\leanok
 If two maps into $\Bbbk^\times$ satisfy the walking-dog inequality
 $\lVert f(x)-g(x)\rVert < \lVert f(x)\rVert$ pointwise, then they are homotopic through maps into
 $\Bbbk^\times$.
@@ -828,7 +813,7 @@ $f=t(f-g)$ there, which would force $\|f\|\le \|f-g\|$, contradicting the hypoth
 %%-/
 
 /-%%
-\begin{corollary}\label{circleWindingNumber_eq_of_norm_sub_lt}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_of_norm_sub_lt}\uses{exists_homotopy_of_norm_sub_lt, circleWindingNumber_eq_of_homotopy}\leanok
+\begin{corollary}\label{circleWindingNumber_eq_of_norm_sub_lt}\lean{ContinuousMap.windingNumber_eq_of_norm_sub_lt}\uses{exists_homotopy_of_norm_sub_lt, circleWindingNumber_eq_of_homotopy}\leanok
 Circle maps satisfying the walking-dog inequality have the same winding number.
 \begin{verbatim}
 theorem windingNumber_eq_of_norm_sub_lt
@@ -855,7 +840,7 @@ number.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{RootsComplexPolynomialsNew.ContinuousMap.windingNumber_eq_zero_of_exists_extension}\uses{circleToDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{ContinuousMap.windingNumber_eq_zero_of_exists_extension}\uses{circleToDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
 If a map from the unit circle to $\C^\times$ extends to the closed unit disk through maps into
 $\C^\times$, then its winding number is zero.
 \begin{verbatim}
@@ -941,7 +926,7 @@ end ContinuousMap
 %%-/
 
 /-%%
-\begin{definition}\label{circleScaledMonomial}\lean{RootsComplexPolynomialsNew.circleScaledMonomial}\leanok
+\begin{definition}\label{circleScaledMonomial}\lean{circleScaledMonomial}\leanok
 Given $a,c\in \C^\times$ and $n\in \mathbb N$, define the circle map
 $z\mapsto a\,(cz)^n$ with values in $\C^\times$.
 \begin{verbatim}
@@ -968,7 +953,7 @@ the circle are nonzero.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{RootsComplexPolynomialsNew.circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, circleLoop}\leanok
+\begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, coe_toPath}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
 theorem circleScaledMonomial_windingNumber
@@ -991,7 +976,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
   have hlift :
       ∀ t,
         exp (tildeω t) =
-          (((ContinuousMap.circleLoop (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
+          (((ContinuousMap.coe_toPath (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
     intro t
     calc
       exp (tildeω t)
@@ -1015,7 +1000,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
       _ = (a : ℂ) * (((c : ℂ) * (Circle.exp (2 * Real.pi * (t : ℝ)) : ℂ)) ^ n) := by
             rw [mul_pow]
             ring
-      _ = (((ContinuousMap.circleLoop (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
+      _ = (((ContinuousMap.coe_toPath (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
             change (a : ℂ) * (((c : ℂ) * Circle.exp (2 * Real.pi * (t : ℝ))) ^ n) =
               ((circleScaledMonomial a c n (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ)
             rfl
@@ -1025,7 +1010,7 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
           = (tildeω 1 - tildeω 0) / ((2 * π) * 𝓲) := by
               symm
               simpa [ContinuousMap.windingNumber] using
-                Path.windingNumber_eq_of_lift (ContinuousMap.circleLoop (circleScaledMonomial a c n)) tildeω hlift
+                Path.windingNumber_eq_of_lift (ContinuousMap.coe_toPath (circleScaledMonomial a c n)) tildeω hlift
       _ = ((n : ℂ) * (2 * π) * 𝓲) / ((2 * π) * 𝓲) := by
             simp [tildeω]
       _ = (n : ℂ) := by
@@ -1049,7 +1034,7 @@ exactly $2\pi n i$.
 namespace Polynomial
 
 /-%%
-\begin{lemma}\label{leadingTerm_dominates_on_circle}\lean{RootsComplexPolynomialsNew.Polynomial.leadingTerm_dominates_on_circle}\leanok
+\begin{lemma}\label{leadingTerm_dominates_on_circle}\lean{Polynomial.leadingTerm_dominates_on_circle}\leanok
 For a nonconstant complex polynomial, there is a radius beyond which the leading term dominates the
 sum of the lower terms on every circle of larger radius.
 \begin{verbatim}
@@ -1155,7 +1140,7 @@ strictly smaller quantity than the norm of the leading term.
 %%-/
 
 /-%%
-\begin{corollary}\label{eventually_leadingTerm_dominates_on_circle}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_leadingTerm_dominates_on_circle}\uses{leadingTerm_dominates_on_circle}\leanok
+\begin{corollary}\label{eventually_leadingTerm_dominates_on_circle}\lean{Polynomial.eventually_leadingTerm_dominates_on_circle}\uses{leadingTerm_dominates_on_circle}\leanok
 Equivalently, the leading-term domination estimate holds eventually along the filter $R\to +\infty$.
 \begin{verbatim}
 theorem eventually_leadingTerm_dominates_on_circle
@@ -1184,7 +1169,7 @@ This is the previous threshold statement rewritten in the standard `atTop` langu
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{RootsComplexPolynomialsNew.Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleScaledMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleScaledMonomial_windingNumber}\leanok
+\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleScaledMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleScaledMonomial_windingNumber}\leanok
 For all sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of
 radius $R$ has winding number equal to the degree of the polynomial.
 \begin{verbatim}
@@ -1248,7 +1233,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{RootsComplexPolynomialsNew.Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegree, circleToDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegree, circleToDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
 Every nonconstant complex polynomial has a complex root.
 \begin{verbatim}
 theorem exists_root_of_natDegree_pos
@@ -1298,5 +1283,3 @@ contradiction.
 %%-/
 
 end Polynomial
-
-end RootsComplexPolynomialsNew
