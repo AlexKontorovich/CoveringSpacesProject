@@ -18,7 +18,7 @@ upstream split would be:
 * `Disk`, `Circle.toDisk`, `ContinuousMap.coe_toPath`, and `ContinuousMap.circleLoopHomotopy`
   near the existing circle API in `Mathlib/Analysis/SpecialFunctions/Complex/Circle.lean` and the
   path/homotopy API in `Mathlib/Topology/Homotopy/Path.lean`;
-* `Path.expLift` and the `Path.windingNumber` API in or next to
+* `Path.expLift` and the `Path.WindingNumber` API in or next to
   `Mathlib/Analysis/Complex/CoveringMap.lean` as a small winding-number companion file;
 * the monomial and polynomial applications left downstream, since they are project-specific rather
   than reusable core library material.
@@ -431,18 +431,18 @@ and uniqueness of lifts then shows the two lifts agree everywhere.
 %%-/
 
 /-%%
-\begin{definition}\label{pathWindingNumber}\lean{Path.windingNumber}\uses{expLift}\leanok
+\begin{definition}\label{WindingNumber}\lean{Path.WindingNumber}\uses{expLift}\leanok
 The winding number of a loop in $\C^\times$ is defined from the endpoint difference of a
 lift through the exponential covering map.
 \begin{verbatim}
-noncomputable def windingNumber
+noncomputable def WindingNumber
     {u : ℂˣ} (γ : Path u u) :
     ℤ
 \end{verbatim}
 \end{definition}
 %%-/
 
-noncomputable def windingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
+noncomputable def WindingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
   let Γ := Path.expLift γ (unitLog u) (exp_unitLog u)
   have hper : exp (Γ 1) = exp (Γ 0) := by
     rw [expLift_apply, expLift_apply]; simp
@@ -457,29 +457,29 @@ winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_lift}\lean{Path.windingNumber_eq_of_lift}\uses{pathWindingNumber, eq_add_int_mul_two_pi_I_of_lifts, expLift, expLift_apply}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_lift}\lean{Path.WindingNumber_eq_of_lift}\uses{pathWindingNumber, eq_add_int_mul_two_pi_I_of_lifts, expLift, expLift_apply}\leanok
 If $\Gamma$ is any lift of a loop in $\C^\times$, then the endpoint quotient
 $(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
 \begin{verbatim}
-theorem windingNumber_eq_of_lift
+theorem WindingNumber_eq_of_lift
     {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
     (hlift : ∀ t, exp (Γ t) = γ t) :
     (Γ 1 - Γ 0) / (2 * π * 𝓲) =
-    Path.windingNumber γ
+    Path.WindingNumber γ
 \end{verbatim}
 \end{lemma}
 %%-/
 
-theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
+theorem WindingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
     (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = γ t) :
-    (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.windingNumber γ := by
+    (Γ 1 - Γ 0) / (2 * π * 𝓲) = γ.WindingNumber := by
   let liftγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
   have hliftγ : ∀ t, exp (liftγ t) = γ t := fun t =>
     expLift_apply γ (unitLog u) (exp_unitLog u) t
   obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
   have hbase_eq :
-      liftγ 1 = liftγ 0 + Path.windingNumber γ * (2 * π * 𝓲) := by
-    unfold windingNumber
+      liftγ 1 = liftγ 0 + γ.WindingNumber * (2 * π * 𝓲) := by
+    unfold WindingNumber
     dsimp [liftγ]
     exact Classical.choose_spec ((exp_eq_exp_iff_exists_int).1 <| by
       calc
@@ -493,7 +493,7 @@ theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
           symm
           exact expLift_apply γ (unitLog u) (exp_unitLog u) 0)
   have hbase :
-      (liftγ 1 - liftγ 0) / (2 * π * 𝓲) = Path.windingNumber γ := by
+      (liftγ 1 - liftγ 0) / (2 * π * 𝓲) = γ.WindingNumber := by
     rw [hbase_eq]
     ring_nf
     field_simp [two_pi_I_ne_zero]
@@ -503,7 +503,7 @@ theorem windingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
             (liftγ 0 + n * (2 * π * 𝓲))) / (2 * π * 𝓲) := by
             rw [hshift_eq 1, hshift_eq 0]
     _ = (liftγ 1 - liftγ 0) / (2 * π * 𝓲) := by ring
-    _ = Path.windingNumber γ := hbase
+    _ = γ.WindingNumber := hbase
 
 /-%%
 \begin{proof}\leanok
@@ -513,25 +513,25 @@ endpoint difference and hence the quotient by $2\pi i$ are unchanged.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{Path.windingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
+\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{Path.WindingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
 Loops in $\C^\times$ that are freely homotopic through loops have the same winding number.
 \begin{verbatim}
-theorem windingNumber_eq_of_homotopy
+theorem WindingNumber_eq_of_homotopy
     {u u' : ℂˣ} (γ : Path u u)
     (γ' : Path u' u') (H : C(I × I, ℂˣ))
     (hhom : ContinuousMap.IsLoopHomotopy H)
     (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
-    Path.windingNumber γ = Path.windingNumber γ'
+    Path.WindingNumber γ = Path.WindingNumber γ'
 \end{verbatim}
 \end{lemma}
 %%-/
 
-theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
+theorem WindingNumber_eq_of_homotopy {u u' : ℂˣ}
     (γ : Path u u) (γ' : Path u' u') (H : C(I × I, ℂˣ))
     (hhom : ContinuousMap.IsLoopHomotopy H) (hzero : ∀ t, H (0, t) = γ t)
     (hone : ∀ t, H (1, t) = γ' t) :
-    Path.windingNumber γ = Path.windingNumber γ' := by
+    Path.WindingNumber γ = Path.WindingNumber γ' := by
   let tildeγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
   have htildeγ : ∀ t, exp (tildeγ t) = γ t := fun t =>
     expLift_apply γ (unitLog u) (exp_unitLog u) t
@@ -604,17 +604,17 @@ theorem windingNumber_eq_of_homotopy {u u' : ℂˣ}
           rw [hμ1.2, hμ0.2]
     rw [hdiff]
   have hcast :
-      ((Path.windingNumber γ : ℤ) : ℂ) = ((Path.windingNumber γ' : ℤ) : ℂ) := by
+      ((Path.WindingNumber γ : ℤ) : ℂ) = ((Path.WindingNumber γ' : ℤ) : ℂ) := by
     calc
-      ((Path.windingNumber γ : ℤ) : ℂ)
+      ((Path.WindingNumber γ : ℤ) : ℂ)
           = (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
               symm
-              exact windingNumber_eq_of_lift γ tildeγ htildeγ
+              exact WindingNumber_eq_of_lift γ tildeγ htildeγ
       _ = (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) := by
             symm
             exact hwind
-      _ = ((Path.windingNumber γ' : ℤ) : ℂ) := by
-            exact windingNumber_eq_of_lift γ' tildeγ' htildeγ'
+      _ = ((Path.WindingNumber γ' : ℤ) : ℂ) := by
+            exact WindingNumber_eq_of_lift γ' tildeγ' htildeγ'
   exact_mod_cast hcast
 
 /-%%
@@ -626,24 +626,24 @@ differences agree and hence their winding numbers agree.
 %%-/
 
 /-%%
-\begin{lemma}\label{pathWindingNumber_refl}\lean{Path.windingNumber_refl}\uses{pathWindingNumber_eq_of_lift}\leanok
+\begin{lemma}\label{pathWindingNumber_refl}\lean{Path.WindingNumber_refl}\uses{pathWindingNumber_eq_of_lift}\leanok
 The constant loop has winding number zero.
 \begin{verbatim}
-theorem windingNumber_refl
+theorem WindingNumber_refl
     (u : ℂˣ) :
-    Path.windingNumber (Path.refl u) = 0
+    Path.WindingNumber (Path.refl u) = 0
 \end{verbatim}
 \end{lemma}
 %%-/
 
-@[simp] theorem windingNumber_refl (u : ℂˣ) :
-    Path.windingNumber (Path.refl u) = 0 := by
+@[simp] theorem WindingNumber_refl (u : ℂˣ) :
+    Path.WindingNumber (Path.refl u) = 0 := by
   let Γ : C(I, ℂ) := ContinuousMap.const _ (unitLog u)
   have hlift : ∀ t, exp (Γ t) = ((Path.refl u) t : ℂ) := by
     intro t
     simp [Γ]
-  have hq : (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.windingNumber (Path.refl u) :=
-    windingNumber_eq_of_lift (Path.refl u) Γ hlift
+  have hq : (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.WindingNumber (Path.refl u) :=
+    WindingNumber_eq_of_lift (Path.refl u) Γ hlift
   simpa [Γ] using hq.symm
 
 /-%%
@@ -661,19 +661,19 @@ end Path
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{circleWindingNumber}\lean{ContinuousMap.windingNumber}\uses{coe_toPath, pathWindingNumber}\leanok
+\begin{definition}\label{circleWindingNumber}\lean{ContinuousMap.WindingNumber}\uses{coe_toPath, pathWindingNumber}\leanok
 The winding number of a continuous map from the circle to $\C^\times$ is the winding number of its
 associated loop.
 \begin{verbatim}
-noncomputable def windingNumber
+noncomputable def WindingNumber
     (f : C(Circle, ℂˣ)) :
     ℤ
 \end{verbatim}
 \end{definition}
 %%-/
 
-noncomputable def windingNumber (f : C(Circle, ℂˣ)) : ℤ :=
-  Path.windingNumber (ContinuousMap.coe_toPath f)
+noncomputable def WindingNumber (f : C(Circle, ℂˣ)) : ℤ :=
+  Path.WindingNumber (ContinuousMap.coe_toPath f)
 
 /-%%
 \begin{proof}\leanok
@@ -683,25 +683,25 @@ taking the loop winding number.
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_const}\lean{ContinuousMap.windingNumber_const}\uses{circleWindingNumber, pathWindingNumber_refl, coe_toPath}\leanok
+\begin{lemma}\label{circleWindingNumber_const}\lean{ContinuousMap.WindingNumber_const}\uses{circleWindingNumber, pathWindingNumber_refl, coe_toPath}\leanok
 A constant map from the circle to $\C^\times$ has winding number zero.
 \begin{verbatim}
-theorem windingNumber_const
+theorem WindingNumber_const
     (c : ℂˣ) :
-    windingNumber (ContinuousMap.const _ c :
+    WindingNumber (ContinuousMap.const _ c :
     C(Circle, ℂˣ)) = 0
 \end{verbatim}
 \end{lemma}
 %%-/
 
-@[simp] theorem windingNumber_const (c : ℂˣ) :
-    windingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
-  change Path.windingNumber (ContinuousMap.coe_toPath (ContinuousMap.const _ c : C(Circle, ℂˣ))) = 0
+@[simp] theorem WindingNumber_const (c : ℂˣ) :
+    WindingNumber (ContinuousMap.const _ c : C(Circle, ℂˣ)) = 0 := by
+  change Path.WindingNumber (ContinuousMap.coe_toPath (ContinuousMap.const _ c : C(Circle, ℂˣ))) = 0
   have hloop : ContinuousMap.coe_toPath (ContinuousMap.const _ c : C(Circle, ℂˣ)) = Path.refl c := by
     ext t
     rfl
   rw [hloop]
-  exact Path.windingNumber_refl c
+  exact Path.WindingNumber_refl c
 
 /-%%
 \begin{proof}\leanok
@@ -710,21 +710,21 @@ The associated loop of a constant circle map is the constant loop, whose winding
 %%-/
 
 /-%%
-\begin{lemma}\label{circleWindingNumber_eq_of_homotopy}\lean{ContinuousMap.windingNumber_eq_of_homotopy}\uses{circleWindingNumber, pathWindingNumber_eq_of_homotopy, circleLoopHomotopy, circleLoopHomotopy_isLoopHomotopy, circleLoopHomotopy_zero_left, circleLoopHomotopy_one_left}\leanok
+\begin{lemma}\label{circleWindingNumber_eq_of_homotopy}\lean{ContinuousMap.WindingNumber_eq_of_homotopy}\uses{circleWindingNumber, pathWindingNumber_eq_of_homotopy, circleLoopHomotopy, circleLoopHomotopy_isLoopHomotopy, circleLoopHomotopy_zero_left, circleLoopHomotopy_one_left}\leanok
 Homotopic circle maps into $\C^\times$ have the same winding number.
 \begin{verbatim}
-theorem windingNumber_eq_of_homotopy
+theorem WindingNumber_eq_of_homotopy
     {f g : C(Circle, ℂˣ)}
     (H : f.Homotopy g) :
-    windingNumber f = windingNumber g
+    WindingNumber f = WindingNumber g
 \end{verbatim}
 \end{lemma}
 %%-/
 
-theorem windingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : f.Homotopy g) :
-    windingNumber f = windingNumber g := by
-  simpa [windingNumber] using
-    Path.windingNumber_eq_of_homotopy (ContinuousMap.coe_toPath f) (ContinuousMap.coe_toPath g)
+theorem WindingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : f.Homotopy g) :
+    WindingNumber f = WindingNumber g := by
+  simpa [WindingNumber] using
+    Path.WindingNumber_eq_of_homotopy (ContinuousMap.coe_toPath f) (ContinuousMap.coe_toPath g)
       (circleLoopHomotopy H) (circleLoopHomotopy_isLoopHomotopy H)
       (circleLoopHomotopy_zero_left H) (circleLoopHomotopy_one_left H)
 
@@ -805,24 +805,24 @@ $f=t(f-g)$ there, which would force $\|f\|\le \|f-g\|$, contradicting the hypoth
 %%-/
 
 /-%%
-\begin{corollary}\label{circleWindingNumber_eq_of_norm_sub_lt}\lean{ContinuousMap.windingNumber_eq_of_norm_sub_lt}\uses{exists_homotopy_of_norm_sub_lt, circleWindingNumber_eq_of_homotopy}\leanok
+\begin{corollary}\label{circleWindingNumber_eq_of_norm_sub_lt}\lean{ContinuousMap.WindingNumber_eq_of_norm_sub_lt}\uses{exists_homotopy_of_norm_sub_lt, circleWindingNumber_eq_of_homotopy}\leanok
 Circle maps satisfying the walking-dog inequality have the same winding number.
 \begin{verbatim}
-theorem windingNumber_eq_of_norm_sub_lt
+theorem WindingNumber_eq_of_norm_sub_lt
     {f g : C(Circle, ℂˣ)}
     (hclose :
       ∀ z : Circle, ‖(f z : ℂ) - g z‖ <
         ‖(f z : ℂ)‖) :
-    windingNumber f = windingNumber g
+    WindingNumber f = WindingNumber g
 \end{verbatim}
 \end{corollary}
 %%-/
 
-theorem windingNumber_eq_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
+theorem WindingNumber_eq_of_norm_sub_lt {f g : C(Circle, ℂˣ)}
     (hclose : ∀ z : Circle, ‖(f z : ℂ) - g z‖ < ‖(f z : ℂ)‖) :
-    windingNumber f = windingNumber g := by
+    WindingNumber f = WindingNumber g := by
   obtain ⟨H⟩ := exists_homotopy_of_norm_sub_lt hclose
-  exact windingNumber_eq_of_homotopy H
+  exact WindingNumber_eq_of_homotopy H
 
 /-%%
 \begin{proof}\leanok
@@ -832,25 +832,25 @@ number.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{ContinuousMap.windingNumber_eq_zero_of_exists_extension}\uses{circleToDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{ContinuousMap.WindingNumber_eq_zero_of_exists_extension}\uses{circleToDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
 If a map from the unit circle to $\C^\times$ extends to the closed unit disk through maps into
 $\C^\times$, then its winding number is zero.
 \begin{verbatim}
-theorem windingNumber_eq_zero_of_exists_extension
+theorem WindingNumber_eq_zero_of_exists_extension
     {f : C(Circle, ℂˣ)}
     {F : C(Disk, ℂˣ)}
     (hF :
       ∀ z : Circle,
         F z = f z) :
-    windingNumber f = 0
+    WindingNumber f = 0
 \end{verbatim}
 \end{theorem}
 %%-/
 
-theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
+theorem WindingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
     {F : C(Disk, ℂˣ)}
     (hF : ∀ z : Circle, F z = f z) :
-    windingNumber f = 0 := by
+    WindingNumber f = 0 := by
   let Jfun : I × Circle → ℂ := fun x =>
     (((1 - (x.1 : ℝ)) : ℂ) * (x.2 : ℂ))
   have hJfun_mem : ∀ x : I × Circle, Jfun x ∈ (Submonoid.unitClosedBall ℂ : Set ℂ) := by
@@ -899,9 +899,9 @@ theorem windingNumber_eq_zero_of_exists_extension {f : C(Circle, ℂˣ)}
           _ = F 0 := by rw [hJ1 z]
           _ = ContinuousMap.const _ (F 0) z := rfl }
   calc
-    windingNumber f = windingNumber (ContinuousMap.const _ (F 0)) := by
-      exact windingNumber_eq_of_homotopy hHom
-    _ = 0 := windingNumber_const (F 0)
+    WindingNumber f = WindingNumber (ContinuousMap.const _ (F 0)) := by
+      exact WindingNumber_eq_of_homotopy hHom
+    _ = 0 := WindingNumber_const (F 0)
 
 /-%%
 \begin{proof}\leanok
@@ -945,19 +945,19 @@ the circle are nonzero.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_windingNumber}\lean{circleScaledMonomial_windingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, coe_toPath}\leanok
+\begin{theorem}\label{circleScaledMonomial_WindingNumber}\lean{circleScaledMonomial_WindingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, coe_toPath}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
-theorem circleScaledMonomial_windingNumber
+theorem circleScaledMonomial_WindingNumber
     (a c : ℂˣ) (n : ℕ) :
-    ContinuousMap.windingNumber
+    ContinuousMap.WindingNumber
     (circleScaledMonomial a c n) = (n : ℤ)
 \end{verbatim}
 \end{theorem}
 %%-/
 
-theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
-    ContinuousMap.windingNumber (circleScaledMonomial a c n) = (n : ℤ) := by
+theorem circleScaledMonomial_WindingNumber (a c : ℂˣ) (n : ℕ) :
+    ContinuousMap.WindingNumber (circleScaledMonomial a c n) = (n : ℤ) := by
   let c0 : ℂˣ := a * c ^ n
   let a0 : ℂ := log (c0 : ℂ)
   have ha0 : exp a0 = c0 := by
@@ -996,13 +996,13 @@ theorem circleScaledMonomial_windingNumber (a c : ℂˣ) (n : ℕ) :
             change (a : ℂ) * (((c : ℂ) * Circle.exp (2 * Real.pi * (t : ℝ))) ^ n) =
               ((circleScaledMonomial a c n (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ)
             rfl
-  have hwind : (((ContinuousMap.windingNumber (circleScaledMonomial a c n) : ℤ) : ℂ)) = n := by
+  have hwind : (((ContinuousMap.WindingNumber (circleScaledMonomial a c n) : ℤ) : ℂ)) = n := by
     calc
-      (((ContinuousMap.windingNumber (circleScaledMonomial a c n) : ℤ) : ℂ))
+      (((ContinuousMap.WindingNumber (circleScaledMonomial a c n) : ℤ) : ℂ))
           = (tildeω 1 - tildeω 0) / ((2 * π) * 𝓲) := by
               symm
-              simpa [ContinuousMap.windingNumber] using
-                Path.windingNumber_eq_of_lift (ContinuousMap.coe_toPath (circleScaledMonomial a c n)) tildeω hlift
+              simpa [ContinuousMap.WindingNumber] using
+                Path.WindingNumber_eq_of_lift (ContinuousMap.coe_toPath (circleScaledMonomial a c n)) tildeω hlift
       _ = ((n : ℂ) * (2 * π) * 𝓲) / ((2 * π) * 𝓲) := by
             simp [tildeω]
       _ = (n : ℂ) := by
@@ -1161,24 +1161,24 @@ This is the previous threshold statement rewritten in the standard `atTop` langu
 %%-/
 
 /-%%
-\begin{theorem}\label{eventually_windingNumber_eq_natDegree}\lean{Polynomial.eventually_windingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleScaledMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleScaledMonomial_windingNumber}\leanok
+\begin{theorem}\label{eventually_WindingNumber_eq_natDegree}\lean{Polynomial.eventually_WindingNumber_eq_natDegree}\uses{eventually_leadingTerm_dominates_on_circle, circleScaledMonomial, circleWindingNumber_eq_of_norm_sub_lt, circleScaledMonomial_WindingNumber}\leanok
 For all sufficiently large $R$, the restriction of a nonconstant polynomial to the circle of
 radius $R$ has winding number equal to the degree of the polynomial.
 \begin{verbatim}
-theorem eventually_windingNumber_eq_natDegree
+theorem eventually_WindingNumber_eq_natDegree
     (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop,
       ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval
-      ((R : ℂ) * z)) ∧ ContinuousMap.windingNumber f
+      ((R : ℂ) * z)) ∧ ContinuousMap.WindingNumber f
       = (p.natDegree : ℤ)
 \end{verbatim}
 \end{theorem}
 %%-/
 
-theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
+theorem eventually_WindingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop,
       ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval ((R : ℂ) * z)) ∧
-        ContinuousMap.windingNumber f = (p.natDegree : ℤ) := by
+        ContinuousMap.WindingNumber f = (p.natDegree : ℤ) := by
   filter_upwards [Filter.eventually_gt_atTop (0 : ℝ),
       eventually_leadingTerm_dominates_on_circle p hdeg]
       with R hRpos hdom
@@ -1210,11 +1210,11 @@ theorem eventually_windingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
   · intro z
     simp [f]
   · calc
-      ContinuousMap.windingNumber f = ContinuousMap.windingNumber g := by
+      ContinuousMap.WindingNumber f = ContinuousMap.WindingNumber g := by
         symm
-        exact ContinuousMap.windingNumber_eq_of_norm_sub_lt hclose
+        exact ContinuousMap.WindingNumber_eq_of_norm_sub_lt hclose
       _ = (p.natDegree : ℤ) := by
-        simpa [g] using circleScaledMonomial_windingNumber a0 cR p.natDegree
+        simpa [g] using circleScaledMonomial_WindingNumber a0 cR p.natDegree
 
 /-%%
 \begin{proof}\leanok
@@ -1225,7 +1225,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{Polynomial.exists_root_of_natDegree_pos}\uses{eventually_windingNumber_eq_natDegree, circleToDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{Polynomial.exists_root_of_natDegree_pos}\uses{eventually_WindingNumber_eq_natDegree, circleToDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
 Every nonconstant complex polynomial has a complex root.
 \begin{verbatim}
 theorem exists_root_of_natDegree_pos
@@ -1241,7 +1241,7 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
   have hnonzero : ∀ z : ℂ, p.eval z ≠ 0 := by
     intro z hz
     exact hroot ⟨z, hz⟩
-  obtain ⟨R, hR⟩ := (eventually_windingNumber_eq_natDegree p hdeg).exists
+  obtain ⟨R, hR⟩ := (eventually_WindingNumber_eq_natDegree p hdeg).exists
   obtain ⟨f, hf, hwind⟩ := hR
   let F : C(Disk, ℂˣ) :=
     ContinuousMap.unitsOfForallIsUnit
@@ -1258,8 +1258,8 @@ theorem exists_root_of_natDegree_pos (p : Polynomial ℂ) (hdeg : 0 < p.natDegre
         simp [F]
       _ = p.eval ((R : ℂ) * z) := by rw [hz]
       _ = f z := (hf z).symm
-  have hzero : ContinuousMap.windingNumber f = 0 :=
-    ContinuousMap.windingNumber_eq_zero_of_exists_extension hboundary
+  have hzero : ContinuousMap.WindingNumber f = 0 :=
+    ContinuousMap.WindingNumber_eq_zero_of_exists_extension hboundary
   have hdeg_ne : (p.natDegree : ℤ) ≠ 0 := by
     exact_mod_cast Nat.ne_of_gt hdeg
   exact hdeg_ne <| by rw [← hwind, hzero]
