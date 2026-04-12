@@ -445,15 +445,7 @@ noncomputable def windingNumber
 noncomputable def windingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
   let Γ := Path.expLift γ (unitLog u) (exp_unitLog u)
   have hper : exp (Γ 1) = exp (Γ 0) := by
-    calc
-      exp (Γ 1) = γ 1 := expLift_apply γ (unitLog u) (exp_unitLog u) 1
-      _ = u := by
-        simp [γ.target]
-      _ = γ 0 := by
-        simp [γ.source]
-      _ = exp (Γ 0) := by
-        symm
-        exact expLift_apply γ (unitLog u) (exp_unitLog u) 0
+    rw [expLift_apply, expLift_apply]; simp
   exact Classical.choose ((exp_eq_exp_iff_exists_int).1 hper)
 
 /-%%
