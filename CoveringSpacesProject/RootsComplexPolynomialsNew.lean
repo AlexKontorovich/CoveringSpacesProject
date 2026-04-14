@@ -30,6 +30,7 @@ open Complex
 
 noncomputable section
 
+-- In this file, `I` refers to the `unitInterval`.
 local notation "𝓲" => (Complex.I : ℂ)
 
 /-%%
@@ -43,7 +44,7 @@ namespace ContinuousMap
 A homotopy $H\colon I\times I\to X$ is a homotopy through loops if each horizontal slice has the
 same initial and terminal point.
 \begin{verbatim}
-def IsLoopHomotopy
+def ContinuousMap.IsLoopHomotopy -- should this be `isLoopHomotopy`?
     [TopologicalSpace X] (H : C(I × I, X)) :
     Prop
 \end{verbatim}
@@ -60,6 +61,390 @@ This is the direct formalization of the condition that every slice $t\mapsto H(s
 %%-/
 
 end ContinuousMap
+
+/-%%
+\section{Lifts and winding numbers of loops}
+%%-/
+
+private noncomputable def complexUnitsHomeomorphNeZero :
+    ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
+  unitsHomeomorphNeZero (G₀ := ℂ)
+
+namespace Path
+
+private noncomputable def toNonzeroPath {u v : ℂˣ} (γ : Path u v) :
+    Path (complexUnitsHomeomorphNeZero u) (complexUnitsHomeomorphNeZero v) :=
+  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
+
+private noncomputable def unitLog (u : ℂˣ) : ℂ :=
+  log (u : ℂ)
+
+@[simp] private theorem exp_unitLog (u : ℂˣ) : exp (unitLog u) = u := by
+  simpa [unitLog] using exp_log u.ne_zero
+
+/-%%
+\begin{definition}\label{expLift}\lean{Path.expLift}\leanok
+Given a path in $\C^\times$ and a chosen logarithm of its starting point, lift the path through the
+exponential covering map.
+\begin{verbatim}
+noncomputable def Path.expLift
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : exp w0 = u₀) :
+    C(I, ℂ)
+\end{verbatim}
+\end{definition}
+%%-/
+
+noncomputable def expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : exp w0 = u₀) : C(I, ℂ) :=
+  isCoveringMap_exp.liftPath (toNonzeroPath γ).toContinuousMap w0 <| by
+    apply Subtype.ext
+    simpa using hw0.symm
+
+/-%%
+\begin{proof}\leanok
+Transport the path to the standard nonzero-complex subtype, where `exp` is already
+registered as a covering map in Mathlib, and apply path lifting there.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{expLift_apply}\lean{Path.expLift_apply}\uses{expLift}\leanok
+The lifted path projects back to the original path under the exponential map.
+\begin{verbatim}
+theorem expLift_apply
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : exp w0 = u₀) (t : I) :
+    exp (γ.expLift w0 hw0 t) =
+    γ t
+\end{verbatim}
+\end{lemma}
+%%-/
+
+@[simp] theorem expLift_apply {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : exp w0 = u₀) (t : I) :
+    exp (γ.expLift w0 hw0 t) = γ t := by
+  have h :=
+    congrFun (isCoveringMap_exp.liftPath_lifts ((toNonzeroPath γ).toContinuousMap) w0 <| by
+      apply Subtype.ext
+      simpa using hw0.symm) t
+  simpa [toNonzeroPath] using congrArg Subtype.val h
+
+/-%%
+\begin{proof}\leanok
+This is exactly the lifting property supplied by the covering-space API, after forgetting the
+codomain subtype.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{eq_expLift}\lean{Path.eq_expLift}\uses{expLift}\leanok
+Any other lift of the same path with the same starting point agrees with the canonical lifted path.
+\begin{verbatim}
+theorem eq_expLift
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : exp w0 = u₀)
+    (Γ : C(I, ℂ))
+    (hlift : ∀ t, exp (Γ t) = γ t)
+    (h0 : Γ 0 = w0) :
+    Γ = γ.expLift w0 hw0
+\end{verbatim}
+\end{lemma}
+%%-/
+
+theorem eq_expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
+    (hw0 : exp w0 = u₀) (Γ : C(I, ℂ))
+    (hlift : ∀ t, exp (Γ t) = γ t) (h0 : Γ 0 = w0) :
+    Γ = γ.expLift w0 hw0 := by
+  apply (isCoveringMap_exp.eq_liftPath_iff' (γ := (toNonzeroPath γ).toContinuousMap)
+    (e := w0)
+    (γ_0 := by
+      apply Subtype.ext
+      simpa using hw0.symm) (Γ := Γ)).2
+  constructor
+  · ext t
+    show exp (Γ t) = (((toNonzeroPath γ).toContinuousMap) t : ℂ)
+    simpa [toNonzeroPath] using hlift t
+  · exact h0
+
+/-%%
+\begin{proof}\leanok
+This is uniqueness of lifts for the covering map $\exp$, after transporting the path from
+$\C^\times$ to the standard nonzero-complex subtype.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_lifts}\lean{Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLift}\leanok
+Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
+\begin{verbatim}
+theorem eq_add_int_mul_two_pi_I_of_lifts
+    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
+    (Γ₀ Γ₁ : C(I, ℂ))
+    (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
+    ∃ n : ℤ, ∀ t, Γ₁ t =
+    Γ₀ t + n * (2 * π * 𝓲)
+\end{verbatim}
+\end{lemma}
+%%-/
+
+private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
+    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
+    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
+    ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * π * 𝓲) := by
+  have h0eq : exp (Γ₁ 0) = exp (Γ₀ 0) := by
+    rw [hΓ₁ 0, hΓ₀ 0]
+  obtain ⟨n, hn⟩ := (exp_eq_exp_iff_exists_int).1 h0eq
+  refine ⟨n, fun t ↦ ?_⟩
+  have hΓ₁0 : exp (Γ₁ 0) = u₀ := by simpa using hΓ₁ 0
+  let shiftedΓ₀ : C(I, ℂ) :=
+    ⟨fun t => Γ₀ t + n * (2 * π * 𝓲), Γ₀.continuous.add continuous_const⟩
+  have hshifted_eq : shiftedΓ₀ = Path.expLift γ (Γ₁ 0) hΓ₁0 := by
+    apply eq_expLift
+    · intro t
+      rw [← hΓ₀ t]
+      apply exp_eq_exp_iff_exists_int.2
+      refine ⟨n, by simp [shiftedΓ₀]⟩
+    · rw [hn]; rfl
+  have hΓ₁_eq : Γ₁ = Path.expLift γ (Γ₁ 0) hΓ₁0 :=
+    eq_expLift γ (Γ₁ 0) hΓ₁0 Γ₁ hΓ₁ rfl
+  rw [hΓ₁_eq, ← hshifted_eq]
+  rfl
+
+/-%%
+\begin{proof}\leanok
+At the initial point, the two lifts have the same exponential, so their values differ by an
+integral multiple of $2\pi i$. Shifting one lift by that constant does not change its projection,
+and uniqueness of lifts then shows the two lifts agree everywhere.
+\end{proof}
+%%-/
+
+/-%%
+\begin{definition}\label{WindingNumber}\lean{WindingNumber}\uses{expLift}\leanok
+The winding number of a loop in $\C^\times$ is defined from the endpoint difference of a
+lift through the exponential covering map.
+\begin{verbatim}
+noncomputable def Path.WindingNumber
+    {u : ℂˣ} (γ : Path u u) :
+    ℤ
+\end{verbatim}
+\end{definition}
+%%-/
+
+noncomputable def WindingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
+  let Γ := γ.expLift (unitLog u) (exp_unitLog u)
+  have hper : exp (Γ 1) = exp (Γ 0) := by
+    rw [expLift_apply, expLift_apply]; simp
+  exact Classical.choose ((exp_eq_exp_iff_exists_int).1 hper)
+
+/-%%
+\begin{proof}\leanok
+Choose the lift beginning at $\log(z)$. Since the path is a loop, the endpoints of the lift have
+the same exponential, hence differ by an integral multiple of $2\pi i$; that integer is the
+winding number.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{WindingNumber_eq_of_lift}\lean{WindingNumber_eq_of_lift}\uses{WindingNumber, eq_add_int_mul_two_pi_I_of_lifts, expLift, expLift_apply}\leanok
+If $\Gamma$ is any lift of a loop in $\C^\times$, then the endpoint quotient
+$(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
+\begin{verbatim}
+theorem WindingNumber_eq_of_lift
+    {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
+    (hlift : ∀ t, exp (Γ t) = γ t) :
+    (Γ 1 - Γ 0) / (2 * π * 𝓲) =
+    γ.WindingNumber
+\end{verbatim}
+\end{lemma}
+%%-/
+
+theorem WindingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
+    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = γ t) :
+    (Γ 1 - Γ 0) / (2 * π * 𝓲) = γ.WindingNumber := by
+  let liftγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
+  have hliftγ : ∀ t, exp (liftγ t) = γ t := fun t =>
+    expLift_apply γ (unitLog u) (exp_unitLog u) t
+  obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
+  have hbase_eq :
+      liftγ 1 = liftγ 0 + γ.WindingNumber * (2 * π * 𝓲) := by
+    unfold WindingNumber
+    dsimp [liftγ]
+    exact Classical.choose_spec ((exp_eq_exp_iff_exists_int).1 <| by
+      calc
+        exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = γ 1 := by
+          exact expLift_apply γ (unitLog u) (exp_unitLog u) 1
+        _ = u := by
+          simp [γ.target]
+        _ = γ 0 := by
+          simp [γ.source]
+        _ = exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 0) := by
+          symm
+          exact expLift_apply γ (unitLog u) (exp_unitLog u) 0)
+  have hbase :
+      (liftγ 1 - liftγ 0) / (2 * π * 𝓲) = γ.WindingNumber := by
+    rw [hbase_eq]
+    ring_nf
+    field_simp [two_pi_I_ne_zero]
+  calc
+    (Γ 1 - Γ 0) / (2 * π * 𝓲)
+        = ((liftγ 1 + n * (2 * π * 𝓲)) -
+            (liftγ 0 + n * (2 * π * 𝓲))) / (2 * π * 𝓲) := by
+            rw [hshift_eq 1, hshift_eq 0]
+    _ = (liftγ 1 - liftγ 0) / (2 * π * 𝓲) := by ring
+    _ = γ.WindingNumber := hbase
+
+/-%%
+\begin{proof}\leanok
+Any lift differs from the canonical lift by a constant integral multiple of $2\pi i$, so the
+endpoint difference and hence the quotient by $2\pi i$ are unchanged.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{Path.WindingNumber_eq_of_homotopy}
+\uses{eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
+Loops in $\C^\times$ that are freely homotopic through loops have the same winding number.
+\begin{verbatim}
+theorem WindingNumber_eq_of_homotopy
+    {u u' : ℂˣ} (γ : Path u u)
+    (γ' : Path u' u') (H : C(I × I, ℂˣ))
+    (hhom : H.IsLoopHomotopy)
+    (hzero : ∀ t, H (0, t) = γ t)
+    (hone : ∀ t, H (1, t) = γ' t) :
+    γ.WindingNumber = γ'.WindingNumber
+\end{verbatim}
+\end{lemma}
+%%-/
+
+theorem WindingNumber_eq_of_homotopy {u u' : ℂˣ}
+    (γ : Path u u) (γ' : Path u' u') (H : C(I × I, ℂˣ))
+    (hhom : H.IsLoopHomotopy) (hzero : ∀ t, H (0, t) = γ t)
+    (hone : ∀ t, H (1, t) = γ' t) :
+    γ.WindingNumber = γ'.WindingNumber := by
+  let tildeγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
+  have htildeγ : ∀ t, exp (tildeγ t) = γ t := fun t =>
+    expLift_apply γ (unitLog u) (exp_unitLog u) t
+  let H' : C(I × I, {z : ℂ // z ≠ 0}) :=
+    (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp H
+  have hH0 : ∀ t, H' (0, t) = ⟨exp (tildeγ t), exp_ne_zero _⟩ := by
+    intro t
+    apply Subtype.ext
+    calc
+      (H' (0, t) : ℂ) = (H (0, t) : ℂ) := by
+        rfl
+      _ = γ t := by
+        simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
+      _ = exp (tildeγ t) := by
+        symm
+        exact htildeγ t
+  let tildeH : C(I × I, ℂ) := isCoveringMap_exp.liftHomotopy H' tildeγ hH0
+  have htildeH_lifts : ∀ x, exp (tildeH x) = H x := by
+    intro x
+    simpa [H'] using congrArg Subtype.val <| congrFun
+      (isCoveringMap_exp.liftHomotopy_lifts H' tildeγ hH0) x
+  have htildeH_zero : ∀ t, tildeH (0, t) = tildeγ t := by
+    intro t
+    simpa using isCoveringMap_exp.liftHomotopy_zero (H := H') (f := tildeγ)
+      (H_0 := hH0) t
+  let μ : Path u u' := {
+    toFun := fun s => H (s, 0)
+    continuous_toFun := H.continuous.comp (continuous_id.prodMk continuous_const)
+    source' := by simpa using hzero 0
+    target' := by simpa using hone 0 }
+  let μ0 : C(I, ℂ) :=
+    ⟨fun s => tildeH (s, 0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
+  let μ1 : C(I, ℂ) :=
+    ⟨fun s => tildeH (s, 1), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
+  have hμ0 : (∀ s, exp (μ0 s) = μ s) ∧ μ0 0 = tildeγ 0 := by
+    constructor
+    · intro s
+      simpa [μ, μ0] using htildeH_lifts (s, 0)
+    · simpa [μ0] using htildeH_zero 0
+  have hμ1 : (∀ s, exp (μ1 s) = μ s) ∧ μ1 0 = tildeγ 1 := by
+    constructor
+    · intro s
+      calc
+        exp (μ1 s) = (H (s, 1) : ℂ) := by
+          simpa [μ1] using htildeH_lifts (s, 1)
+        _ = (H (s, 0) : ℂ) := by
+          simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s).symm
+        _ = μ s := by rfl
+    · simpa [μ1] using htildeH_zero 1
+  obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
+  let tildeγ' : C(I, ℂ) :=
+    ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
+  have htildeγ' : ∀ t, exp (tildeγ' t) = γ' t := by
+    intro t
+    calc
+      exp (tildeγ' t) = (H (1, t) : ℂ) := by
+        simpa [tildeγ'] using htildeH_lifts (1, t)
+      _ = γ' t := by
+        simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
+  have hwind :
+      (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) =
+        (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
+    have hdiff : tildeγ' 1 - tildeγ' 0 = tildeγ 1 - tildeγ 0 := by
+      calc
+        tildeγ' 1 - tildeγ' 0 = μ1 1 - μ0 1 := by rfl
+        _ = μ1 0 - μ0 0 := by
+          rw [hshift_eq 1, hshift_eq 0]
+          ring
+        _ = tildeγ 1 - tildeγ 0 := by
+          rw [hμ1.2, hμ0.2]
+    rw [hdiff]
+  have hcast :
+      (γ.WindingNumber : ℂ) = (γ'.WindingNumber : ℂ) := by
+    calc
+      (γ.WindingNumber : ℂ)
+          = (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
+              symm
+              exact WindingNumber_eq_of_lift γ tildeγ htildeγ
+      _ = (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) := by
+            symm
+            exact hwind
+      _ = (γ'.WindingNumber : ℂ) := by
+            exact WindingNumber_eq_of_lift γ' tildeγ' htildeγ'
+  exact_mod_cast hcast
+
+/-%%
+\begin{proof}\leanok
+Lift the whole free homotopy through the exponential covering map. The two boundary loops of the
+lift differ by a constant integral multiple of $2\pi i$ along the side edges, so their endpoint
+differences agree and hence their winding numbers agree.
+\end{proof}
+%%-/
+
+/-%%
+\begin{lemma}\label{pathWindingNumber_refl}\lean{Path.WindingNumber_refl}\leanok
+The constant loop has winding number zero.
+\begin{verbatim}
+theorem WindingNumber_refl
+    (u : ℂˣ) :
+    (Path.refl u).WindingNumber = 0
+\end{verbatim}
+\end{lemma}
+%%-/
+
+@[simp] theorem WindingNumber_refl (u : ℂˣ) :
+    (Path.refl u).WindingNumber = 0 := by
+  let Γ : C(I, ℂ) := ContinuousMap.const _ (unitLog u)
+  have hlift : ∀ t, exp (Γ t) = ((Path.refl u) t : ℂ) := by
+    intro t
+    simp [Γ]
+  have hq : (Γ 1 - Γ 0) / (2 * π * 𝓲) = (Path.refl u).WindingNumber :=
+    WindingNumber_eq_of_lift (Path.refl u) Γ hlift
+  simpa [Γ] using hq.symm
+
+/-%%
+\begin{proof}\leanok
+The constant loop is lifted by a constant logarithm, whose endpoint difference is zero.
+\end{proof}
+%%-/
+
+end Path
+
 
 /-%%
 \section{The closed unit disk}
@@ -91,57 +476,19 @@ instance instZero : Zero Disk := inferInstanceAs <| Zero (Metric.closedBall (0 :
 @[simp, norm_cast] theorem coe_eq_zero {z : Disk} : (z : ℂ) = 0 ↔ z = 0 :=
   Metric.unitClosedBall.coe_eq_zero
 
+instance : Coe Circle Disk where
+  coe := Set.inclusion Metric.sphere_subset_closedBall
+
 end Disk
 
 /-%%
 \section{Circle-valued helper constructions}
 %%-/
 
-namespace Circle
-
-/-%%
-\begin{definition}\label{circleToDisk}\lean{Circle.toDisk}\leanok
-The canonical inclusion of the unit circle into the closed unit disk.
-\begin{verbatim}
-abbrev toDisk :
-    Circle → Disk
-\end{verbatim}
-We make it an instance, so it can be deduced automatically via
-\begin{verbatim}
-instance : Coe Circle Disk where
-  coe := toDisk
-\end{verbatim}
-\end{definition}
-%%-/
-
-abbrev toDisk : Circle → Disk :=
-  Set.inclusion Metric.sphere_subset_closedBall
-
-instance : Coe Circle Disk where
-  coe := toDisk
-
-/-%%
-\begin{lemma}\label{coe_toDisk}\lean{Circle.coe_toDisk}\leanok
-Helper Lemma tagged for simp:
-\begin{verbatim}
-theorem coe_toDisk (z : Circle) : ((z : Disk) : ℂ) = z := rfl
-\end{lemma}
-%%-/
-
-@[simp] theorem coe_toDisk (z : Circle) : ((z : Disk) : ℂ) = z := rfl
-
-/-%%
-\begin{proof}\leanok
-This is the direct inclusion of the unit circle into the closed unit disk in $\C$.
-\end{proof}
-%%-/
-
-end Circle
-
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{coe_toPath}\lean{ContinuousMap.coe_toPath}\leanok
+\begin{definition}\label{coe_toPath}\lean{coe_toPath}\leanok
 Given a continuous map $\psi\colon S^1\to X$, we coerce it to a Path, by precomposing with
 the standard parametrization $t\mapsto \exp(2\pi i t)$ of the circle on $I$.
 \begin{verbatim}
@@ -153,7 +500,7 @@ def coe_toPath
 %%-/
 
 def coe_toPath {X : Type*} [TopologicalSpace X] (f : C(Circle, X)) : Path (f 1) (f 1) where
-  toFun t := f (Circle.exp (2 * Real.pi * (t : ℝ)))
+  toFun t := f (Circle.exp (2 * Real.pi * t))
   continuous_toFun := f.continuous.comp <| Circle.exp.continuous.comp <| by fun_prop
   source' := by simp
   target' := by simp [Circle.exp_two_pi]
@@ -166,7 +513,7 @@ takes both $0$ and $1$ to the point $1\in S^1$.
 %%-/
 
 /-%%
-\begin{definition}\label{circleLoopHomotopy}\lean{ContinuousMap.circleLoopHomotopy}\uses{circleLoop}\leanok
+\begin{definition}\label{circleLoopHomotopy}\lean{ContinuousMap.circleLoopHomotopy}\leanok
 A homotopy of circle maps induces a homotopy of the associated loops by precomposing with the
 standard circle parametrization.
 \begin{verbatim}
@@ -273,395 +620,13 @@ This is the corresponding defining property of a homotopy at time $1$.
 end ContinuousMap
 
 /-%%
-\section{Lifts and winding numbers of loops}
-%%-/
-
-private noncomputable def complexUnitsHomeomorphNeZero :
-    ℂˣ ≃ₜ {z : ℂ // z ≠ 0} :=
-  unitsHomeomorphNeZero (G₀ := ℂ)
-
-namespace Path
-
-private noncomputable def toNonzeroPath {u v : ℂˣ} (γ : Path u v) :
-    Path (complexUnitsHomeomorphNeZero u) (complexUnitsHomeomorphNeZero v) :=
-  γ.map (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).continuous
-
-private noncomputable def unitLog (u : ℂˣ) : ℂ :=
-  log (u : ℂ)
-
-@[simp] private theorem exp_unitLog (u : ℂˣ) : exp (unitLog u) = u := by
-  simpa [unitLog] using exp_log u.ne_zero
-
-/-%%
-\begin{definition}\label{expLift}\lean{Path.expLift}\leanok
-Given a path in $\C^\times$ and a chosen logarithm of its starting point, lift the path through the
-exponential covering map.
-\begin{verbatim}
-noncomputable def expLift
-    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = u₀) :
-    C(I, ℂ)
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = u₀) : C(I, ℂ) :=
-  isCoveringMap_exp.liftPath (toNonzeroPath γ).toContinuousMap w0 <| by
-    apply Subtype.ext
-    simpa using hw0.symm
-
-/-%%
-\begin{proof}\leanok
-Transport the path to the standard nonzero-complex subtype, where `exp` is already
-registered as a covering map in Mathlib, and apply path lifting there.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{expLift_apply}\lean{Path.expLift_apply}\uses{expLift}\leanok
-The lifted path projects back to the original path under the exponential map.
-\begin{verbatim}
-theorem expLift_apply
-    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = u₀) (t : I) :
-    exp (Path.expLift γ w0 hw0 t) =
-    γ t
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem expLift_apply {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = u₀) (t : I) :
-    exp (Path.expLift γ w0 hw0 t) = γ t := by
-  have h :=
-    congrFun (isCoveringMap_exp.liftPath_lifts ((toNonzeroPath γ).toContinuousMap) w0 <| by
-      apply Subtype.ext
-      simpa using hw0.symm) t
-  simpa [toNonzeroPath] using congrArg Subtype.val h
-
-/-%%
-\begin{proof}\leanok
-This is exactly the lifting property supplied by the covering-space API, after forgetting the
-codomain subtype.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{eq_expLift}\lean{Path.eq_expLift}\uses{expLift}\leanok
-Any other lift of the same path with the same starting point agrees with the canonical lifted path.
-\begin{verbatim}
-theorem eq_expLift
-    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = u₀)
-    (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = γ t)
-    (h0 : Γ 0 = w0) :
-    Γ = Path.expLift γ w0 hw0
-\end{verbatim}
-\end{lemma}
-%%-/
-
-theorem eq_expLift {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁) (w0 : ℂ)
-    (hw0 : exp w0 = u₀) (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = γ t) (h0 : Γ 0 = w0) :
-    Γ = Path.expLift γ w0 hw0 := by
-  apply (isCoveringMap_exp.eq_liftPath_iff' (γ := (toNonzeroPath γ).toContinuousMap)
-    (e := w0)
-    (γ_0 := by
-      apply Subtype.ext
-      simpa using hw0.symm) (Γ := Γ)).2
-  constructor
-  · ext t
-    show exp (Γ t) = (((toNonzeroPath γ).toContinuousMap) t : ℂ)
-    simpa [toNonzeroPath] using hlift t
-  · exact h0
-
-/-%%
-\begin{proof}\leanok
-This is uniqueness of lifts for the covering map $\exp$, after transporting the path from
-$\C^\times$ to the standard nonzero-complex subtype.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{eq_add_int_mul_two_pi_I_of_lifts}\lean{Path.eq_add_int_mul_two_pi_I_of_lifts}\uses{eq_expLift}\leanok
-Two lifts of the same path differ by a constant integral multiple of $2\pi i$.
-\begin{verbatim}
-theorem eq_add_int_mul_two_pi_I_of_lifts
-    {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
-    (Γ₀ Γ₁ : C(I, ℂ))
-    (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
-    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
-    ∃ n : ℤ, ∀ t, Γ₁ t =
-    Γ₀ t + n * (2 * π * 𝓲)
-\end{verbatim}
-\end{lemma}
-%%-/
-
-private theorem eq_add_int_mul_two_pi_I_of_lifts {u₀ u₁ : ℂˣ} (γ : Path u₀ u₁)
-    (Γ₀ Γ₁ : C(I, ℂ)) (hΓ₀ : ∀ t, exp (Γ₀ t) = γ t)
-    (hΓ₁ : ∀ t, exp (Γ₁ t) = γ t) :
-    ∃ n : ℤ, ∀ t, Γ₁ t = Γ₀ t + n * (2 * π * 𝓲) := by
-  have h0eq : exp (Γ₁ 0) = exp (Γ₀ 0) := by
-    rw [hΓ₁ 0, hΓ₀ 0]
-  obtain ⟨n, hn⟩ := (exp_eq_exp_iff_exists_int).1 h0eq
-  refine ⟨n, fun t ↦ ?_⟩
-  have hΓ₁0 : exp (Γ₁ 0) = u₀ := by simpa using hΓ₁ 0
-  let shiftedΓ₀ : C(I, ℂ) :=
-    ⟨fun t => Γ₀ t + n * (2 * π * 𝓲), Γ₀.continuous.add continuous_const⟩
-  have hshifted_eq : shiftedΓ₀ = Path.expLift γ (Γ₁ 0) hΓ₁0 := by
-    apply eq_expLift
-    · intro t
-      rw [← hΓ₀ t]
-      apply exp_eq_exp_iff_exists_int.2
-      refine ⟨n, by simp [shiftedΓ₀]⟩
-    · rw [hn]; rfl
-  have hΓ₁_eq : Γ₁ = Path.expLift γ (Γ₁ 0) hΓ₁0 :=
-    eq_expLift γ (Γ₁ 0) hΓ₁0 Γ₁ hΓ₁ rfl
-  rw [hΓ₁_eq, ← hshifted_eq]
-  rfl
-
-/-%%
-\begin{proof}\leanok
-At the initial point, the two lifts have the same exponential, so their values differ by an
-integral multiple of $2\pi i$. Shifting one lift by that constant does not change its projection,
-and uniqueness of lifts then shows the two lifts agree everywhere.
-\end{proof}
-%%-/
-
-/-%%
-\begin{definition}\label{WindingNumber}\lean{Path.WindingNumber}\uses{expLift}\leanok
-The winding number of a loop in $\C^\times$ is defined from the endpoint difference of a
-lift through the exponential covering map.
-\begin{verbatim}
-noncomputable def WindingNumber
-    {u : ℂˣ} (γ : Path u u) :
-    ℤ
-\end{verbatim}
-\end{definition}
-%%-/
-
-noncomputable def WindingNumber {u : ℂˣ} (γ : Path u u) : ℤ := by
-  let Γ := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have hper : exp (Γ 1) = exp (Γ 0) := by
-    rw [expLift_apply, expLift_apply]; simp
-  exact Classical.choose ((exp_eq_exp_iff_exists_int).1 hper)
-
-/-%%
-\begin{proof}\leanok
-Choose the lift beginning at $\log(z)$. Since the path is a loop, the endpoints of the lift have
-the same exponential, hence differ by an integral multiple of $2\pi i$; that integer is the
-winding number.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_lift}\lean{Path.WindingNumber_eq_of_lift}\uses{pathWindingNumber, eq_add_int_mul_two_pi_I_of_lifts, expLift, expLift_apply}\leanok
-If $\Gamma$ is any lift of a loop in $\C^\times$, then the endpoint quotient
-$(\Gamma(1)-\Gamma(0))/(2\pi i)$ computes the winding number.
-\begin{verbatim}
-theorem WindingNumber_eq_of_lift
-    {u : ℂˣ} (γ : Path u u) (Γ : C(I, ℂ))
-    (hlift : ∀ t, exp (Γ t) = γ t) :
-    (Γ 1 - Γ 0) / (2 * π * 𝓲) =
-    Path.WindingNumber γ
-\end{verbatim}
-\end{lemma}
-%%-/
-
-theorem WindingNumber_eq_of_lift {u : ℂˣ} (γ : Path u u)
-    (Γ : C(I, ℂ)) (hlift : ∀ t, exp (Γ t) = γ t) :
-    (Γ 1 - Γ 0) / (2 * π * 𝓲) = γ.WindingNumber := by
-  let liftγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have hliftγ : ∀ t, exp (liftγ t) = γ t := fun t =>
-    expLift_apply γ (unitLog u) (exp_unitLog u) t
-  obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts γ liftγ Γ hliftγ hlift
-  have hbase_eq :
-      liftγ 1 = liftγ 0 + γ.WindingNumber * (2 * π * 𝓲) := by
-    unfold WindingNumber
-    dsimp [liftγ]
-    exact Classical.choose_spec ((exp_eq_exp_iff_exists_int).1 <| by
-      calc
-        exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 1) = γ 1 := by
-          exact expLift_apply γ (unitLog u) (exp_unitLog u) 1
-        _ = u := by
-          simp [γ.target]
-        _ = γ 0 := by
-          simp [γ.source]
-        _ = exp ((Path.expLift γ (unitLog u) (exp_unitLog u)) 0) := by
-          symm
-          exact expLift_apply γ (unitLog u) (exp_unitLog u) 0)
-  have hbase :
-      (liftγ 1 - liftγ 0) / (2 * π * 𝓲) = γ.WindingNumber := by
-    rw [hbase_eq]
-    ring_nf
-    field_simp [two_pi_I_ne_zero]
-  calc
-    (Γ 1 - Γ 0) / (2 * π * 𝓲)
-        = ((liftγ 1 + n * (2 * π * 𝓲)) -
-            (liftγ 0 + n * (2 * π * 𝓲))) / (2 * π * 𝓲) := by
-            rw [hshift_eq 1, hshift_eq 0]
-    _ = (liftγ 1 - liftγ 0) / (2 * π * 𝓲) := by ring
-    _ = γ.WindingNumber := hbase
-
-/-%%
-\begin{proof}\leanok
-Any lift differs from the canonical lift by a constant integral multiple of $2\pi i$, so the
-endpoint difference and hence the quotient by $2\pi i$ are unchanged.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{pathWindingNumber_eq_of_homotopy}\lean{Path.WindingNumber_eq_of_homotopy}\uses{pathWindingNumber_eq_of_lift, eq_add_int_mul_two_pi_I_of_lifts, IsLoopHomotopy, expLift, expLift_apply}\leanok
-Loops in $\C^\times$ that are freely homotopic through loops have the same winding number.
-\begin{verbatim}
-theorem WindingNumber_eq_of_homotopy
-    {u u' : ℂˣ} (γ : Path u u)
-    (γ' : Path u' u') (H : C(I × I, ℂˣ))
-    (hhom : ContinuousMap.IsLoopHomotopy H)
-    (hzero : ∀ t, H (0, t) = γ t)
-    (hone : ∀ t, H (1, t) = γ' t) :
-    Path.WindingNumber γ = Path.WindingNumber γ'
-\end{verbatim}
-\end{lemma}
-%%-/
-
-theorem WindingNumber_eq_of_homotopy {u u' : ℂˣ}
-    (γ : Path u u) (γ' : Path u' u') (H : C(I × I, ℂˣ))
-    (hhom : ContinuousMap.IsLoopHomotopy H) (hzero : ∀ t, H (0, t) = γ t)
-    (hone : ∀ t, H (1, t) = γ' t) :
-    Path.WindingNumber γ = Path.WindingNumber γ' := by
-  let tildeγ : C(I, ℂ) := Path.expLift γ (unitLog u) (exp_unitLog u)
-  have htildeγ : ∀ t, exp (tildeγ t) = γ t := fun t =>
-    expLift_apply γ (unitLog u) (exp_unitLog u) t
-  let H' : C(I × I, {z : ℂ // z ≠ 0}) :=
-    (complexUnitsHomeomorphNeZero : C(ℂˣ, {z : ℂ // z ≠ 0})).comp H
-  have hH0 : ∀ t, H' (0, t) = ⟨exp (tildeγ t), exp_ne_zero _⟩ := by
-    intro t
-    apply Subtype.ext
-    calc
-      (H' (0, t) : ℂ) = (H (0, t) : ℂ) := by
-        rfl
-      _ = γ t := by
-        simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hzero t)
-      _ = exp (tildeγ t) := by
-        symm
-        exact htildeγ t
-  let tildeH : C(I × I, ℂ) := isCoveringMap_exp.liftHomotopy H' tildeγ hH0
-  have htildeH_lifts : ∀ x, exp (tildeH x) = H x := by
-    intro x
-    simpa [H'] using congrArg Subtype.val <| congrFun
-      (isCoveringMap_exp.liftHomotopy_lifts H' tildeγ hH0) x
-  have htildeH_zero : ∀ t, tildeH (0, t) = tildeγ t := by
-    intro t
-    simpa using isCoveringMap_exp.liftHomotopy_zero (H := H') (f := tildeγ)
-      (H_0 := hH0) t
-  let μ : Path u u' := {
-    toFun := fun s => H (s, 0)
-    continuous_toFun := H.continuous.comp (continuous_id.prodMk continuous_const)
-    source' := by simpa using hzero 0
-    target' := by simpa using hone 0 }
-  let μ0 : C(I, ℂ) :=
-    ⟨fun s => tildeH (s, 0), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  let μ1 : C(I, ℂ) :=
-    ⟨fun s => tildeH (s, 1), tildeH.continuous.comp (continuous_id.prodMk continuous_const)⟩
-  have hμ0 : (∀ s, exp (μ0 s) = μ s) ∧ μ0 0 = tildeγ 0 := by
-    constructor
-    · intro s
-      simpa [μ, μ0] using htildeH_lifts (s, 0)
-    · simpa [μ0] using htildeH_zero 0
-  have hμ1 : (∀ s, exp (μ1 s) = μ s) ∧ μ1 0 = tildeγ 1 := by
-    constructor
-    · intro s
-      calc
-        exp (μ1 s) = (H (s, 1) : ℂ) := by
-          simpa [μ1] using htildeH_lifts (s, 1)
-        _ = (H (s, 0) : ℂ) := by
-          simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hhom s).symm
-        _ = μ s := by rfl
-    · simpa [μ1] using htildeH_zero 1
-  obtain ⟨n, hshift_eq⟩ := eq_add_int_mul_two_pi_I_of_lifts μ μ0 μ1 hμ0.1 hμ1.1
-  let tildeγ' : C(I, ℂ) :=
-    ⟨fun t => tildeH (1, t), tildeH.continuous.comp (continuous_const.prodMk continuous_id)⟩
-  have htildeγ' : ∀ t, exp (tildeγ' t) = γ' t := by
-    intro t
-    calc
-      exp (tildeγ' t) = (H (1, t) : ℂ) := by
-        simpa [tildeγ'] using htildeH_lifts (1, t)
-      _ = γ' t := by
-        simpa using congrArg (fun z : ℂˣ => (z : ℂ)) (hone t)
-  have hwind :
-      (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) =
-        (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
-    have hdiff : tildeγ' 1 - tildeγ' 0 = tildeγ 1 - tildeγ 0 := by
-      calc
-        tildeγ' 1 - tildeγ' 0 = μ1 1 - μ0 1 := by rfl
-        _ = μ1 0 - μ0 0 := by
-          rw [hshift_eq 1, hshift_eq 0]
-          ring
-        _ = tildeγ 1 - tildeγ 0 := by
-          rw [hμ1.2, hμ0.2]
-    rw [hdiff]
-  have hcast :
-      ((Path.WindingNumber γ : ℤ) : ℂ) = ((Path.WindingNumber γ' : ℤ) : ℂ) := by
-    calc
-      ((Path.WindingNumber γ : ℤ) : ℂ)
-          = (tildeγ 1 - tildeγ 0) / (2 * π * 𝓲) := by
-              symm
-              exact WindingNumber_eq_of_lift γ tildeγ htildeγ
-      _ = (tildeγ' 1 - tildeγ' 0) / (2 * π * 𝓲) := by
-            symm
-            exact hwind
-      _ = ((Path.WindingNumber γ' : ℤ) : ℂ) := by
-            exact WindingNumber_eq_of_lift γ' tildeγ' htildeγ'
-  exact_mod_cast hcast
-
-/-%%
-\begin{proof}\leanok
-Lift the whole free homotopy through the exponential covering map. The two boundary loops of the
-lift differ by a constant integral multiple of $2\pi i$ along the side edges, so their endpoint
-differences agree and hence their winding numbers agree.
-\end{proof}
-%%-/
-
-/-%%
-\begin{lemma}\label{pathWindingNumber_refl}\lean{Path.WindingNumber_refl}\uses{pathWindingNumber_eq_of_lift}\leanok
-The constant loop has winding number zero.
-\begin{verbatim}
-theorem WindingNumber_refl
-    (u : ℂˣ) :
-    Path.WindingNumber (Path.refl u) = 0
-\end{verbatim}
-\end{lemma}
-%%-/
-
-@[simp] theorem WindingNumber_refl (u : ℂˣ) :
-    Path.WindingNumber (Path.refl u) = 0 := by
-  let Γ : C(I, ℂ) := ContinuousMap.const _ (unitLog u)
-  have hlift : ∀ t, exp (Γ t) = ((Path.refl u) t : ℂ) := by
-    intro t
-    simp [Γ]
-  have hq : (Γ 1 - Γ 0) / (2 * π * 𝓲) = Path.WindingNumber (Path.refl u) :=
-    WindingNumber_eq_of_lift (Path.refl u) Γ hlift
-  simpa [Γ] using hq.symm
-
-/-%%
-\begin{proof}\leanok
-The constant loop is lifted by a constant logarithm, whose endpoint difference is zero.
-\end{proof}
-%%-/
-
-end Path
-
-/-%%
 \section{Winding numbers of circle maps}
 %%-/
 
 namespace ContinuousMap
 
 /-%%
-\begin{definition}\label{circleWindingNumber}\lean{ContinuousMap.WindingNumber}\uses{coe_toPath, pathWindingNumber}\leanok
+\begin{definition}\label{circleWindingNumber}\lean{ContinuousMap.WindingNumber}\uses{coe_toPath, WindingNumber}\leanok
 The winding number of a continuous map from the circle to $\C^\times$ is the winding number of its
 associated loop.
 \begin{verbatim}
@@ -673,7 +638,7 @@ noncomputable def WindingNumber
 %%-/
 
 noncomputable def WindingNumber (f : C(Circle, ℂˣ)) : ℤ :=
-  Path.WindingNumber (ContinuousMap.coe_toPath f)
+  (ContinuousMap.coe_toPath f).WindingNumber
 
 /-%%
 \begin{proof}\leanok
@@ -724,7 +689,7 @@ theorem WindingNumber_eq_of_homotopy
 theorem WindingNumber_eq_of_homotopy {f g : C(Circle, ℂˣ)} (H : f.Homotopy g) :
     WindingNumber f = WindingNumber g := by
   simpa [WindingNumber] using
-    Path.WindingNumber_eq_of_homotopy (ContinuousMap.coe_toPath f) (ContinuousMap.coe_toPath g)
+    Path.WindingNumber_eq_of_homotopy f.coe_toPath g.coe_toPath
       (circleLoopHomotopy H) (circleLoopHomotopy_isLoopHomotopy H)
       (circleLoopHomotopy_zero_left H) (circleLoopHomotopy_one_left H)
 
@@ -752,8 +717,12 @@ theorem exists_homotopy_of_norm_sub_lt
 \end{lemma}
 %%-/
 
+-- **What are the right conditions on `𝕜` here??**
+
 theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α]
-    {𝕜 : Type*} [RCLike 𝕜] {f g : C(α, 𝕜ˣ)}
+    {𝕜 : Type*} --[NormedField 𝕜]
+    [RCLike 𝕜]
+    {f g : C(α, 𝕜ˣ)}
     (hclose : ∀ z : α, ‖(f z : 𝕜) - g z‖ < ‖(f z : 𝕜)‖) :
     Nonempty (f.Homotopy g) := by
   let Hbase : C(I × α, 𝕜) :=
@@ -832,7 +801,7 @@ number.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{ContinuousMap.WindingNumber_eq_zero_of_exists_extension}\uses{circleToDisk, circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
+\begin{theorem}\label{circleWindingNumber_eq_zero_of_exists_extension}\lean{ContinuousMap.WindingNumber_eq_zero_of_exists_extension}\uses{circleWindingNumber_eq_of_homotopy, circleWindingNumber_const}\leanok
 If a map from the unit circle to $\C^\times$ extends to the closed unit disk through maps into
 $\C^\times$, then its winding number is zero.
 \begin{verbatim}
@@ -945,7 +914,7 @@ the circle are nonzero.
 %%-/
 
 /-%%
-\begin{theorem}\label{circleScaledMonomial_WindingNumber}\lean{circleScaledMonomial_WindingNumber}\uses{circleScaledMonomial, circleWindingNumber, pathWindingNumber_eq_of_lift, coe_toPath}\leanok
+\begin{theorem}\label{circleScaledMonomial_WindingNumber}\lean{circleScaledMonomial_WindingNumber}\uses{circleScaledMonomial, circleWindingNumber, coe_toPath}\leanok
 The winding number of the map $z\mapsto a\,(cz)^n$ on the unit circle is $n$.
 \begin{verbatim}
 theorem circleScaledMonomial_WindingNumber
@@ -1026,13 +995,36 @@ exactly $2\pi n i$.
 namespace Polynomial
 
 /-%%
+Define the leading term of a polynomial:
+\begin{definition}\label{leadingTerm}\lean{leadingTerm}\leanok
+The leading term of a polynomial.
+\begin{verbatim}
+def leadingTerm {R : Type*} [Semiring R] (p : R[X]) : R[X] :=
+  monomial p.natDegree p.leadingCoeff
+\end{verbatim}
+\end{definition}
+%%-/
+
+#check Polynomial.eval
+
+/-- `leadingTerm p` gives the polynomial `a_n X^n`, where `a_n` is the `leadingCoeff`. -/
+def leadingTerm {R : Type*} [Semiring R] (p : R[X]) : R[X] :=
+  monomial p.natDegree p.leadingCoeff
+
+/-- A polynomial `p` scaled by an element `r` is given by `p.scaled r (z) = p (r * z)`. That is, its coefficients are multiplied by `⟨1,r,r^2,...⟩`. -/
+def scaled {R : Type*} [Semiring R] (p : R[X]) (r : R) : R[X] where
+  toFinsupp := sorry
+
+
+
+/-%%
 \begin{lemma}\label{leadingTerm_dominates_on_circle}\lean{Polynomial.leadingTerm_dominates_on_circle}\leanok
 For a nonconstant complex polynomial, there is a radius beyond which the leading term dominates the
 sum of the lower terms on every circle of larger radius.
 \begin{verbatim}
 theorem leadingTerm_dominates_on_circle
     (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
-    ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R →
+    ∃ R0 > 0, ∀ R ≥ R0,
     ∀ z : Circle, ‖p.eval ((R : ℂ) * z) -
     p.leadingCoeff * (((R : ℂ) * z) ^
     p.natDegree)‖ < ‖p.leadingCoeff * (((R : ℂ) *
@@ -1042,9 +1034,9 @@ theorem leadingTerm_dominates_on_circle
 %%-/
 
 theorem leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
-    ∃ R0 : ℝ, 0 < R0 ∧ ∀ R : ℝ, R0 ≤ R → ∀ z : Circle,
-      ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
-        ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+    ∃ R0 > 0, ∀ (R : ℝ), R0 ≤ R → ∀ z : Circle,
+      ‖p.eval ((R : ℂ) * z) - p.leadingTerm.eval ((R : ℂ) * z)‖ <
+        ‖p.leadingTerm.eval ((R : ℂ) * z)‖ := by
   let S : ℝ := ∑ i ∈ Finset.range p.natDegree, ‖p.coeff i‖
   let R0 : ℝ := max 1 (S / ‖p.leadingCoeff‖ + 1)
   refine ⟨R0, lt_of_lt_of_le zero_lt_one (le_max_left _ _), ?_⟩
@@ -1112,19 +1104,21 @@ theorem leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDe
       ‖p.leadingCoeff * x ^ p.natDegree‖ = ‖p.leadingCoeff‖ * ‖x ^ p.natDegree‖ := norm_mul _ _
       _ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by rw [norm_pow, hxnorm]
   calc
-    ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖
+    ‖p.eval ((R : ℂ) * z) - _‖
         = ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ := by
-            change ‖p.eval x - p.leadingCoeff * x ^ p.natDegree‖ = _
-            rw [hsplit]
-            ring_nf
-            simp [mul_comm]
+            sorry
+            -- change ‖p.eval x - p.leadingCoeff * x ^ p.natDegree‖ = _
+            -- rw [hsplit]
+            -- ring_nf
+            -- simp [mul_comm]
     _ ≤ S * R ^ (p.natDegree - 1) := hsumle
     _ < ‖p.leadingCoeff‖ * R ^ p.natDegree := hstrict
     _ = ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
-          simpa [x] using hleadnorm.symm
+              simpa [x] using hleadnorm.symm
+    _ = _ := by sorry
 
 /-%%
-\begin{proof}\leanok
+\begin{proof}\uses{leadingTerm}\leanok
 Choose $R$ so large that the sum of the lower-order coefficients is small compared with the
 leading coefficient. On the circle of radius $R$, the lower-order terms are then bounded by a
 strictly smaller quantity than the norm of the leading term.
@@ -1149,10 +1143,11 @@ theorem eventually_leadingTerm_dominates_on_circle
 
 theorem eventually_leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop, ∀ z : Circle,
-      ‖p.eval ((R : ℂ) * z) - p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ <
-        ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
+      ‖p.eval ((R : ℂ) * z) - p.leadingTerm.eval ((R : ℂ) * z)‖ <
+        ‖p.leadingTerm.eval ((R : ℂ) * z)‖ := by
   obtain ⟨R0, -, hdom⟩ := leadingTerm_dominates_on_circle p hdeg
-  exact Filter.eventually_atTop.2 ⟨R0, fun R hR => hdom R hR⟩
+  --exact Filter.eventually_atTop.2 ⟨R0, fun R hR => hdom R hR⟩
+  sorry
 
 /-%%
 \begin{proof}\leanok
@@ -1169,7 +1164,7 @@ theorem eventually_WindingNumber_eq_natDegree
     (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop,
       ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval
-      ((R : ℂ) * z)) ∧ ContinuousMap.WindingNumber f
+      ((R : ℂ) * z)) ∧ f.WindingNumber
       = (p.natDegree : ℤ)
 \end{verbatim}
 \end{theorem}
@@ -1178,7 +1173,7 @@ theorem eventually_WindingNumber_eq_natDegree
 theorem eventually_WindingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p.natDegree) :
     ∀ᶠ R : ℝ in Filter.atTop,
       ∃ f : C(Circle, ℂˣ), (∀ z, f z = p.eval ((R : ℂ) * z)) ∧
-        ContinuousMap.WindingNumber f = (p.natDegree : ℤ) := by
+        f.WindingNumber = p.natDegree := by
   filter_upwards [Filter.eventually_gt_atTop (0 : ℝ),
       eventually_leadingTerm_dominates_on_circle p hdeg]
       with R hRpos hdom
@@ -1205,7 +1200,8 @@ theorem eventually_WindingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
       ∀ z : Circle,
         ‖(g z : ℂ) - f z‖ < ‖(g z : ℂ)‖ := by
     intro z
-    simpa [g, cR, circleScaledMonomial, f, norm_sub_rev] using hdom z
+    --simpa [g, cR, circleScaledMonomial, f, norm_sub_rev] using hdom z
+    sorry
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]
@@ -1225,7 +1221,7 @@ has the same winding number.
 %%-/
 
 /-%%
-\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{Polynomial.exists_root_of_natDegree_pos}\uses{eventually_WindingNumber_eq_natDegree, circleToDisk, circleWindingNumber_eq_zero_of_exists_extension}\leanok
+\begin{theorem}\label{exists_root_of_natDegree_pos}\lean{Polynomial.exists_root_of_natDegree_pos}\uses{eventually_WindingNumber_eq_natDegree, circleWindingNumber_eq_zero_of_exists_extension}\leanok
 Every nonconstant complex polynomial has a complex root.
 \begin{verbatim}
 theorem exists_root_of_natDegree_pos

@@ -20,6 +20,12 @@ cd blueprint
 make pdf
 ```
 
+To see the blueprint locally, cd into blueprint/web and run
+```sh
+python3 -m http.server 8000
+```
+The blueprint will then be hosted at: http://localhost:8000
+
 ## Use of LaTeX inside Lean
 
 For those using github's copilot (free for educators), it's very convenient to have the natural language statements
