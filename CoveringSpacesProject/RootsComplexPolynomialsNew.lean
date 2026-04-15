@@ -44,7 +44,7 @@ namespace ContinuousMap
 A homotopy $H\colon I\times I\to X$ is a homotopy through loops if each horizontal slice has the
 same initial and terminal point.
 \begin{verbatim}
-def ContinuousMap.IsLoopHomotopy -- should this be `isLoopHomotopy`?
+def ContinuousMap.IsLoopHomotopy
     [TopologicalSpace X] (H : C(I × I, X)) :
     Prop
 \end{verbatim}
@@ -717,10 +717,8 @@ theorem exists_homotopy_of_norm_sub_lt
 \end{lemma}
 %%-/
 
--- **What are the right conditions on `𝕜` here??**
-
 theorem exists_homotopy_of_norm_sub_lt {α : Type*} [TopologicalSpace α]
-    {𝕜 : Type*} --[NormedField 𝕜]
+    {𝕜 : Type*}
     [RCLike 𝕜]
     {f g : C(α, 𝕜ˣ)}
     (hclose : ∀ z : α, ‖(f z : 𝕜) - g z‖ < ‖(f z : 𝕜)‖) :
@@ -1005,15 +1003,9 @@ def leadingTerm {R : Type*} [Semiring R] (p : R[X]) : R[X] :=
 \end{definition}
 %%-/
 
-#check Polynomial.eval
-
 /-- `leadingTerm p` gives the polynomial `a_n X^n`, where `a_n` is the `leadingCoeff`. -/
 def leadingTerm {R : Type*} [Semiring R] (p : R[X]) : R[X] :=
   monomial p.natDegree p.leadingCoeff
-
-/-- A polynomial `p` scaled by an element `r` is given by `p.scaled r (z) = p (r * z)`. That is, its coefficients are multiplied by `⟨1,r,r^2,...⟩`. -/
-def scaled {R : Type*} [Semiring R] (p : R[X]) (r : R) : R[X] where
-  toFinsupp := sorry
 
 
 
@@ -1104,18 +1096,19 @@ theorem leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 0 < p.natDe
       ‖p.leadingCoeff * x ^ p.natDegree‖ = ‖p.leadingCoeff‖ * ‖x ^ p.natDegree‖ := norm_mul _ _
       _ = ‖p.leadingCoeff‖ * R ^ p.natDegree := by rw [norm_pow, hxnorm]
   calc
-    ‖p.eval ((R : ℂ) * z) - _‖
-        = ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ := by
-            sorry
-            -- change ‖p.eval x - p.leadingCoeff * x ^ p.natDegree‖ = _
-            -- rw [hsplit]
-            -- ring_nf
-            -- simp [mul_comm]
+    ‖p.eval ((R : ℂ) * z) - p.leadingTerm.eval ((R : ℂ) * z)‖
+        = ‖p.eval x - p.leadingCoeff * x ^ p.natDegree‖ := by
+            simp [leadingTerm, x]
+    _ = ‖∑ i ∈ Finset.range p.natDegree, p.coeff i * x ^ i‖ := by
+            rw [hsplit]
+            ring_nf
+            simp [mul_comm]
     _ ≤ S * R ^ (p.natDegree - 1) := hsumle
     _ < ‖p.leadingCoeff‖ * R ^ p.natDegree := hstrict
     _ = ‖p.leadingCoeff * (((R : ℂ) * z) ^ p.natDegree)‖ := by
               simpa [x] using hleadnorm.symm
-    _ = _ := by sorry
+    _ = ‖p.leadingTerm.eval ((R : ℂ) * z)‖ := by
+          simp [leadingTerm]
 
 /-%%
 \begin{proof}\uses{leadingTerm}\leanok
@@ -1146,8 +1139,7 @@ theorem eventually_leadingTerm_dominates_on_circle (p : Polynomial ℂ) (hdeg : 
       ‖p.eval ((R : ℂ) * z) - p.leadingTerm.eval ((R : ℂ) * z)‖ <
         ‖p.leadingTerm.eval ((R : ℂ) * z)‖ := by
   obtain ⟨R0, -, hdom⟩ := leadingTerm_dominates_on_circle p hdeg
-  --exact Filter.eventually_atTop.2 ⟨R0, fun R hR => hdom R hR⟩
-  sorry
+  exact Filter.eventually_atTop.2 ⟨R0, fun R hR => hdom R hR⟩
 
 /-%%
 \begin{proof}\leanok
@@ -1200,8 +1192,7 @@ theorem eventually_WindingNumber_eq_natDegree (p : Polynomial ℂ) (hdeg : 0 < p
       ∀ z : Circle,
         ‖(g z : ℂ) - f z‖ < ‖(g z : ℂ)‖ := by
     intro z
-    --simpa [g, cR, circleScaledMonomial, f, norm_sub_rev] using hdom z
-    sorry
+    simpa [a0, cR, g, circleScaledMonomial, f, leadingTerm, norm_sub_rev] using hdom z
   refine ⟨f, ?_, ?_⟩
   · intro z
     simp [f]
