@@ -884,6 +884,13 @@ end ContinuousMap
 \section{Monomials on the circle}
 %%-/
 
+private noncomputable def circleToUnits : C(Circle, ℂˣ) :=
+  ContinuousMap.unitsOfForallIsUnit
+    (f := ⟨fun z => (z : ℂ), continuous_subtype_val⟩)
+    fun z => isUnit_iff_ne_zero.mpr z.coe_ne_zero
+
+@[simp] private theorem circleToUnits_apply (z : Circle) : ((circleToUnits z : ℂˣ) : ℂ) = z := rfl
+
 /-%%
 \begin{definition}\label{circleScaledMonomial}\lean{circleScaledMonomial}\leanok
 Given $a,c\in \C^\times$ and $n\in \mathbb N$, define the circle map
@@ -897,12 +904,11 @@ noncomputable def circleScaledMonomial
 %%-/
 
 noncomputable def circleScaledMonomial (a c : ℂˣ) (n : ℕ) : C(Circle, ℂˣ) :=
-  ContinuousMap.unitsOfForallIsUnit
-    (f := ⟨fun z => a * (((c : ℂ) * z) ^ n), by
-      fun_prop⟩)
-    fun z => by
-      exact isUnit_iff_ne_zero.mpr <|
-        mul_ne_zero a.ne_zero (pow_ne_zero n <| mul_ne_zero c.ne_zero (Circle.coe_ne_zero z))
+  ContinuousMap.const _ a * (ContinuousMap.const _ c * circleToUnits) ^ n
+
+@[simp] theorem circleScaledMonomial_apply (a c : ℂˣ) (n : ℕ) (z : Circle) :
+    ((circleScaledMonomial a c n z : ℂˣ) : ℂ) = (a : ℂ) * (((c : ℂ) * z) ^ n) := by
+  simp [circleScaledMonomial]
 
 /-%%
 \begin{proof}\leanok
@@ -962,7 +968,7 @@ theorem circleScaledMonomial_WindingNumber (a c : ℂˣ) (n : ℕ) :
       _ = (((ContinuousMap.coe_toPath (circleScaledMonomial a c n)) t : ℂˣ) : ℂ) := by
             change (a : ℂ) * (((c : ℂ) * Circle.exp (2 * Real.pi * (t : ℝ))) ^ n) =
               ((circleScaledMonomial a c n (Circle.exp (2 * Real.pi * (t : ℝ))) : ℂˣ) : ℂ)
-            rfl
+            simp [circleScaledMonomial]
   have hwind : (((ContinuousMap.WindingNumber (circleScaledMonomial a c n) : ℤ) : ℂ)) = n := by
     calc
       (((ContinuousMap.WindingNumber (circleScaledMonomial a c n) : ℤ) : ℂ))
@@ -1006,6 +1012,15 @@ def leadingTerm {R : Type*} [Semiring R] (p : R[X]) : R[X] :=
 /-- `leadingTerm p` gives the polynomial `a_n X^n`, where `a_n` is the `leadingCoeff`. -/
 def leadingTerm {R : Type*} [Semiring R] (p : R[X]) : R[X] :=
   monomial p.natDegree p.leadingCoeff
+
+/-- `rescale p r` is the polynomial obtained from `p` by the substitution `X ↦ r * X`. -/
+def rescale {R : Type*} [Semiring R] (p : R[X]) (r : R) : R[X] :=
+  p.comp (C r * X)
+
+@[simp] theorem eval_rescale {R : Type*} [CommSemiring R] (p : R[X]) (r x : R) :
+    (p.rescale r).eval x = p.eval (r * x) := by
+  rw [rescale, Polynomial.eval_comp]
+  simp
 
 
 
